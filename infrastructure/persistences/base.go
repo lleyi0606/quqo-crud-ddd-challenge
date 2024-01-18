@@ -5,12 +5,16 @@ import (
 	"products-crud/domain/entity"
 	"products-crud/infrastructure/persistences/db"
 
+	"go.uber.org/zap"
+
+	"github.com/go-redis/redis"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gorm.io/gorm"
 )
 
 type Persistence struct {
-	ProductDb *gorm.DB
+	ProductDb      *gorm.DB
+	ProductRedisDb *redis.Client
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -22,9 +26,13 @@ func NewPersistence() (*Persistence, error) {
 	}
 
 	// Product Redis engine
-
+	redisClient, errRedisProductR := db.NewProductRedisDB()
+	if errRedisProductR != nil {
+		zap.S().Error("REDIS NOT INITIALIZED", "error", errRedisProductR)
+	}
 	return &Persistence{
-		ProductDb: productEngine.DB,
+		ProductDb:      productEngine.DB,
+		ProductRedisDb: redisClient,
 	}, nil
 }
 
