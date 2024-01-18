@@ -2,7 +2,7 @@ package base
 
 import (
 	"log"
-	"products-crud/domain/entity"
+	entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"

@@ -1,7 +1,7 @@
 package application
 
 import (
-	"products-crud/domain/entity"
+	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/product"
 	base "products-crud/infrastructure/persistences"

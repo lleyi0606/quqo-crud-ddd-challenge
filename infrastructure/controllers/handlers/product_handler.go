@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 	"products-crud/application"
-	"products-crud/domain/entity"
+	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
 	base "products-crud/infrastructure/persistences"
 	"strconv"

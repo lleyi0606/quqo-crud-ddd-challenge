@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"products-crud/domain/entity"
+	entity "products-crud/domain/entity/product_entity"
 )
 
 type ProductRepository interface {
