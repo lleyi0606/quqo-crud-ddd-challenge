@@ -4,23 +4,26 @@ import (
 	"net/http"
 	"products-crud/application"
 	"products-crud/domain/entity"
+	"products-crud/domain/repository"
+	base "products-crud/infrastructure/persistences"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Products struct {
-	us application.ProductAppInterface
+type ProductHandler struct {
+	p_repo      repository.ProductHandlerRepository
+	Persistence *base.Persistence
 }
 
 // Products constructor
-func NewProducts(us application.ProductAppInterface) *Products {
-	return &Products{
-		us: us,
+func NewProductController(p *base.Persistence) *ProductHandler {
+	return &ProductHandler{
+		Persistence: p,
 	}
 }
 
-func (p *Products) AddProduct(c *gin.Context) {
+func (p *ProductHandler) AddProduct(c *gin.Context) {
 	var pdt entity.Product
 	if err := c.ShouldBindJSON(&pdt); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -29,7 +32,8 @@ func (p *Products) AddProduct(c *gin.Context) {
 		return
 	}
 
-	newProduct, err := p.us.AddProduct(&pdt)
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	newProduct, err := p.p_repo.AddProduct(&pdt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
@@ -37,10 +41,12 @@ func (p *Products) AddProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, newProduct)
 }
 
-func (p *Products) GetProducts(c *gin.Context) {
+func (p *ProductHandler) GetProducts(c *gin.Context) {
 	var products []entity.Product
 	var err error
-	products, err = p.us.GetProducts()
+
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	products, err = p.p_repo.GetProducts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -48,7 +54,7 @@ func (p *Products) GetProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, products)
 }
 
-func (p *Products) GetProduct(c *gin.Context) {
+func (p *ProductHandler) GetProduct(c *gin.Context) {
 	// Extract product ID from the URL parameter
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
@@ -58,7 +64,8 @@ func (p *Products) GetProduct(c *gin.Context) {
 	}
 
 	// Call the service to get a single product by ID
-	product, err := p.us.GetProduct(productID)
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	product, err := p.p_repo.GetProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -68,7 +75,7 @@ func (p *Products) GetProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
-func (p *Products) UpdateProduct(c *gin.Context) {
+func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
@@ -87,7 +94,8 @@ func (p *Products) UpdateProduct(c *gin.Context) {
 	var newPdt entity.ProductUpdate
 	newPdt = entity.SqlProductRToProductForUpdate(pdt, productID)
 
-	newProduct, err := p.us.UpdateProduct(&newPdt)
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	newProduct, err := p.p_repo.UpdateProduct(&newPdt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
@@ -95,7 +103,7 @@ func (p *Products) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, newProduct)
 }
 
-func (p *Products) DeleteProduct(c *gin.Context) {
+func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	// Extract product ID from the URL parameter
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
@@ -105,7 +113,8 @@ func (p *Products) DeleteProduct(c *gin.Context) {
 	}
 
 	// Call the service to get a single product by ID
-	product, err := p.us.DeleteProduct(productID)
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	product, err := p.p_repo.DeleteProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -115,12 +124,14 @@ func (p *Products) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
-func (p *Products) SearchProducts(c *gin.Context) {
+func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	keyword := c.Query("name")
 
 	var products []entity.Product
 	var err error
-	products, err = p.us.SearchProducts(keyword)
+
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	products, err = p.p_repo.SearchProducts(keyword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

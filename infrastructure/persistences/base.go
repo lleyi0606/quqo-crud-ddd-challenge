@@ -10,7 +10,7 @@ import (
 )
 
 type Persistence struct {
-	db *gorm.DB
+	ProductDb *gorm.DB
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -24,13 +24,13 @@ func NewPersistence() (*Persistence, error) {
 	// Product Redis engine
 
 	return &Persistence{
-		db: productEngine.DB,
+		ProductDb: productEngine.DB,
 	}, nil
 }
 
 // closes the  database connection
 func (p *Persistence) Close() error {
-	pdtDB, errQ := p.db.DB()
+	pdtDB, errQ := p.ProductDb.DB()
 	if errQ != nil {
 		return errQ
 	}
@@ -44,5 +44,5 @@ func (p *Persistence) Close() error {
 
 // This migrate all tables
 func (p *Persistence) Automigrate() error {
-	return p.db.AutoMigrate(&entity.Product{})
+	return p.ProductDb.AutoMigrate(&entity.Product{})
 }

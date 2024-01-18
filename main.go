@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"products-crud/infrastructure/controllers/handlers"
 	"products-crud/infrastructure/routes"
 
 	"os"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -43,17 +41,6 @@ func main() {
 
 	// Routes
 	r := routes.InitRouter(p)
-
-	r := gin.Default()
-
-	products := handlers.NewProducts(services.Product)
-	//product routes
-	r.POST("/products", products.AddProduct)
-	r.GET("/products", products.GetProducts)
-	r.GET("/products/:id", products.GetProduct)
-	r.PUT("/products/:id", products.UpdateProduct)
-	r.DELETE("/products/:id", products.DeleteProduct)
-	r.GET("/products/search", products.SearchProducts)
 
 	//Starting the application
 	app_port := os.Getenv("PORT")
