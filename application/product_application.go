@@ -3,44 +3,44 @@ package application
 import (
 	"products-crud/domain/entity"
 	"products-crud/domain/repository"
+	"products-crud/infrastructure/implementations/product"
+	base "products-crud/infrastructure/persistences"
 )
 
 type productApp struct {
-	us repository.ProductRepository
+	p *base.Persistence
 }
 
-// ProductApp implements the ProductAppInterface
-var _ ProductAppInterface = &productApp{}
-
-type ProductAppInterface interface {
-	AddProduct(*entity.Product) (*entity.Product, error)
-	GetProduct(uint64) (*entity.Product, error)
-	GetProducts() ([]entity.Product, error)
-	UpdateProduct(*entity.ProductUpdate) (*entity.Product, error)
-	DeleteProduct(uint64) (*entity.Product, error)
-	SearchProducts(string) ([]entity.Product, error)
+func NewProductApplication(p *base.Persistence) repository.ProductHandlerRepository {
+	return &productApp{p}
 }
 
 func (u *productApp) AddProduct(user *entity.Product) (*entity.Product, error) {
-	return u.us.AddProduct(user)
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.AddProduct(user)
 }
 
 func (u *productApp) GetProduct(pdtId uint64) (*entity.Product, error) {
-	return u.us.GetProduct(pdtId)
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.GetProduct(pdtId)
 }
 
 func (u *productApp) GetProducts() ([]entity.Product, error) {
-	return u.us.GetProducts()
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.GetProducts()
 }
 
 func (u *productApp) UpdateProduct(pdt *entity.ProductUpdate) (*entity.Product, error) {
-	return u.us.UpdateProduct(pdt)
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.UpdateProduct(pdt)
 }
 
 func (u *productApp) DeleteProduct(pdtId uint64) (*entity.Product, error) {
-	return u.us.DeleteProduct(pdtId)
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.DeleteProduct(pdtId)
 }
 
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
-	return u.us.SearchProducts(str)
+	repoProduct := product.NewProductRepository(u.p)
+	return repoProduct.SearchProducts(str)
 }
