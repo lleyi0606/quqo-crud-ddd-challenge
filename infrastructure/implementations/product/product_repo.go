@@ -1,4 +1,4 @@
-package persistence
+package product
 
 import (
 	"errors"

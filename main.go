@@ -4,13 +4,15 @@ import (
 	"log"
 
 	"products-crud/infrastructure/controllers/handlers"
+	"products-crud/infrastructure/routes"
 
 	"os"
-	"products-crud/infrastructure/persistence"
+	base "products-crud/infrastructure/persistences"
 
 	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func init() {
@@ -21,16 +23,30 @@ func init() {
 }
 
 func main() {
-	services, err := persistence.NewRepositories(os.Getenv("DB_PASSWORD"))
+
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
+	undo := zap.ReplaceGlobals(logger)
+	defer undo()
+
+	p, err := base.NewPersistence()
 	if err != nil {
 		panic(err)
 	}
-	services.Automigrate()
 
-	products := handlers.NewProducts(services.Product)
+	// Migrations
+	p.Automigrate()
+
+	// Defer close
+	defer p.Close()
+
+	// Routes
+	r := routes.InitRouter(p)
 
 	r := gin.Default()
 
+	products := handlers.NewProducts(services.Product)
 	//product routes
 	r.POST("/products", products.AddProduct)
 	r.GET("/products", products.GetProducts)
