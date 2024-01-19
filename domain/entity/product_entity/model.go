@@ -28,14 +28,3 @@ type ProductUpdate struct {
 	Stock       int     `json:"stock"`
 	Image       string  `json:"image"`
 }
-
-// func addProduct(db *gorm.DB, id int, name string, desc string, price float64, cat string, stock int, image string) error {
-// 	log.Println("Adding new product ", name, "...")
-
-// 	if err := db.Create(&Product{ID: uint64(id), Name: name, Description: &desc, Price: price, Category: cat, Stock: stock, Image: image}).Error; err != nil {
-// 		return err
-// 	}
-
-// 	log.Println(name, " created.")
-// 	return nil
-// }
