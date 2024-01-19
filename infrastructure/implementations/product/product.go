@@ -6,7 +6,7 @@ import (
 	"log"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/redis_entity"
-	"products-crud/infrastructure/implementations/redis"
+	"products-crud/infrastructure/implementations/cache"
 	base "products-crud/infrastructure/persistences"
 
 	"gorm.io/gorm"
@@ -36,8 +36,8 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	var pdt *entity.Product
 
-	redisRepo := redis.NewRedisRepository(r.p)
-	_ = redisRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
 		err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
@@ -49,7 +49,7 @@ func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 			return nil, errors.New("product not found")
 		}
 
-		_ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 	}
 
 	return pdt, nil
@@ -93,8 +93,8 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	var pdts []entity.Product
 
-	// redisRepo := redis.NewRedisRepository(r.p)
-	// _ = redisRepo.SearchName(str, &pdts)
+	// cacheRepo := redis.NewRedisRepository(r.p)
+	// _ = cacheRepo.SearchName(str, &pdts)
 
 	// if pdts == nil {
 
@@ -108,7 +108,7 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 	// var pdt []entity.Product
 
-	// _ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+	// _ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 
 	// }
 
