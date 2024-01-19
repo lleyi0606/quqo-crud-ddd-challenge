@@ -5,6 +5,7 @@ import (
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
+	"strconv"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 
@@ -20,6 +21,16 @@ func (a algoliaRepo) AddProduct(p *entity.Product) error {
 
 	if err != nil {
 		zap.S().Errorw("Algoria AddProduct ERROR", "error", err)
+		return err
+	}
+	return nil
+}
+
+func (a algoliaRepo) DeleteProduct(id uint64) error {
+	_, err := a.p.ProductAlgoliaDb.DeleteObject(strconv.FormatUint(id, 10))
+
+	if err != nil {
+		zap.S().Errorw("Algoria DeleteProduct ERROR", "error", err)
 		return err
 	}
 	return nil

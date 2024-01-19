@@ -138,3 +138,24 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, products)
 }
+
+func (p *ProductHandler) AddProducts(c *gin.Context) {
+	var pdts []entity.Product
+	if err := c.ShouldBindJSON(&pdts); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"invalid_json": "invalid json",
+		})
+		return
+	}
+
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	for _, pdt := range pdts {
+		_, err := p.p_repo.AddProduct(&pdt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	c.JSON(http.StatusCreated, pdts)
+}

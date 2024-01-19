@@ -94,6 +94,14 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
 	}
+
+	// search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	err = searchRepo.DeleteProduct(id)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pdt, nil
 }
 

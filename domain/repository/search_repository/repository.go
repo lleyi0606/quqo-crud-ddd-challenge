@@ -7,4 +7,5 @@ import (
 type SearchRepository interface {
 	AddProduct(*entity.Product) error
 	SearchProducts(string) ([]entity.Product, error)
+	DeleteProduct(uint64) error
 }
