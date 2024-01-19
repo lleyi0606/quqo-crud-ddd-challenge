@@ -2,8 +2,11 @@ package product
 
 import (
 	"errors"
+	"fmt"
 	"log"
-	"products-crud/domain/entity"
+	entity "products-crud/domain/entity/product_entity"
+	"products-crud/domain/entity/redis_entity"
+	"products-crud/infrastructure/implementations/redis"
 	base "products-crud/infrastructure/persistences"
 
 	"gorm.io/gorm"
@@ -31,15 +34,25 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 }
 
 func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
-	var pdt entity.Product
-	err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
-	if err != nil {
-		return nil, err
+	var pdt *entity.Product
+
+	redisRepo := redis.NewRedisRepository(r.p)
+	_ = redisRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+
+	if pdt == nil {
+		err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
+		if err != nil {
+			return nil, err
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("product not found")
+		}
+
+		_ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("product not found")
-	}
-	return &pdt, nil
+
+	return pdt, nil
 }
 
 func (r productRepo) GetProducts() ([]entity.Product, error) {
@@ -76,8 +89,15 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	return &pdt, nil
 }
 
+// Search from CockroachDB
 func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	var pdts []entity.Product
+
+	// redisRepo := redis.NewRedisRepository(r.p)
+	// _ = redisRepo.SearchName(str, &pdts)
+
+	// if pdts == nil {
+
 	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
 	if err != nil {
 		return nil, err
@@ -85,5 +105,12 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
 	}
+
+	// var pdt []entity.Product
+
+	// _ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+
+	// }
+
 	return pdts, nil
 }
