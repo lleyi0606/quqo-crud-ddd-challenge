@@ -60,7 +60,7 @@ func (r redisRepo) GetKey(key string, src interface{}) error {
 
 }
 
-func (r redisRepo) SearchName(key string, src interface{}) error {
+func (r redisRepo) SearchName(keyword string, src interface{}) error {
 
 	if r.p.ProductRedisDb == nil {
 		return errors.New("REDIS NOT FOUND")
@@ -69,7 +69,7 @@ func (r redisRepo) SearchName(key string, src interface{}) error {
 	// get all the keys in Redis
 	keys, err := r.p.ProductRedisDb.Keys("*").Result()
 	if err != nil {
-		zap.S().Error("1. Redis SearchName ERROR", "error", err, "key", key)
+		zap.S().Error("1. Redis SearchName ERROR", "error", err)
 		return err
 	}
 
@@ -88,7 +88,7 @@ func (r redisRepo) SearchName(key string, src interface{}) error {
 			zap.S().Error("3. Redis SearchName ERROR", "error", err, "key", key)
 		}
 
-		if strings.Contains(pdt.Name, key) {
+		if strings.Contains(pdt.Name, keyword) {
 			products = append(products, pdt)
 		}
 	}
