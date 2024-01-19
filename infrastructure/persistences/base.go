@@ -7,14 +7,16 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/go-redis/redis"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gorm.io/gorm"
 )
 
 type Persistence struct {
-	ProductDb      *gorm.DB
-	ProductRedisDb *redis.Client
+	ProductDb        *gorm.DB
+	ProductRedisDb   *redis.Client
+	ProductAlgoliaDb *search.Index
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -30,9 +32,17 @@ func NewPersistence() (*Persistence, error) {
 	if errRedisProductR != nil {
 		zap.S().Error("REDIS NOT INITIALIZED", "error", errRedisProductR)
 	}
+
+	// Product Algolia engine
+	algoliaIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
+	if errAlgoliaProductR != nil {
+		zap.S().Error("REDIS NOT INITIALIZED", "error", errAlgoliaProductR)
+	}
+
 	return &Persistence{
-		ProductDb:      productEngine.DB,
-		ProductRedisDb: redisClient,
+		ProductDb:        productEngine.DB,
+		ProductRedisDb:   redisClient,
+		ProductAlgoliaDb: algoliaIndex,
 	}, nil
 }
 
@@ -52,5 +62,6 @@ func (p *Persistence) Close() error {
 
 // This migrate all tables
 func (p *Persistence) Automigrate() error {
+
 	return p.ProductDb.AutoMigrate(&entity.Product{})
 }
