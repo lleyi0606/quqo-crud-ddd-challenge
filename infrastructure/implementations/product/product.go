@@ -9,6 +9,8 @@ import (
 	"products-crud/infrastructure/implementations/redis"
 	base "products-crud/infrastructure/persistences"
 
+	// "golang.org/x/text/search"
+
 	"gorm.io/gorm"
 )
 
@@ -92,7 +94,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	var pdts []entity.Product
 
-	redisRepo := redis.NewRedisRepository(r.p)
+	// redisRepo := redis.NewRedisRepository(r.p)
 	// _ = redisRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
