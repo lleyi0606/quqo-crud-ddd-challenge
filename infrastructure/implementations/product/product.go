@@ -6,7 +6,8 @@ import (
 	"log"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/redis_entity"
-	"products-crud/infrastructure/implementations/redis"
+	"products-crud/infrastructure/implementations/cache"
+	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
 	"gorm.io/gorm"
@@ -29,6 +30,13 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 		return nil, err
 	}
 
+	// add to search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	err := searchRepo.AddProduct(pdt)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Println(pdt.Name, " created.")
 	return pdt, nil
 }
@@ -36,8 +44,8 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	var pdt *entity.Product
 
-	redisRepo := redis.NewRedisRepository(r.p)
-	_ = redisRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
 		err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
@@ -49,7 +57,7 @@ func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 			return nil, errors.New("product not found")
 		}
 
-		_ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 	}
 
 	return pdt, nil
@@ -86,31 +94,51 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
 	}
-	return &pdt, nil
-}
 
-// Search from CockroachDB
-func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
-	var pdts []entity.Product
-
-	// redisRepo := redis.NewRedisRepository(r.p)
-	// _ = redisRepo.SearchName(str, &pdts)
-
-	// if pdts == nil {
-
-	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
+	// search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	err = searchRepo.DeleteProduct(id)
 	if err != nil {
 		return nil, err
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("product not found")
-	}
 
-	// var pdt []entity.Product
-
-	// _ = redisRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
-
-	// }
-
-	return pdts, nil
+	return &pdt, nil
 }
+
+func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
+
+	// new search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	pdts, err := searchRepo.SearchProducts(str)
+	if err != nil {
+		return nil, err
+	}
+	return pdts, nil
+
+}
+
+// Search from CockroachDB
+// func (r productRepo) SearchProductsCockroach(str string) ([]entity.Product, error) {
+// 	var pdts []entity.Product
+
+// 	// cacheRepo := redis.NewRedisRepository(r.p)
+// 	// _ = cacheRepo.SearchName(str, &pdts)
+
+// 	// if pdts == nil {
+
+// 	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+// 		return nil, errors.New("product not found")
+// 	}
+
+// 	// var pdt []entity.Product
+
+// 	// _ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+
+// 	// }
+
+// 	return pdts, nil
+// }

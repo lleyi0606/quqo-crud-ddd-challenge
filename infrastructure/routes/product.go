@@ -10,7 +10,9 @@ import (
 func ProductRoutes(r *gin.RouterGroup, p *base.Persistence) {
 
 	productHandler := handlers.NewProductController(p)
+
 	r.POST("/products", productHandler.AddProduct)
+	r.POST("/products/all", productHandler.AddProducts)
 	r.GET("/products", productHandler.GetProducts)
 	r.GET("/products/:id", productHandler.GetProduct)
 	r.PUT("/products/:id", productHandler.UpdateProduct)

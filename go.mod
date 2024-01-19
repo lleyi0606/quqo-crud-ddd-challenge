@@ -3,6 +3,7 @@ module products-crud
 go 1.21.6
 
 require (
+	github.com/algolia/algoliasearch-client-go/v3 v3.31.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/jinzhu/gorm v1.9.16

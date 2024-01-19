@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	product_entity "products-crud/domain/entity/product_entity"
-	redis_repository "products-crud/domain/repository/redis_respository"
+	cache_repository "products-crud/domain/repository/cache_respository"
 	base "products-crud/infrastructure/persistences"
 	"strings"
 	"time"
@@ -99,6 +99,6 @@ func (r redisRepo) SearchName(keyword string, src interface{}) error {
 
 }
 
-func NewRedisRepository(p *base.Persistence) redis_repository.RedisRepository {
+func NewRedisRepository(p *base.Persistence) cache_repository.CacheRepository {
 	return &redisRepo{p}
 }

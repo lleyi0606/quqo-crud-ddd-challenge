@@ -1,8 +1,8 @@
-package redis_repository
+package cache_repository
 
 import "time"
 
-type RedisRepository interface {
+type CacheRepository interface {
 	SetKey(key string, value interface{}, expiration time.Duration) error
 	GetKey(key string, src interface{}) error
 	SearchName(key string, src interface{}) error
