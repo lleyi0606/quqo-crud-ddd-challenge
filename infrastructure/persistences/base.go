@@ -36,7 +36,7 @@ func NewPersistence() (*Persistence, error) {
 	// Product Algolia engine
 	algoliaIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
 	if errAlgoliaProductR != nil {
-		zap.S().Error("REDIS NOT INITIALIZED", "error", errAlgoliaProductR)
+		zap.S().Error("ALGOLIA NOT INITIALIZED", "error", errAlgoliaProductR)
 	}
 
 	return &Persistence{

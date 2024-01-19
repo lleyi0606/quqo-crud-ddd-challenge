@@ -6,6 +6,8 @@ import (
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
+
 	"go.uber.org/zap"
 )
 
@@ -17,29 +19,30 @@ func (a algoliaRepo) AddProduct(p *entity.Product) error {
 	_, err := a.p.ProductAlgoliaDb.SaveObject(p)
 
 	if err != nil {
-		zap.S().Errorw("2. Redis SetKey ERROR", "error", err)
+		zap.S().Errorw("Algoria AddProduct ERROR", "error", err)
 		return err
 	}
 	return nil
 }
 
 func (a algoliaRepo) SearchProducts(str string) ([]entity.Product, error) {
-	res, err := a.p.ProductAlgoliaDb.SearchForFacetValues("name", str)
+	res, err := a.p.ProductAlgoliaDb.Search(str, opt.AttributesToRetrieve("*"))
+
 	if err != nil {
 		return nil, err
 	}
+
 	var products []entity.Product
 
-	for _, hit := range res.FacetHits {
-		var product entity.Product
-
-		// Assuming each hit is a JSON representation of a Product
+	for _, hit := range res.Hits {
+		// Each hit is a JSON representation of a Product
 		jsonBytes, err := json.Marshal(hit)
 		if err != nil {
 			return nil, err
 		}
 
 		// Unmarshal the JSON data into a Product struct
+		var product entity.Product
 		if err := json.Unmarshal(jsonBytes, &product); err != nil {
 			return nil, err
 		}
