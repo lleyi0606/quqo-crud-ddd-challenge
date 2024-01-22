@@ -82,6 +82,21 @@ func (r productRepo) UpdateProduct(pdt *entity.ProductUpdate) (*entity.Product, 
 		return nil, err
 	}
 
+	// update cache
+	// cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	// err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ID), pdt, redis_entity.RedisExpirationGlobal)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// update search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	err = searchRepo.UpdateProduct(pdt)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
 	return r.GetProduct(pdt.ID)
 }
 

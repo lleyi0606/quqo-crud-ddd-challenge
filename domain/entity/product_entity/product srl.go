@@ -26,3 +26,20 @@ func SqlProductRToProductForUpdate(p ProductToReceive, id uint64) ProductUpdate 
 
 	return product
 }
+
+func SqlProductToProductAloglia(p Product) ProductAlgolia {
+	var product ProductAlgolia
+
+	product.ID = p.ID
+	product.Name = p.Name
+	if p.Description != nil {
+		product.Description = *p.Description
+	}
+	product.Price = p.Price
+	product.Category = p.Category
+	product.Stock = p.Stock
+	product.Image = p.Image
+	// product.ObjectID = strconv.FormatUint(p.ID, 10)
+	product.ObjectID = p.ID
+	return product
+}

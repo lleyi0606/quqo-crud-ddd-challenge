@@ -1,7 +1,7 @@
 package entity
 
 type Product struct {
-	ID          uint64  `gorm:"primary_key;auto_increment" json:"id"`
+	ID          uint64  `gorm:"primary_key;auto_increment" json:"id" algolia:"objectID"`
 	Name        string  `gorm:"size:100;not null;" json:"name"`
 	Description *string `gorm:"size:255;" json:"description"`
 	Price       float64 `gorm:"type:numeric;not null;" json:"price"`
@@ -20,11 +20,23 @@ type ProductToReceive struct {
 }
 
 type ProductUpdate struct {
-	ID          uint64  `json:"id"`
+	ID          uint64  `json:"id" algolia:"objectID"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Category    string  `json:"category"`
 	Stock       int     `json:"stock"`
 	Image       string  `json:"image"`
+}
+
+type ProductAlgolia struct {
+	// ID          uint64  `json:"id"`
+	// Name        string  `json:"name"`
+	// Description string  `json:"description"`
+	// Price       float64 `json:"price"`
+	// Category    string  `json:"category"`
+	// Stock       int     `json:"stock"`
+	// Image       string  `json:"image"`
+	ProductUpdate
+	ObjectID uint64 `json:"objectID"`
 }

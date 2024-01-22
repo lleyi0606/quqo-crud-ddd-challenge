@@ -2,6 +2,7 @@ package algolia
 
 import (
 	"encoding/json"
+	"log"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
@@ -17,7 +18,8 @@ type algoliaRepo struct {
 }
 
 func (a algoliaRepo) AddProduct(p *entity.Product) error {
-	_, err := a.p.ProductAlgoliaDb.SaveObject(p)
+	pdtA := entity.SqlProductToProductAloglia(*p)
+	_, err := a.p.ProductAlgoliaDb.SaveObject(pdtA)
 
 	if err != nil {
 		zap.S().Errorw("Algoria AddProduct ERROR", "error", err)
@@ -65,9 +67,28 @@ func (a algoliaRepo) SearchProducts(str string) ([]entity.Product, error) {
 	return products, nil
 }
 
-func (a algoliaRepo) UpdateProduct(p *entity.Product) error {
-	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(p)
+func (a algoliaRepo) UpdateProduct(p *entity.ProductUpdate) error {
+
+	// var product entity.ProductAlgolia
+
+	// product.ID = p.ID
+	// product.Name = p.Name
+	// product.Description = p.Description
+	// product.Price = p.Price
+	// product.Category = p.Category
+	// product.Stock = p.Stock
+	// product.Image = p.Image
+	// product.ObjectID = p.ID
+
+	product := entity.ProductAlgolia{
+		ProductUpdate: *p,
+		ObjectID:      p.ID, // Convert ID to string
+	}
+
+	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(product)
+	log.Print(p)
 	if err != nil {
+		zap.S().Errorw("Algolia UpdateProduct error", "error", err, "product", p)
 		return err
 	}
 	return nil
