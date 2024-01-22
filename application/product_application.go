@@ -30,7 +30,7 @@ func (u *productApp) GetProducts() ([]entity.Product, error) {
 	return repoProduct.GetProducts()
 }
 
-func (u *productApp) UpdateProduct(pdt *entity.ProductUpdate) (*entity.Product, error) {
+func (u *productApp) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
 	repoProduct := product.NewProductRepository(u.p)
 	return repoProduct.UpdateProduct(pdt)
 }

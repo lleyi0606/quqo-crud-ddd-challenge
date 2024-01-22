@@ -75,14 +75,30 @@ func (r productRepo) GetProducts() ([]entity.Product, error) {
 	return pdts, nil
 }
 
-func (r productRepo) UpdateProduct(pdt *entity.ProductUpdate) (*entity.Product, error) {
-	err := r.p.ProductDb.Debug().Model(&entity.Product{}).Where("id = ?", pdt.ID).Updates(pdt).Error
+func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
+	// err := r.p.ProductDb.Debug().Model(&entity.Product{}).Where("id = ?", pdt.ID).Updates(pdt).Error
+	err := r.p.ProductDb.Debug().Where("id = ?", pdt.ID).Updates(&pdt).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return r.GetProduct(pdt.ID)
+	// update cache
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ID), &pdt, redis_entity.RedisExpirationGlobal)
+	if err != nil {
+		return nil, err
+	}
+
+	// update search repo
+	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	err = searchRepo.UpdateProduct(pdt)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	return pdt, nil
 }
 
 func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
@@ -98,6 +114,13 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	// search repo
 	searchRepo := search.NewSearchRepository(r.p, "algolia")
 	err = searchRepo.DeleteProduct(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// update cache
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	err = cacheRepo.DeleteProduct(id)
 	if err != nil {
 		return nil, err
 	}
