@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"products-crud/domain/entity/redis_entity"
 	cache_repository "products-crud/domain/repository/cache_respository"
 	base "products-crud/infrastructure/persistences"
@@ -68,6 +69,7 @@ func (r redisRepo) ProductExists(id uint64) (int64, error) {
 }
 
 func (r redisRepo) DeleteProduct(id uint64) error {
+	log.Print(id)
 	err := r.p.ProductRedisDb.Del(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id)).Err()
 	if err != nil {
 		zap.S().Error("Redis ProductExists ERROR", "error", err, "key", id)

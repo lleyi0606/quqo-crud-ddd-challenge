@@ -67,7 +67,7 @@ func (a algoliaRepo) SearchProducts(str string) ([]entity.Product, error) {
 	return products, nil
 }
 
-func (a algoliaRepo) UpdateProduct(p *entity.ProductUpdate) error {
+func (a algoliaRepo) UpdateProduct(p *entity.Product) error {
 
 	// var product entity.ProductAlgolia
 
@@ -81,8 +81,8 @@ func (a algoliaRepo) UpdateProduct(p *entity.ProductUpdate) error {
 	// product.ObjectID = p.ID
 
 	product := entity.ProductAlgolia{
-		ProductUpdate: *p,
-		ObjectID:      p.ID, // Convert ID to string
+		Product:  *p,
+		ObjectID: p.ID, // Convert ID to string
 	}
 
 	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(product)

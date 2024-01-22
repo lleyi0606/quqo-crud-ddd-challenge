@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"products-crud/application"
 	entity "products-crud/domain/entity/product_entity"
@@ -83,7 +84,11 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	var pdt entity.ProductToReceive
+	// var pdt entity.Product
+
+	p.p_repo = application.NewProductApplication(p.Persistence)
+	pdt, _ := p.p_repo.GetProduct(productID)
+
 	if err := c.ShouldBindJSON(&pdt); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"invalid_json": "invalid json",
@@ -91,11 +96,16 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	var newPdt entity.ProductUpdate
-	newPdt = entity.SqlProductRToProductForUpdate(pdt, productID)
+	// var newPdt entity.ProductUpdate
+	// newPdt = entity.SqlProductRToProductForUpdate(pdt, productID)
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
-	newProduct, err := p.p_repo.UpdateProduct(&newPdt)
+	// Log the JSON input
+	log.Printf("Received JSON input for product update: %+v", pdt)
+
+	pdt.ID = productID
+
+	// p.p_repo = application.NewProductApplication(p.Persistence)
+	newProduct, err := p.p_repo.UpdateProduct(pdt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
