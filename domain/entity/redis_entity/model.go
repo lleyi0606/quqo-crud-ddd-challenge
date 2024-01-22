@@ -10,5 +10,5 @@ const (
 
 // expirations
 const (
-	RedisExpirationGlobal = time.Minute * 1
+	RedisExpirationGlobal = time.Minute * 2
 )

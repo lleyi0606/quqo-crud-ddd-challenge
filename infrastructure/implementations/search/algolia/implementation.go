@@ -65,6 +65,14 @@ func (a algoliaRepo) SearchProducts(str string) ([]entity.Product, error) {
 	return products, nil
 }
 
+func (a algoliaRepo) UpdateProduct(p *entity.Product) error {
+	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(p)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewAlgoliaRepository(p *base.Persistence) search_repository.SearchRepository {
 	return &algoliaRepo{p}
 }
