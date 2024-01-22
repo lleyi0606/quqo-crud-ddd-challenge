@@ -48,13 +48,18 @@ func NewPersistence() (*Persistence, error) {
 
 // closes the  database connection
 func (p *Persistence) Close() error {
-	pdtDB, errQ := p.ProductDb.DB()
-	if errQ != nil {
-		return errQ
+	pdtDB, errP := p.ProductDb.DB()
+	if errP != nil {
+		return errP
 	}
 	errDbClose := pdtDB.Close()
 	if errDbClose != nil {
 		return errDbClose
+	}
+
+	errRedisClose := p.ProductRedisDb.Close()
+	if errRedisClose != nil {
+		return errRedisClose
 	}
 
 	return nil
