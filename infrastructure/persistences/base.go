@@ -2,6 +2,7 @@ package base
 
 import (
 	"log"
+	"products-crud/domain/entity/opensearch_entity"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
@@ -14,9 +15,10 @@ import (
 )
 
 type Persistence struct {
-	ProductDb        *gorm.DB
-	ProductRedisDb   *redis.Client
-	ProductAlgoliaDb *search.Index
+	ProductDb          *gorm.DB
+	ProductRedisDb     *redis.Client
+	ProductAlgoliaDb   *search.Index
+	SearchOpenSearchDb *opensearch_entity.OpenSearch
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -39,10 +41,17 @@ func NewPersistence() (*Persistence, error) {
 		zap.S().Error("ALGOLIA NOT INITIALIZED", "error", errAlgoliaProductR)
 	}
 
+	// OpenSearch
+	opensearchIndex, errOpensearchR := db.NewProductOpenSearchDB()
+	if errOpensearchR != nil {
+		zap.S().Error("OPENSEARCH NOT INITIALIZED", "error", errOpensearchR)
+	}
+
 	return &Persistence{
-		ProductDb:        productEngine.DB,
-		ProductRedisDb:   redisClient,
-		ProductAlgoliaDb: algoliaIndex,
+		ProductDb:          productEngine.DB,
+		ProductRedisDb:     redisClient,
+		ProductAlgoliaDb:   algoliaIndex,
+		SearchOpenSearchDb: opensearchIndex,
 	}, nil
 }
 

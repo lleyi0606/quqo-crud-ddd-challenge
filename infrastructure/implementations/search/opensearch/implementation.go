@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
+	"products-crud/domain/entity/opensearch_entity"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
@@ -22,19 +22,13 @@ type opensearchRepo struct {
 }
 
 func (o opensearchRepo) AddProduct(p *entity.Product) error {
-	domainEndpoint := os.Getenv("AWS_DOMAIN_ENDPOINT")
 
-	// Basic authentication credentials
-	username := os.Getenv("AWS_USER")
-	password := os.Getenv("AWS_PASSWORD")
-
-	// Index and document ID
-	index := "products"
-	documentID := p.ID
+	openS := o.p.SearchOpenSearchDb
 
 	pdt, err := json.Marshal(p)
+	documentID := p.ID
 
-	url := fmt.Sprintf("%s/%s/_doc/%d", domainEndpoint, index, documentID)
+	url := fmt.Sprintf("%s/%s/_doc/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
 
 	req, err := http.NewRequest("PUT", url, strings.NewReader(string(pdt)))
 	if err != nil {
@@ -42,11 +36,10 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 		return err
 	}
 
-	req.SetBasicAuth(username, password)
+	req.SetBasicAuth(openS.Username, openS.Password)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := openS.Client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
 		return err
@@ -54,7 +47,7 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 	defer resp.Body.Close()
 
 	// Check the response
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode == 201 {
 		fmt.Println("Document indexed successfully.", documentID)
 	} else {
 		// Read the response body
@@ -68,10 +61,6 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 		fmt.Printf("Failed to index document. Status code: %d\n Body: %s\n", resp.StatusCode, string(body))
 	}
 
-	if err != nil {
-		zap.S().Errorw("Algoria AddProduct ERROR", "error", err)
-		return err
-	}
 	return nil
 }
 

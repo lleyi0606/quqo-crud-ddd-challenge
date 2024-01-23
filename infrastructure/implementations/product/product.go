@@ -26,9 +26,9 @@ func NewProductRepository(p *base.Persistence) *productRepo {
 func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	log.Println("Adding new product ", pdt.Name, "...")
 
-	// if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
-	// 	return nil, err
-	// }
+	if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
+		return nil, err
+	}
 
 	// add to search repo
 	searchRepo := search.NewSearchRepository(r.p, "opensearch")
