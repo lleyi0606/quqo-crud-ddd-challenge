@@ -131,7 +131,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 	// new search repo
-	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	searchRepo := search.NewSearchRepository(r.p, "opensearch")
 	pdts, err := searchRepo.SearchProducts(str)
 	if err != nil {
 		return nil, err

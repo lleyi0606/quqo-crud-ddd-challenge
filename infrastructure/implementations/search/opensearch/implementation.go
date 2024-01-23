@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"go.uber.org/zap"
 )
 
@@ -75,17 +74,73 @@ func (o opensearchRepo) DeleteProduct(id uint64) error {
 }
 
 func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
-	res, err := o.p.ProductAlgoliaDb.Search(str, opt.AttributesToRetrieve("*"))
+	openS := o.p.SearchOpenSearchDb
 
+	url := fmt.Sprintf("%s/%s/_search?q=%s&pretty=true", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, str)
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
+		fmt.Println("Error creating request:", err)
 		return nil, err
+	}
+
+	req.SetBasicAuth(openS.Username, openS.Password)
+
+	resp, err := openS.Client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	// Check the response
+	if resp.StatusCode == 200 {
+		fmt.Println("Document searched successfully.")
+	} else {
+		// Read the response body
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return nil, err
+		}
+
+		// Convert the body to a string and print it
+		fmt.Printf("Failed to search documents. Status code: %d\n Body: %s\n", resp.StatusCode, string(body))
 	}
 
 	var products []entity.Product
 
-	for _, hit := range res.Hits {
-		// Each hit is a JSON representation of a Product
-		jsonBytes, err := json.Marshal(hit)
+	// Parse the response JSON
+	var response map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+
+	// Extract hits from the response
+	hits, ok := response["hits"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("hits not found in response")
+	}
+
+	hitsList, ok := hits["hits"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("hits list not found in response")
+	}
+
+	// Iterate through hits and extract products
+	for _, hit := range hitsList {
+		hitMap, ok := hit.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("hit is not a map")
+		}
+
+		source, ok := hitMap["_source"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("_source not found in hit")
+		}
+
+		// Convert _source to JSON
+		jsonBytes, err := json.Marshal(source)
 		if err != nil {
 			return nil, err
 		}
