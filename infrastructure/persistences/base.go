@@ -2,8 +2,9 @@ package base
 
 import (
 	"log"
+	inventory_entity "products-crud/domain/entity/inventory_entity"
 	"products-crud/domain/entity/opensearch_entity"
-	entity "products-crud/domain/entity/product_entity"
+	product_entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"
@@ -76,6 +77,7 @@ func (p *Persistence) Close() error {
 
 // This migrate all tables
 func (p *Persistence) Automigrate() error {
+	p.ProductDb.AutoMigrate(&inventory_entity.Inventory{})
 
-	return p.ProductDb.AutoMigrate(&entity.Product{})
+	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }
