@@ -6,6 +6,7 @@ import (
 	"log"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/redis_entity"
+	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/cache"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
@@ -17,7 +18,7 @@ type productRepo struct {
 	p *base.Persistence
 }
 
-func NewProductRepository(p *base.Persistence) *productRepo {
+func NewProductRepository(p *base.Persistence) repository.ProductRepository {
 	return &productRepo{p}
 }
 

@@ -11,6 +11,7 @@ type ProductRepository interface {
 	UpdateProduct(*entity.Product) (*entity.Product, error)
 	DeleteProduct(uint64) (*entity.Product, error)
 	SearchProducts(string) ([]entity.Product, error)
+	// GetProductsByInventory(uint64) ([]entity.Product, error)
 }
 
 type ProductHandlerRepository interface {

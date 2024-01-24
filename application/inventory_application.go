@@ -36,6 +36,8 @@ func (u *inventoryApp) UpdateInventory(pdt *entity.Inventory) (*entity.Inventory
 }
 
 func (u *inventoryApp) DeleteInventory(ivtId uint64) (*entity.Inventory, error) {
+	// repoProduct := product.NewProductRepository(u.p)
+
 	repoInventory := inventory.NewInventoryRepository(u.p)
 	return repoInventory.DeleteInventory(ivtId)
 }
