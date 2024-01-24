@@ -12,14 +12,6 @@ type Product struct {
 }
 
 type ProductAlgolia struct {
-	// ID          uint64  `json:"id"`
-	// Name        string  `json:"name"`
-	// Description string  `json:"description"`
-	// Price       float64 `json:"price"`
-	// Category    string  `json:"category"`
-	// Stock       int     `json:"stock"`
-	// Image       string  `json:"image"`
-	// ProductUpdate
 	Product
 	ObjectID uint64 `json:"objectID"`
 }

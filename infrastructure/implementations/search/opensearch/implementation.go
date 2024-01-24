@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"products-crud/domain/entity/opensearch_entity"
 	entity "products-crud/domain/entity/product_entity"
-	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
 	"strings"
 
@@ -195,7 +193,6 @@ func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
 	}
 
 	_, err := o.p.ProductAlgoliaDb.PartialUpdateObject(product)
-	log.Print(p)
 	if err != nil {
 		zap.S().Errorw("Algolia UpdateProduct error", "error", err, "product", p)
 		return err
@@ -203,6 +200,6 @@ func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
 	return nil
 }
 
-func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
-	return &opensearchRepo{p}
-}
+// func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
+// 	return &opensearchRepo{p}
+// }

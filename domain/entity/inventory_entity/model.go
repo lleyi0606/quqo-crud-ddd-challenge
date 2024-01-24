@@ -5,3 +5,8 @@ type Inventory struct {
 	Name        string `gorm:"size:100;" json:"name"`
 	Address     string `gorm:"size:255;" json:"address"`
 }
+
+type InventoryAlgolia struct {
+	Inventory
+	ObjectID uint64 `json:"objectID"`
+}

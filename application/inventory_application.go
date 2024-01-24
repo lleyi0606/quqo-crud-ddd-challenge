@@ -20,9 +20,9 @@ func (u *inventoryApp) AddInventory(user *entity.Inventory) (*entity.Inventory, 
 	return repoInventory.AddInventory(user)
 }
 
-func (u *inventoryApp) GetInventory(pdtId uint64) (*entity.Inventory, error) {
+func (u *inventoryApp) GetInventory(ivtId uint64) (*entity.Inventory, error) {
 	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.GetInventory(pdtId)
+	return repoInventory.GetInventory(ivtId)
 }
 
 func (u *inventoryApp) GetInventories() ([]entity.Inventory, error) {
@@ -35,9 +35,9 @@ func (u *inventoryApp) UpdateInventory(pdt *entity.Inventory) (*entity.Inventory
 	return repoInventory.UpdateInventory(pdt)
 }
 
-func (u *inventoryApp) DeleteInventory(pdtId uint64) (*entity.Inventory, error) {
+func (u *inventoryApp) DeleteInventory(ivtId uint64) (*entity.Inventory, error) {
 	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.DeleteInventory(pdtId)
+	return repoInventory.DeleteInventory(ivtId)
 }
 
 func (u *inventoryApp) SearchInventory(str string) ([]entity.Inventory, error) {

@@ -120,7 +120,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, "redis")
-	err = cacheRepo.DeleteProduct(id)
+	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id))
 	if err != nil {
 		return nil, err
 	}
@@ -139,29 +139,3 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	return pdts, nil
 
 }
-
-// Search from CockroachDB
-// func (r productRepo) SearchProductsCockroach(str string) ([]entity.Product, error) {
-// 	var pdts []entity.Product
-
-// 	// cacheRepo := redis.NewRedisRepository(r.p)
-// 	// _ = cacheRepo.SearchName(str, &pdts)
-
-// 	// if pdts == nil {
-
-// 	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if errors.Is(err, gorm.ErrRecordNotFound) {
-// 		return nil, errors.New("product not found")
-// 	}
-
-// 	// var pdt []entity.Product
-
-// 	// _ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
-
-// 	// }
-
-// 	return pdts, nil
-// }

@@ -19,6 +19,7 @@ type Persistence struct {
 	ProductDb          *gorm.DB
 	ProductRedisDb     *redis.Client
 	ProductAlgoliaDb   *search.Index
+	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch_entity.OpenSearch
 }
 
@@ -37,7 +38,7 @@ func NewPersistence() (*Persistence, error) {
 	}
 
 	// Product Algolia engine
-	algoliaIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
+	algoliaPdtIndex, algoliaInventoryIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
 	if errAlgoliaProductR != nil {
 		zap.S().Error("ALGOLIA NOT INITIALIZED", "error", errAlgoliaProductR)
 	}
@@ -51,7 +52,8 @@ func NewPersistence() (*Persistence, error) {
 	return &Persistence{
 		ProductDb:          productEngine.DB,
 		ProductRedisDb:     redisClient,
-		ProductAlgoliaDb:   algoliaIndex,
+		ProductAlgoliaDb:   algoliaPdtIndex,
+		InventoryAlgoliaDb: algoliaInventoryIndex,
 		SearchOpenSearchDb: opensearchIndex,
 	}, nil
 }
