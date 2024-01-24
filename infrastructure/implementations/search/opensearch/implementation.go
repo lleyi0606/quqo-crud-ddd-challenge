@@ -10,7 +10,6 @@ import (
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
-	"strconv"
 	"strings"
 
 	"go.uber.org/zap"
@@ -64,12 +63,42 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 }
 
 func (o opensearchRepo) DeleteProduct(id uint64) error {
-	_, err := o.p.ProductAlgoliaDb.DeleteObject(strconv.FormatUint(id, 10))
 
+	openS := o.p.SearchOpenSearchDb
+
+	url := fmt.Sprintf("%s/%s/_delete/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, id)
+
+	req, err := http.NewRequest("DEL", url, nil)
 	if err != nil {
-		zap.S().Errorw("Algoria DeleteProduct ERROR", "error", err)
+		fmt.Println("Error creating request:", err)
 		return err
 	}
+
+	req.SetBasicAuth(openS.Username, openS.Password)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := openS.Client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check the response
+	if resp.StatusCode == 201 {
+		fmt.Println("Document deleted successfully.", id)
+	} else {
+		// Read the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return err
+		}
+
+		// Convert the body to a string and print it
+		fmt.Printf("Failed to delete document. Status code: %d\n Body: %s\n", resp.StatusCode, string(body))
+	}
+
 	return nil
 }
 
@@ -159,17 +188,6 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 }
 
 func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
-
-	// var product entity.ProductAlgolia
-
-	// product.ID = p.ID
-	// product.Name = p.Name
-	// product.Description = p.Description
-	// product.Price = p.Price
-	// product.Category = p.Category
-	// product.Stock = p.Stock
-	// product.Image = p.Image
-	// product.ObjectID = p.ID
 
 	product := entity.ProductAlgolia{
 		Product:  *p,
