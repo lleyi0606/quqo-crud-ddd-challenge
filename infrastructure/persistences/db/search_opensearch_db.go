@@ -2,7 +2,6 @@ package db
 
 import (
 	"net/http"
-	"os"
 
 	"products-crud/domain/entity/opensearch_entity"
 	"products-crud/infrastructure/config"
@@ -16,8 +15,8 @@ func NewProductOpenSearchDB() (*opensearch_entity.OpenSearch, error) {
 		// Username:       os.Getenv("AWS_USER"),
 		// Password:       os.Getenv("AWS_PASSWORD"),
 		DomainEndpoint: config.Configuration.GetString("awsOpensearch.domainEndpoint"),
-		Username:       os.Getenv("awsOpensearch.opensearch.dev.user"),
-		Password:       os.Getenv("awsOpensearch.opensearch.dev.pass"),
+		Username:       config.Configuration.GetString("awsOpensearch.opensearch.dev.user"),
+		Password:       config.Configuration.GetString("awsOpensearch.opensearch.dev.pass"),
 	}
 
 	return openS, nil

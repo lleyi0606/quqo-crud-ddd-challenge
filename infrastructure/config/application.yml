@@ -9,3 +9,8 @@ awsOpensearch:
     dev:
       user: "admin"
       pass: "aDmIN!12345"
+
+redis:
+  dev: 
+    host: redis-11655.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11655
+    pass: cEWumizsf73PPx1QeSEBQexRfjt5ng4T
