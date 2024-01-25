@@ -1,9 +1,6 @@
 package db
 
 import (
-	"log"
-	"os"
-
 	"products-crud/infrastructure/config"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
@@ -12,13 +9,13 @@ import (
 
 func NewProductAlgoliaDB() (*search.Index, *search.Index, error) {
 
-	aapp_id := config.Configuration.GetString("algolia.dev.id")
-	aapi_key := config.Configuration.GetString("algolia.dev.key")
+	app_id := config.Configuration.GetString("algolia.dev.id")
+	api_key := config.Configuration.GetString("algolia.dev.key")
 
-	app_id := os.Getenv("ALGOLIA_APPLICATION_ID")
-	api_key := os.Getenv("ALGOLIA_API_KEY")
+	// app_id := os.Getenv("ALGOLIA_APPLICATION_ID")
+	// api_key := os.Getenv("ALGOLIA_API_KEY")
 
-	log.Print("ALGOLIA DB NEWWWWW", aapp_id, aapi_key, "....", app_id, api_key)
+	// log.Print("ALGOLIA DB NEWWWWW", aapp_id, aapi_key, "....", app_id, api_key)
 
 	client := search.NewClient(app_id, api_key)
 	index := client.InitIndex("products")
