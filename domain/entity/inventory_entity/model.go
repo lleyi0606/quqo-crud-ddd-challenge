@@ -1,14 +1,14 @@
 package entity
 
 type Inventory struct {
-	ProductID   uint64 `gorm:"primaryKey;autoIncrement:true" json:"i_id"`
-	WarehouseID uint64 `gorm:"type:numeric" json:"warehouse_id"`
+	ProductID   uint64 `gorm:"primaryKey;autoIncrement:true" json:"productId"`
+	WarehouseID uint64 `gorm:"type:numeric" json:"warehouseId"`
 	Stock       int    `gorm:"type:numeric;" json:"stock"`
 }
 
 type InventoryAlgolia struct {
 	Inventory
-	ObjectID uint64 `json:"objectID"`
+	ObjectID uint64 `json:"objectId"`
 }
 
 type InventoryStockOnly struct {
