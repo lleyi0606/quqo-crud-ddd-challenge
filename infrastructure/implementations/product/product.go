@@ -8,6 +8,7 @@ import (
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/cache"
+	"products-crud/infrastructure/implementations/inventory"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
@@ -49,7 +50,8 @@ func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
-		err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
+		err := r.p.ProductDb.Debug().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
+		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +80,7 @@ func (r productRepo) GetProducts() ([]entity.Product, error) {
 
 func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
 	// err := r.p.ProductDb.Debug().Model(&entity.Product{}).Where("id = ?", pdt.ID).Updates(pdt).Error
-	err := r.p.ProductDb.Debug().Where("id = ?", pdt.ProductID).Updates(&pdt).Error
+	err := r.p.ProductDb.Debug().Where("product_id = ?", pdt.ProductID).Updates(&pdt).Error
 
 	if err != nil {
 		return nil, err
@@ -104,13 +106,21 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	var pdt entity.Product
-	err := r.p.ProductDb.Debug().Where("id = ?", id).Delete(&pdt).Error
+	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&pdt).Error
 	if err != nil {
 		return nil, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
 	}
+
+	// delete from inventory too
+	inventoryRepo := inventory.NewInventoryRepository(r.p)
+	ivt, err := inventoryRepo.DeleteInventory(id)
+	if err != nil {
+		return nil, err
+	}
+	pdt.Inventory = *ivt
 
 	// search repo
 	searchRepo := search.NewSearchRepository(r.p, "algolia")

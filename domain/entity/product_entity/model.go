@@ -4,7 +4,7 @@ import (
 	entity "products-crud/domain/entity/inventory_entity"
 )
 
-type Product struct {
+type ProductWithoutInventory struct {
 	ProductID   uint64  `gorm:"primary_key;auto_increment" json:"id"`
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description *string `gorm:"size:255;" json:"description"`
@@ -22,8 +22,8 @@ type ProductWithStockAndWarehouse struct {
 	Stock       int     `gorm:"type:numeric;" json:"stock"`
 }
 
-type ProductWithInventory struct {
-	ProductID   uint64  `gorm:"primary_key;auto_increment" json:"id"`
+type Product struct {
+	ProductID   uint64  `gorm:"primary_key;auto_increment:false" json:"id"`
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description *string `gorm:"size:255;" json:"description"`
 	Price       float64 `gorm:"type:numeric;" json:"price"`

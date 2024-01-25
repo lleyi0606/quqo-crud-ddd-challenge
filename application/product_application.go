@@ -20,24 +20,24 @@ func NewProductApplication(p *base.Persistence) repository.ProductHandlerReposit
 func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*entity.Product, error) {
 	repoProduct := product.NewProductRepository(u.p)
 
-	p := &entity.Product{
-		ProductID:   pdt.ProductID,
-		Name:        pdt.Name,
-		Description: pdt.Description,
-		Price:       pdt.Price,
-		Category:    pdt.Category,
-	}
-
 	i := &inventory_entity.Inventory{
-		ProductID:   pdt.ProductID,
 		WarehouseID: pdt.WarehouseID,
 		Stock:       pdt.Stock,
 	}
 
 	repoInventory := inventory.NewInventoryRepository(u.p)
-	_, err := repoInventory.AddInventory(i)
+	ivt, err := repoInventory.AddInventory(i)
 	if err != nil {
 		return nil, err
+	}
+
+	p := &entity.Product{
+		ProductID:   ivt.ProductID,
+		Name:        pdt.Name,
+		Description: pdt.Description,
+		Price:       pdt.Price,
+		Category:    pdt.Category,
+		Inventory:   *ivt,
 	}
 
 	return repoProduct.AddProduct(p)

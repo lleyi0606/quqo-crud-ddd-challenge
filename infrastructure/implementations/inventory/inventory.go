@@ -100,32 +100,32 @@ func (r inventoryRepo) UpdateInventory(ivt *entity.Inventory) (*entity.Inventory
 	return ivt, nil
 }
 
-// func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
-// 	var ivt entity.Inventory
-// 	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&ivt).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if errors.Is(err, gorm.ErrRecordNotFound) {
-// 		return nil, errors.New("inventory not found")
-// 	}
+func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
+	var ivt entity.Inventory
+	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&ivt).Error
+	if err != nil {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("inventory not found")
+	}
 
-// 	// search repo
-// 	searchRepo := search.NewSearchRepository(r.p, "algolia")
-// 	err = searchRepo.DeleteInventory(id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// search repo
+	// searchRepo := search.NewSearchRepository(r.p, "algolia")
+	// err = searchRepo.DeleteInventory(id)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-// 	// update cache
-// 	cacheRepo := cache.NewCacheRepository(r.p, "redis")
-// 	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id))
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// update cache
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id))
+	if err != nil {
+		return nil, err
+	}
 
-// 	return &ivt, nil
-// }
+	return &ivt, nil
+}
 
 // func (r inventoryRepo) SearchInventory(str string) ([]entity.Inventory, error) {
 

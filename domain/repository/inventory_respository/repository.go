@@ -9,7 +9,7 @@ type InventoryRepository interface {
 	GetInventory(uint64) (*entity.Inventory, error)
 	// GetInventories() ([]entity.Inventory, error)
 	UpdateInventory(*entity.Inventory) (*entity.Inventory, error)
-	// DeleteInventory(uint64) (*entity.Inventory, error)
+	DeleteInventory(uint64) (*entity.Inventory, error)
 	// SearchInventory(string) ([]entity.Inventory, error)
 }
 

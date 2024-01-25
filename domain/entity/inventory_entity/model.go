@@ -1,7 +1,7 @@
 package entity
 
 type Inventory struct {
-	ProductID   uint64 `gorm:"primary_key;auto_increment" json:"i_id"`
+	ProductID   uint64 `gorm:"primaryKey;autoIncrement:true" json:"i_id"`
 	WarehouseID uint64 `gorm:"type:numeric" json:"warehouse_id"`
 	Stock       int    `gorm:"type:numeric;" json:"stock"`
 }
