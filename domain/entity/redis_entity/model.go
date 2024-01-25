@@ -4,8 +4,10 @@ import "time"
 
 // keys
 const (
-	RedisProducts    = "PRODUCTS_ENABLED_LIST_DATA"
-	RedisProductData = "PRODUCT_"
+	RedisProducts      = "PRODUCTS_ENABLED_LIST_DATA"
+	RedisProductData   = "PRODUCT_"
+	RedisInventories   = "INVENTORIES_ENABLED_LIST_DATA"
+	RedisInventoryData = "INVENTORY_"
 )
 
 // expirations

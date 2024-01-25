@@ -3,9 +3,6 @@ package redis
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
-	"products-crud/domain/entity/redis_entity"
 	cache_repository "products-crud/domain/repository/cache_respository"
 	base "products-crud/infrastructure/persistences"
 	"time"
@@ -59,20 +56,19 @@ func (r redisRepo) GetKey(key string, src interface{}) error {
 
 }
 
-func (r redisRepo) ProductExists(id uint64) (int64, error) {
-	exists, err := r.p.ProductRedisDb.Exists(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id)).Result()
-	if err != nil {
-		zap.S().Error("Redis ProductExists ERROR", "error", err, "key", id)
-		return 0, err
-	}
-	return exists, nil
-}
+// func (r redisRepo) ProductExists(id uint64) (int64, error) {
+// 	exists, err := r.p.ProductRedisDb.Exists(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id)).Result()
+// 	if err != nil {
+// 		zap.S().Error("Redis ProductExists ERROR", "error", err, "key", id)
+// 		return 0, err
+// 	}
+// 	return exists, nil
+// }
 
-func (r redisRepo) DeleteProduct(id uint64) error {
-	log.Print(id)
-	err := r.p.ProductRedisDb.Del(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id)).Err()
+func (r redisRepo) DeleteRecord(key string) error {
+	err := r.p.ProductRedisDb.Del(key).Err()
 	if err != nil {
-		zap.S().Error("Redis ProductExists ERROR", "error", err, "key", id)
+		zap.S().Error("Redis DeleteRecord ERROR", "error", err, "key", key)
 		return err
 	}
 	return nil

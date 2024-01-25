@@ -6,7 +6,9 @@ import (
 	"log"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/redis_entity"
+	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/cache"
+	"products-crud/infrastructure/implementations/inventory"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
@@ -17,7 +19,7 @@ type productRepo struct {
 	p *base.Persistence
 }
 
-func NewProductRepository(p *base.Persistence) *productRepo {
+func NewProductRepository(p *base.Persistence) repository.ProductRepository {
 	return &productRepo{p}
 }
 
@@ -48,7 +50,8 @@ func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
-		err := r.p.ProductDb.Debug().Where("id = ?", id).Take(&pdt).Error
+		err := r.p.ProductDb.Debug().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
+		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +80,7 @@ func (r productRepo) GetProducts() ([]entity.Product, error) {
 
 func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
 	// err := r.p.ProductDb.Debug().Model(&entity.Product{}).Where("id = ?", pdt.ID).Updates(pdt).Error
-	err := r.p.ProductDb.Debug().Where("id = ?", pdt.ID).Updates(&pdt).Error
+	err := r.p.ProductDb.Debug().Where("product_id = ?", pdt.ProductID).Updates(&pdt).Error
 
 	if err != nil {
 		return nil, err
@@ -85,7 +88,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, "redis")
-	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ID), &pdt, redis_entity.RedisExpirationGlobal)
+	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ProductID), &pdt, redis_entity.RedisExpirationGlobal)
 	if err != nil {
 		return nil, err
 	}
@@ -103,12 +106,19 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	var pdt entity.Product
-	err := r.p.ProductDb.Debug().Where("id = ?", id).Delete(&pdt).Error
+	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&pdt).Error
 	if err != nil {
 		return nil, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("product not found")
+	}
+
+	// delete from inventory too
+	inventoryRepo := inventory.NewInventoryRepository(r.p)
+	_, err = inventoryRepo.DeleteInventory(id)
+	if err != nil {
+		return nil, err
 	}
 
 	// search repo
@@ -120,7 +130,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, "redis")
-	err = cacheRepo.DeleteProduct(id)
+	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id))
 	if err != nil {
 		return nil, err
 	}
@@ -139,29 +149,3 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	return pdts, nil
 
 }
-
-// Search from CockroachDB
-// func (r productRepo) SearchProductsCockroach(str string) ([]entity.Product, error) {
-// 	var pdts []entity.Product
-
-// 	// cacheRepo := redis.NewRedisRepository(r.p)
-// 	// _ = cacheRepo.SearchName(str, &pdts)
-
-// 	// if pdts == nil {
-
-// 	err := r.p.ProductDb.Debug().Where("lower(name) LIKE lower(?)", "%"+str+"%").Find(&pdts).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if errors.Is(err, gorm.ErrRecordNotFound) {
-// 		return nil, errors.New("product not found")
-// 	}
-
-// 	// var pdt []entity.Product
-
-// 	// _ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
-
-// 	// }
-
-// 	return pdts, nil
-// }

@@ -25,7 +25,7 @@ func NewProductController(p *base.Persistence) *ProductHandler {
 }
 
 func (p *ProductHandler) AddProduct(c *gin.Context) {
-	var pdt entity.Product
+	var pdt entity.ProductWithStockAndWarehouse
 	if err := c.ShouldBindJSON(&pdt); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"invalid_json": "invalid json",
@@ -102,7 +102,7 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	// Log the JSON input
 	log.Printf("Received JSON input for product update: %+v", pdt)
 
-	pdt.ID = productID
+	pdt.ProductID = productID
 
 	// p.p_repo = application.NewProductApplication(p.Persistence)
 	newProduct, err := p.p_repo.UpdateProduct(pdt)
@@ -150,7 +150,7 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 }
 
 func (p *ProductHandler) AddProducts(c *gin.Context) {
-	var pdts []entity.Product
+	var pdts []entity.ProductWithStockAndWarehouse
 	if err := c.ShouldBindJSON(&pdts); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"invalid_json": "invalid json",

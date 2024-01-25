@@ -8,6 +8,8 @@ import (
 	"os"
 	base "products-crud/infrastructure/persistences"
 
+	"products-crud/infrastructure/config"
+
 	"github.com/joho/godotenv"
 
 	"go.uber.org/zap"
@@ -27,6 +29,8 @@ func main() {
 
 	undo := zap.ReplaceGlobals(logger)
 	defer undo()
+
+	config.LoadConfiguration()
 
 	p, err := base.NewPersistence()
 	if err != nil {

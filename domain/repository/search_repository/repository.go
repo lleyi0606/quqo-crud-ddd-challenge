@@ -9,4 +9,9 @@ type SearchRepository interface {
 	SearchProducts(string) ([]entity.Product, error)
 	DeleteProduct(uint64) error
 	UpdateProduct(*entity.Product) error
+
+	// AddInventory(*inventory_entity.Inventory) error
+	// SearchInventories(string) ([]inventory_entity.Inventory, error)
+	// DeleteInventory(uint64) error
+	// UpdateInventory(*inventory_entity.Inventory) error
 }

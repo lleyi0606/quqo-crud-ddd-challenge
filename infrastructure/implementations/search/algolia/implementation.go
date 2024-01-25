@@ -69,20 +69,9 @@ func (a algoliaRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 func (a algoliaRepo) UpdateProduct(p *entity.Product) error {
 
-	// var product entity.ProductAlgolia
-
-	// product.ID = p.ID
-	// product.Name = p.Name
-	// product.Description = p.Description
-	// product.Price = p.Price
-	// product.Category = p.Category
-	// product.Stock = p.Stock
-	// product.Image = p.Image
-	// product.ObjectID = p.ID
-
 	product := entity.ProductAlgolia{
 		Product:  *p,
-		ObjectID: p.ID, // Convert ID to string
+		ObjectID: p.ProductID, // Convert ID to string
 	}
 
 	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(product)
@@ -93,6 +82,72 @@ func (a algoliaRepo) UpdateProduct(p *entity.Product) error {
 	}
 	return nil
 }
+
+// func (a algoliaRepo) AddInventory(i *inventory_entity.Inventory) error {
+// 	ivtA := inventory_entity.SqlInventorytoInventoryAlgolia(*i)
+// 	_, err := a.p.InventoryAlgoliaDb.SaveObject(ivtA)
+
+// 	if err != nil {
+// 		zap.S().Errorw("Algoria AddInventory ERROR", "error", err)
+// 		return err
+// 	}
+// 	return nil
+// }
+
+// func (a algoliaRepo) SearchInventories(str string) ([]inventory_entity.Inventory, error) {
+// 	res, err := a.p.InventoryAlgoliaDb.Search(str, opt.AttributesToRetrieve("*"))
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var inventories []inventory_entity.Inventory
+
+// 	for _, hit := range res.Hits {
+// 		// Each hit is a JSON representation of a Product
+// 		jsonBytes, err := json.Marshal(hit)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		// Unmarshal the JSON data into a Product struct
+// 		var inventory inventory_entity.Inventory
+// 		if err := json.Unmarshal(jsonBytes, &inventory); err != nil {
+// 			return nil, err
+// 		}
+
+// 		// Append the unmarshaled product to the result slice
+// 		inventories = append(inventories, inventory)
+// 	}
+
+// 	return inventories, nil
+// }
+
+// func (a algoliaRepo) DeleteInventory(id uint64) error {
+// 	_, err := a.p.InventoryAlgoliaDb.DeleteObject(strconv.FormatUint(id, 10))
+
+// 	if err != nil {
+// 		zap.S().Errorw("Algoria DeleteInventory ERROR", "error", err)
+// 		return err
+// 	}
+// 	return nil
+// }
+
+// func (a algoliaRepo) UpdateInventory(i *inventory_entity.Inventory) error {
+
+// 	inventory := inventory_entity.InventoryAlgolia{
+// 		Inventory: *i,
+// 		ObjectID:  i.InventoryID,
+// 	}
+
+// 	_, err := a.p.ProductAlgoliaDb.PartialUpdateObject(inventory)
+// 	log.Print(i)
+// 	if err != nil {
+// 		zap.S().Errorw("Algolia UpdateInventory error", "error", err, "inventory", i)
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func NewAlgoliaRepository(p *base.Persistence) search_repository.SearchRepository {
 	return &algoliaRepo{p}

@@ -1,0 +1,16 @@
+algolia:
+  dev:
+    id: LVZ7HRDIU5
+    key: 6eb68873e1de03f00a992c09a31d8e48
+
+awsOpensearch:
+  domainEndpoint: "https://search-quqo-intern-cha-1-m6hqbawoegozen66ssxkyqut6a.ap-southeast-1.es.amazonaws.com"
+  opensearch:
+    dev:
+      user: "admin"
+      pass: "aDmIN!12345"
+
+redis:
+  dev: 
+    host: redis-11655.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11655
+    pass: cEWumizsf73PPx1QeSEBQexRfjt5ng4T

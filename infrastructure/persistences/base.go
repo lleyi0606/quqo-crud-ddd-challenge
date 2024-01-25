@@ -2,8 +2,9 @@ package base
 
 import (
 	"log"
+	inventory_entity "products-crud/domain/entity/inventory_entity"
 	"products-crud/domain/entity/opensearch_entity"
-	entity "products-crud/domain/entity/product_entity"
+	product_entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"
@@ -18,6 +19,7 @@ type Persistence struct {
 	ProductDb          *gorm.DB
 	ProductRedisDb     *redis.Client
 	ProductAlgoliaDb   *search.Index
+	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch_entity.OpenSearch
 }
 
@@ -36,7 +38,7 @@ func NewPersistence() (*Persistence, error) {
 	}
 
 	// Product Algolia engine
-	algoliaIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
+	algoliaPdtIndex, algoliaInventoryIndex, errAlgoliaProductR := db.NewProductAlgoliaDB()
 	if errAlgoliaProductR != nil {
 		zap.S().Error("ALGOLIA NOT INITIALIZED", "error", errAlgoliaProductR)
 	}
@@ -50,7 +52,8 @@ func NewPersistence() (*Persistence, error) {
 	return &Persistence{
 		ProductDb:          productEngine.DB,
 		ProductRedisDb:     redisClient,
-		ProductAlgoliaDb:   algoliaIndex,
+		ProductAlgoliaDb:   algoliaPdtIndex,
+		InventoryAlgoliaDb: algoliaInventoryIndex,
 		SearchOpenSearchDb: opensearchIndex,
 	}, nil
 }
@@ -76,6 +79,7 @@ func (p *Persistence) Close() error {
 
 // This migrate all tables
 func (p *Persistence) Automigrate() error {
+	p.ProductDb.AutoMigrate(&inventory_entity.Inventory{})
 
-	return p.ProductDb.AutoMigrate(&entity.Product{})
+	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }
