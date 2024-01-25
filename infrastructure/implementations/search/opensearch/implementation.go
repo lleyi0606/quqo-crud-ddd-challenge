@@ -22,7 +22,7 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 	openS := o.p.SearchOpenSearchDb
 
 	pdt, err := json.Marshal(p)
-	documentID := p.ID
+	documentID := p.ProductID
 
 	url := fmt.Sprintf("%s/%s/_doc/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
 
@@ -189,7 +189,7 @@ func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
 
 	product := entity.ProductAlgolia{
 		Product:  *p,
-		ObjectID: p.ID, // Convert ID to string
+		ObjectID: p.ProductID, // Convert ID to string
 	}
 
 	_, err := o.p.ProductAlgoliaDb.PartialUpdateObject(product)

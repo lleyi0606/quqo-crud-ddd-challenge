@@ -1,8 +1,6 @@
 package repository
 
-import (
-	entity "products-crud/domain/entity/product_entity"
-)
+import entity "products-crud/domain/entity/product_entity"
 
 type ProductRepository interface {
 	AddProduct(*entity.Product) (*entity.Product, error)
@@ -15,7 +13,7 @@ type ProductRepository interface {
 }
 
 type ProductHandlerRepository interface {
-	AddProduct(*entity.Product) (*entity.Product, error)
+	AddProduct(*entity.ProductWithStockAndWarehouse) (*entity.Product, error)
 	GetProduct(uint64) (*entity.Product, error)
 	GetProducts() ([]entity.Product, error)
 	UpdateProduct(*entity.Product) (*entity.Product, error)

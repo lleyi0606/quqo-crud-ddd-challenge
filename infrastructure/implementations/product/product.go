@@ -78,7 +78,7 @@ func (r productRepo) GetProducts() ([]entity.Product, error) {
 
 func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
 	// err := r.p.ProductDb.Debug().Model(&entity.Product{}).Where("id = ?", pdt.ID).Updates(pdt).Error
-	err := r.p.ProductDb.Debug().Where("id = ?", pdt.ID).Updates(&pdt).Error
+	err := r.p.ProductDb.Debug().Where("id = ?", pdt.ProductID).Updates(&pdt).Error
 
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, "redis")
-	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ID), &pdt, redis_entity.RedisExpirationGlobal)
+	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ProductID), &pdt, redis_entity.RedisExpirationGlobal)
 	if err != nil {
 		return nil, err
 	}

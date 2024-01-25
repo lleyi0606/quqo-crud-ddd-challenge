@@ -15,34 +15,47 @@ func NewInventoryApplication(p *base.Persistence) repository.InventoryHandlerRep
 	return &inventoryApp{p}
 }
 
-func (u *inventoryApp) AddInventory(user *entity.Inventory) (*entity.Inventory, error) {
-	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.AddInventory(user)
-}
+// func (u *inventoryApp) AddInventory(user *entity.Inventory) (*entity.Inventory, error) {
+// 	repoInventory := inventory.NewInventoryRepository(u.p)
+// 	return repoInventory.AddInventory(user)
+// }
 
 func (u *inventoryApp) GetInventory(ivtId uint64) (*entity.Inventory, error) {
 	repoInventory := inventory.NewInventoryRepository(u.p)
 	return repoInventory.GetInventory(ivtId)
 }
 
-func (u *inventoryApp) GetInventories() ([]entity.Inventory, error) {
+// func (u *inventoryApp) GetInventories() ([]entity.Inventory, error) {
+// 	repoInventory := inventory.NewInventoryRepository(u.p)
+// 	return repoInventory.GetInventories()
+// }
+
+// func (u *inventoryApp) UpdateInventory(pdt *entity.Inventory) (*entity.Inventory, error) {
+// 	repoInventory := inventory.NewInventoryRepository(u.p)
+// 	return repoInventory.UpdateInventory(pdt)
+// }
+
+func (u *inventoryApp) UpdateStock(id uint64, ivt *entity.InventoryStockOnly) (*entity.Inventory, error) {
 	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.GetInventories()
+
+	// var inventory entity.Inventory
+	invent, err := repoInventory.GetInventory(id)
+	if err != nil {
+		return nil, err
+	}
+	invent.Stock = ivt.Stock
+
+	return repoInventory.UpdateInventory(invent)
 }
 
-func (u *inventoryApp) UpdateInventory(pdt *entity.Inventory) (*entity.Inventory, error) {
-	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.UpdateInventory(pdt)
-}
+// func (u *inventoryApp) DeleteInventory(ivtId uint64) (*entity.Inventory, error) {
+// 	// repoProduct := product.NewProductRepository(u.p)
 
-func (u *inventoryApp) DeleteInventory(ivtId uint64) (*entity.Inventory, error) {
-	// repoProduct := product.NewProductRepository(u.p)
+// 	repoInventory := inventory.NewInventoryRepository(u.p)
+// 	return repoInventory.DeleteInventory(ivtId)
+// }
 
-	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.DeleteInventory(ivtId)
-}
-
-func (u *inventoryApp) SearchInventory(str string) ([]entity.Inventory, error) {
-	repoInventory := inventory.NewInventoryRepository(u.p)
-	return repoInventory.SearchInventory(str)
-}
+// func (u *inventoryApp) SearchInventory(str string) ([]entity.Inventory, error) {
+// 	repoInventory := inventory.NewInventoryRepository(u.p)
+// 	return repoInventory.SearchInventory(str)
+// }
