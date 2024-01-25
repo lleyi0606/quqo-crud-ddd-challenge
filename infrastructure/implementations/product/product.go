@@ -116,11 +116,10 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 
 	// delete from inventory too
 	inventoryRepo := inventory.NewInventoryRepository(r.p)
-	ivt, err := inventoryRepo.DeleteInventory(id)
+	_, err = inventoryRepo.DeleteInventory(id)
 	if err != nil {
 		return nil, err
 	}
-	pdt.Inventory = *ivt
 
 	// search repo
 	searchRepo := search.NewSearchRepository(r.p, "algolia")
