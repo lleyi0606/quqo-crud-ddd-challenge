@@ -70,7 +70,7 @@ func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
 
 	if img == nil {
 		err := r.p.ProductDb.Debug().Where("product_id = ?", id).Find(&img).Error
-		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
+		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&img).Error
 		if err != nil {
 			return nil, err
 		}
@@ -83,4 +83,31 @@ func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
 	}
 
 	return img, nil
+}
+
+func (r imageRepo) DeleteImage(id uint64) error {
+	var img entity.Image
+
+	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&img).Error
+	if err != nil {
+		return err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("product not found")
+	}
+
+	// delete from CDN database
+	_, err = r.p.ImageSupabaseDB.RemoveFile("images", []string{"image/storage/" + fmt.Sprint(id)})
+	if err != nil {
+		return err
+	}
+
+	// update cache
+	// cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	// err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisImageData, id))
+	// if err != nil {
+	// 	return err
+	// }
+
+	return nil
 }

@@ -24,3 +24,8 @@ func (u *imageApp) GetImage(id uint64) ([]entity.Image, error) {
 	repoInventory := image.NewImageRepository(u.p)
 	return repoInventory.GetImage(id)
 }
+
+func (u *imageApp) DeleteImage(id uint64) error {
+	repoInventory := image.NewImageRepository(u.p)
+	return repoInventory.DeleteImage(id)
+}

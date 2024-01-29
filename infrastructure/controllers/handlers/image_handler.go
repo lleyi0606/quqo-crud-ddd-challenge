@@ -92,3 +92,24 @@ func (p *ImageHandler) GetImage(c *gin.Context) {
 	// Respond with the single product
 	c.JSON(http.StatusOK, product)
 }
+
+func (p *ImageHandler) DeleteImage(c *gin.Context) {
+	// Extract product ID from the URL parameter
+	imageIDStr := c.Param("id")
+	imageID, err := strconv.ParseUint(imageIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID DeleteImage"})
+		return
+	}
+
+	// Call the service to get a single product by ID
+	p.repo = application.NewImageApplication(p.Persistence)
+	err = p.repo.DeleteImage(imageID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Respond with the single product
+	c.JSON(http.StatusOK, nil)
+}

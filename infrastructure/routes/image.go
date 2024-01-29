@@ -16,7 +16,7 @@ func ImageRoutes(r *gin.RouterGroup, p *base.Persistence) {
 	r.GET("/images/:id", ImageHandler.GetImage)
 	// r.PUT("/images/:id", inventoryHandler.UpdateStock)
 	// r.PUT("/images/:id", inventoryHandler.UpdateInventory)
-	// r.DELETE("/images/:id", inventoryHandler.DeleteInventory)
+	r.DELETE("/images/:id", ImageHandler.DeleteImage)
 	// r.GET("/images/search", inventoryHandler.SearchInventory)
 
 }
