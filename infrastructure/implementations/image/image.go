@@ -88,7 +88,7 @@ func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
 func (r imageRepo) DeleteImage(id uint64) error {
 	var img entity.Image
 
-	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&img).Error
+	err := r.p.ProductDb.Debug().Where("image_id = ?", id).Delete(&img).Error
 	if err != nil {
 		return err
 	}
