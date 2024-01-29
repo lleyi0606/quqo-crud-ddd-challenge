@@ -1,12 +1,15 @@
 package opensearch
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"products-crud/domain/entity/opensearch_entity"
 	entity "products-crud/domain/entity/product_entity"
+	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
 	"strings"
 
@@ -19,6 +22,7 @@ type opensearchRepo struct {
 
 func (o opensearchRepo) AddProduct(p *entity.Product) error {
 
+	log.Print("add product in opensearch")
 	openS := o.p.SearchOpenSearchDb
 
 	pdt, err := json.Marshal(p)
@@ -103,13 +107,32 @@ func (o opensearchRepo) DeleteProduct(id uint64) error {
 func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 	openS := o.p.SearchOpenSearchDb
 
-	url := fmt.Sprintf("%s/%s/_search?q=%s&pretty=true", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, str)
+	// url := fmt.Sprintf("%s/%s/_search?q=%s&pretty=true", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, str)
 
-	req, err := http.NewRequest("GET", url, nil)
+	url := fmt.Sprintf("%s/%s/_search", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex)
+
+	// Build the request body
+	query := fmt.Sprintf(`{
+		"query": {
+			"fuzzy": {
+			"name": {
+				"value": "%s",
+				"fuzziness": "2",
+				"max_expansions": 40,
+				"prefix_length": 0,
+				"transpositions": true,
+				"rewrite": "constant_score"
+			}
+			}
+		}
+		}`, str)
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte(query)))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	req.SetBasicAuth(openS.Username, openS.Password)
 
@@ -200,6 +223,6 @@ func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
 	return nil
 }
 
-// func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
-// 	return &opensearchRepo{p}
-// }
+func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
+	return &opensearchRepo{p}
+}

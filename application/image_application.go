@@ -15,7 +15,7 @@ func NewImageApplication(p *base.Persistence) repository.ImageHandlerRepository 
 	return &imageApp{p}
 }
 
-func (u *imageApp) AddImage(img *entity.Image) (*entity.Image, error) {
+func (u *imageApp) AddImage(img *entity.ImageInput) (*entity.Image, error) {
 	repoInventory := image.NewImageRepository(u.p)
 	return repoInventory.AddImage(img)
 }

@@ -2,12 +2,15 @@ package base
 
 import (
 	"log"
+	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
 	"products-crud/domain/entity/opensearch_entity"
 	product_entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"
+
+	storage_go "github.com/supabase-community/storage-go"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/go-redis/redis"
@@ -21,6 +24,7 @@ type Persistence struct {
 	ProductAlgoliaDb   *search.Index
 	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch_entity.OpenSearch
+	ImageSupabaseDB    *storage_go.Client
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -49,12 +53,19 @@ func NewPersistence() (*Persistence, error) {
 		zap.S().Error("OPENSEARCH NOT INITIALIZED", "error", errOpensearchR)
 	}
 
+	// Supabase
+	supabaseEngine, errSupabase := db.NewImageSupabaseDB()
+	if errSupabase != nil {
+		zap.S().Error("SUPABASES NOT INITIALIZED", "error", errSupabase)
+	}
+
 	return &Persistence{
 		ProductDb:          productEngine.DB,
 		ProductRedisDb:     redisClient,
 		ProductAlgoliaDb:   algoliaPdtIndex,
 		InventoryAlgoliaDb: algoliaInventoryIndex,
 		SearchOpenSearchDb: opensearchIndex,
+		ImageSupabaseDB:    supabaseEngine.Client,
 	}, nil
 }
 
@@ -80,6 +91,7 @@ func (p *Persistence) Close() error {
 // This migrate all tables
 func (p *Persistence) Automigrate() error {
 	p.ProductDb.AutoMigrate(&inventory_entity.Inventory{})
+	p.ProductDb.AutoMigrate(&image_entity.Image{})
 
 	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }
