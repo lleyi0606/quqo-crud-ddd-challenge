@@ -71,3 +71,24 @@ func (p *ImageHandler) AddImage(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, newImage)
 }
+
+func (p *ImageHandler) GetImage(c *gin.Context) {
+	// Extract product ID from the URL parameter
+	productIDStr := c.Param("id")
+	productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID GetInventory"})
+		return
+	}
+
+	// Call the service to get a single product by ID
+	p.repo = application.NewImageApplication(p.Persistence)
+	product, err := p.repo.GetImage(productID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Respond with the single product
+	c.JSON(http.StatusOK, product)
+}

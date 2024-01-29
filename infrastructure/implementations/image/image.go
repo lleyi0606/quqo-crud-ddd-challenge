@@ -1,13 +1,17 @@
 package image
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	entity "products-crud/domain/entity/image_entity"
+	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/image_repository"
+	"products-crud/infrastructure/implementations/cache"
 	base "products-crud/infrastructure/persistences"
 
 	storage_go "github.com/supabase-community/storage-go"
+	"gorm.io/gorm"
 )
 
 type imageRepo struct {
@@ -52,6 +56,31 @@ func (r imageRepo) AddImage(img *entity.ImageInput) (*entity.Image, error) {
 	result := r.p.ImageSupabaseDB.GetPublicUrl("images", "image/storage/"+fmt.Sprint(img.ProductID))
 	image.Url = result.SignedURL
 
+	err = r.p.ProductDb.Debug().Where("image_id = ?", image.ImageID).Updates(&image).Error
+
 	log.Println(img.ProductID, " created. ", res.Key)
 	return &image, nil
+}
+
+func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
+	var img []entity.Image
+
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisImageData, id), &img)
+
+	if img == nil {
+		err := r.p.ProductDb.Debug().Where("product_id = ?", id).Find(&img).Error
+		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
+		if err != nil {
+			return nil, err
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("product not found")
+		}
+
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisImageData, id), img, redis_entity.RedisExpirationGlobal)
+	}
+
+	return img, nil
 }

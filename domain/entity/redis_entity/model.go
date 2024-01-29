@@ -8,6 +8,8 @@ const (
 	RedisProductData   = "PRODUCT_"
 	RedisInventories   = "INVENTORIES_ENABLED_LIST_DATA"
 	RedisInventoryData = "INVENTORY_"
+	RedisImages        = "IMAGES_ENABLED_LIST_DATA"
+	RedisImageData     = "IMAGE_"
 )
 
 // expirations

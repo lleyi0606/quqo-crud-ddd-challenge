@@ -6,7 +6,7 @@ import (
 
 type ImageRepository interface {
 	AddImage(*entity.ImageInput) (*entity.Image, error)
-	// GetInventory(uint64) (*entity.Image, error)
+	GetImage(uint64) ([]entity.Image, error)
 	// GetInventories() ([]entity.Image, error)
 	// UpdateInventory(*entity.Image) (*entity.Image, error)
 	// DeleteInventory(uint64) (*entity.Image, error)
@@ -15,7 +15,7 @@ type ImageRepository interface {
 
 type ImageHandlerRepository interface {
 	AddImage(*entity.ImageInput) (*entity.Image, error)
-	// GetInventory(uint64) (*entity.Image, error)
+	GetImage(uint64) ([]entity.Image, error)
 	// GetInventories() ([]entity.Image, error)
 	// UpdateInventory(*entity.Image) (*entity.Image, error)
 	// DeleteInventory(uint64) (*entity.Image, error)

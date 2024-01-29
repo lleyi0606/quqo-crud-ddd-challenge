@@ -19,3 +19,8 @@ func (u *imageApp) AddImage(img *entity.ImageInput) (*entity.Image, error) {
 	repoInventory := image.NewImageRepository(u.p)
 	return repoInventory.AddImage(img)
 }
+
+func (u *imageApp) GetImage(id uint64) ([]entity.Image, error) {
+	repoInventory := image.NewImageRepository(u.p)
+	return repoInventory.GetImage(id)
+}
