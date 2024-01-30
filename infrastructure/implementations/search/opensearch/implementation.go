@@ -12,8 +12,6 @@ import (
 	"products-crud/domain/repository/search_repository"
 	base "products-crud/infrastructure/persistences"
 	"strings"
-
-	"go.uber.org/zap"
 )
 
 type opensearchRepo struct {
@@ -22,15 +20,29 @@ type opensearchRepo struct {
 
 func (o opensearchRepo) AddProduct(p *entity.Product) error {
 
-	log.Print("add product in opensearch")
 	openS := o.p.SearchOpenSearchDb
 
 	pdt, err := json.Marshal(p)
-	documentID := p.ProductID
+	// documentID := p.ProductID
+	documentID := fmt.Sprint(p.ProductID)
 
-	url := fmt.Sprintf("%s/%s/_doc/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
+	log.Print(documentID, pdt)
 
-	req, err := http.NewRequest("PUT", url, strings.NewReader(string(pdt)))
+	mapping := `{
+		"mappings" : {
+		  "properties" :  {
+			"counter" : {
+			  "type" : "unsigned_long"
+			}
+		  }
+		}
+	}`
+
+	requestBody := mapping + string(pdt)
+
+	url := fmt.Sprintf("%s/%s/_doc/%v", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
+
+	req, err := http.NewRequest("PUT", url, strings.NewReader(requestBody))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return err
@@ -209,18 +221,46 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 }
 
 func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
+	openS := o.p.SearchOpenSearchDb
 
-	product := entity.ProductAlgolia{
-		Product:  *p,
-		ObjectID: p.ProductID, // Convert ID to string
-	}
+	pdt, err := json.Marshal(p)
+	documentID := p.ProductID
 
-	_, err := o.p.ProductAlgoliaDb.PartialUpdateObject(product)
+	url := fmt.Sprintf("%s/%s/_update/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
+
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(pdt)))
 	if err != nil {
-		zap.S().Errorw("Algolia UpdateProduct error", "error", err, "product", p)
+		fmt.Println("Error creating request:", err)
 		return err
 	}
+
+	req.SetBasicAuth(openS.Username, openS.Password)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := openS.Client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check the response
+	if resp.StatusCode == 201 {
+		fmt.Println("Document updated successfully.", documentID)
+	} else {
+		// Read the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return err
+		}
+
+		// Convert the body to a string and print it
+		fmt.Printf("Failed to update document. Status code: %d\n Body: %s\n", resp.StatusCode, string(body))
+	}
+
 	return nil
+
 }
 
 func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
