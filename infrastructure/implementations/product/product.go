@@ -33,7 +33,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	}
 
 	// add to search repo
-	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	searchRepo := search.NewSearchRepository(r.p, "opensearch")
 	err := searchRepo.AddProduct(pdt)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 	}
 
 	// update search repo
-	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	searchRepo := search.NewSearchRepository(r.p, "opensearch")
 	err = searchRepo.UpdateProduct(pdt)
 	if err != nil {
 		log.Print(err)
@@ -122,7 +122,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	}
 
 	// search repo
-	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	searchRepo := search.NewSearchRepository(r.p, "opensearch")
 	err = searchRepo.DeleteProduct(id)
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 	// new search repo
-	searchRepo := search.NewSearchRepository(r.p, "algolia")
+	searchRepo := search.NewSearchRepository(r.p, "opensearch")
 	pdts, err := searchRepo.SearchProducts(str)
 	if err != nil {
 		return nil, err

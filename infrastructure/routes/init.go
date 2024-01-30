@@ -23,5 +23,5 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 	// List Injection
 	ProductRoutes(apiR, p)
 	InventoryRoutes(apiR, p)
-
+	ImageRoutes(apiR, p)
 }

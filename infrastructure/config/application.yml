@@ -4,13 +4,18 @@ algolia:
     key: 6eb68873e1de03f00a992c09a31d8e48
 
 awsOpensearch:
-  domainEndpoint: "https://search-quqo-intern-cha-1-m6hqbawoegozen66ssxkyqut6a.ap-southeast-1.es.amazonaws.com"
+  domainEndpoint: https://search-quqo-intern-cha-1-echvw7talpeoxlpfzq4vdywgbi.us-east-1.es.amazonaws.com
   opensearch:
     dev:
-      user: "admin"
-      pass: "aDmIN!12345"
+      user: admin
+      pass: "@DmIN29183"
 
 redis:
   dev: 
     host: redis-11655.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11655
     pass: cEWumizsf73PPx1QeSEBQexRfjt5ng4T
+
+supabase:
+  dev:
+    url: https://qvxjfoxiannzjfiujclp.supabase.co
+    key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2eGpmb3hpYW5uempmaXVqY2xwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwNjE3OTc4OSwiZXhwIjoyMDIxNzU1Nzg5fQ._0FGt4XbHDWEg8rq81YyYsfcNiOXNLS0dp8NarNUZBg
