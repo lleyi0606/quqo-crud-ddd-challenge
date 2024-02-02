@@ -94,8 +94,8 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 	}
 
 	// update search repo
-	searchRepo := search.NewSearchRepository(r.p, "opensearch")
-	err = searchRepo.UpdateProduct(pdt)
+	// searchRepo := search.NewSearchRepository(r.p, "opensearch")
+	// err = searchRepo.UpdateProduct(pdt)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -147,5 +147,4 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 		return nil, err
 	}
 	return pdts, nil
-
 }

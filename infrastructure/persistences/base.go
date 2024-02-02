@@ -4,7 +4,6 @@ import (
 	"log"
 	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
-	"products-crud/domain/entity/opensearch_entity"
 	product_entity "products-crud/domain/entity/product_entity"
 	"products-crud/infrastructure/persistences/db"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/go-redis/redis"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	opensearch "github.com/opensearch-project/opensearch-go/v2"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +23,7 @@ type Persistence struct {
 	ProductRedisDb     *redis.Client
 	ProductAlgoliaDb   *search.Index
 	InventoryAlgoliaDb *search.Index
-	SearchOpenSearchDb *opensearch_entity.OpenSearch
+	SearchOpenSearchDb *opensearch.Client
 	ImageSupabaseDB    *storage_go.Client
 }
 

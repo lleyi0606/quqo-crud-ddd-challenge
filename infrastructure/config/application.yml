@@ -8,7 +8,7 @@ awsOpensearch:
   opensearch:
     dev:
       user: admin
-      pass: "@DmIN29183"
+      pass: "Vjc4sbmu_"
 
 redis:
   dev: 

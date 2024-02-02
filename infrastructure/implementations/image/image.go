@@ -53,7 +53,7 @@ func (r imageRepo) AddImage(img *entity.ImageInput) (*entity.Image, error) {
 		return nil, err
 	}
 
-	result := r.p.ImageSupabaseDB.GetPublicUrl("images", "image/storage/"+fmt.Sprint(img.ProductID))
+	result := r.p.ImageSupabaseDB.GetPublicUrl("images", "image/storage/"+fmt.Sprint(image.ImageID))
 	image.Url = result.SignedURL
 
 	err = r.p.ProductDb.Debug().Where("image_id = ?", image.ImageID).Updates(&image).Error
@@ -70,7 +70,6 @@ func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
 
 	if img == nil {
 		err := r.p.ProductDb.Debug().Where("product_id = ?", id).Find(&img).Error
-		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&img).Error
 		if err != nil {
 			return nil, err
 		}
@@ -99,6 +98,7 @@ func (r imageRepo) DeleteImage(id uint64) error {
 	// delete from CDN database
 	_, err = r.p.ImageSupabaseDB.RemoveFile("images", []string{"image/storage/" + fmt.Sprint(id)})
 	if err != nil {
+		log.Println("CDN delete fail: ", err)
 		return err
 	}
 

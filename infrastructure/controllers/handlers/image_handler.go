@@ -94,8 +94,8 @@ func (p *ImageHandler) GetImage(c *gin.Context) {
 		return
 	}
 
-	// Respond with the single product
-	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, err.Error(), product))
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Successfully get images.", product))
+
 }
 
 func (p *ImageHandler) DeleteImage(c *gin.Context) {
