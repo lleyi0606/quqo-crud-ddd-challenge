@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"products-crud/application"
+	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
 	entity "products-crud/domain/entity/image_entity"
 	repository "products-crud/domain/repository/image_repository"
@@ -25,6 +26,18 @@ func NewImageController(p *base.Persistence) *ImageHandler {
 	}
 }
 
+// @Summary Add image
+// @Description Add an image to the database
+// @Tags Image
+// @Accept mpfd
+// @Produce json
+// @Param product_id formData int64 true "Product ID"
+// @Param caption formData string false "Caption"
+// @Param image_file formData file true "Image file"
+// @Success 201 {object} response_entity.Response "Image created"
+// @Failure 400 {object} response_entity.Response "Invalid product ID format, Unable to parse form data, Unable to get image from form"
+// @Failure 500 {object} response_entity.Response "Application AddImage error"
+// @Router /images [post]
 func (p *ImageHandler) AddImage(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -74,6 +87,16 @@ func (p *ImageHandler) AddImage(c *gin.Context) {
 
 }
 
+// @Summary Get images
+// @Description Get image details by product ID
+// @Tags Image
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} response_entity.Response "Successfully get images"
+// @Failure 400 {object} response_entity.Response "Invalid product ID GetImage"
+// @Failure 500 {object} response_entity.Response "Application GetImage error"
+// @Router /images/{id} [get]
 func (p *ImageHandler) GetImage(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -98,6 +121,16 @@ func (p *ImageHandler) GetImage(c *gin.Context) {
 
 }
 
+// @Summary Delete image
+// @Description Delete an image from the database by ID
+// @Tags Image
+// @Accept json
+// @Produce json
+// @Param id path int true "Image ID"
+// @Success 200 {object} response_entity.Response "Image deleted"
+// @Failure 400 {object} response_entity.Response "Invalid image ID DeleteImage"
+// @Failure 500 {object} response_entity.Response "Application DeleteImage error"
+// @Router /images/{id} [delete]
 func (p *ImageHandler) DeleteImage(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

@@ -22,76 +22,8 @@ type opensearchRepo struct {
 
 func (o opensearchRepo) AddProduct(p *entity.Product) error {
 
-	// openS := o.p.SearchOpenSearchDb
-
 	pdt, err := json.Marshal(p)
-	// // documentID := p.ProductID
 	documentID := fmt.Sprint(p.ProductID)
-
-	// log.Print(documentID, pdt)
-
-	// mapping := `{
-	// 	"mappings" : {
-	// 		"properties" :  {
-	// 			"counter" : {
-	// 				"type" : "unsigned_long"
-	// 			}
-	// 		}
-	// 	}
-	// }`
-	// requestBody := mapping + string(pdt)
-
-	// // url := fmt.Sprintf("%s/%s/_doc/%v", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
-
-	// req, err := http.NewRequest("PUT", url, strings.NewReader(requestBody))
-	// if err != nil {
-	// 	fmt.Println("Error creating request:", err)
-	// 	return err
-	// }
-
-	// req.SetBasicAuth(openS.Username, openS.Password)
-	// req.Header.Set("Content-Type", "application/json")
-
-	// resp, err := openS.Client.Do(req)
-	// if err != nil {
-	// 	fmt.Println("Error sending request:", err)
-	// 	return err
-	// }
-	// defer resp.Body.Close()
-
-	// Create an IndexRequest with the mapping included in the request body GOOOOOOD
-	// mapping := `
-	// {
-	//   "mappings": {
-	// 	"properties": {
-	// 	  "productID": { "type": "unsigned_long" },
-	// 	  "name": { "type": "text" },
-	// 	  "description": { "type": "text" },
-	// 	  "price": { "type": "double" },
-	// 	  "category": { "type": "keyword" },
-	// 	  "warehouseID": { "type": "unsigned_long" },
-	// 	  "stock": { "type": "integer" }
-	// 	}
-	//   }
-	// }`
-
-	// req_indice := opensearchapi.IndicesCreateRequest{
-	// 	Index: opensearch_entity.OpenSearchProductsIndex,
-	// 	Body:  strings.NewReader(mapping),
-	// }
-
-	// createIndexResponse, err := req_indice.Do(context.Background(), openS)
-	// if err != nil {
-	// 	fmt.Println("Failed to create index with mapping:", err)
-	// 	return err
-	// }
-	// defer createIndexResponse.Body.Close()
-
-	// // Check the response
-	// if createIndexResponse.IsError() {
-	// 	fmt.Printf("Error creating index: %s\n", createIndexResponse.Status())
-	// 	return fmt.Errorf("failed to create index: %s", createIndexResponse.Status())
-	// }
 
 	req := opensearchapi.IndexRequest{
 		Index:      opensearch_entity.OpenSearchProductsIndex,
@@ -107,6 +39,7 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 	fmt.Println("Inserting a document", string(pdt))
 	fmt.Println(insertResponse)
 	defer insertResponse.Body.Close()
+
 	// Check the response
 	if insertResponse.StatusCode == 201 {
 		fmt.Println("Document indexed successfully.", documentID)
@@ -183,28 +116,11 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 	
 	  `, str, str)
 
-	// content := fmt.Sprintf(`{
-	// 	"size": 100,
-	// 	"_source": {
-	// 	  "includes": ["name", "description"]
-	// 	},
-	// 	"query": {
-	// 	  "neural": {
-	// 		"name_v": {
-	// 		  "query_text": "%s",
-	// 		  "model_id": "dZGTYo0BqHh94dza0aSQ",
-	// 		  "k": 100
-	// 		}
-	// 	  }
-	// 	}
-	//   }`, str)
-
 	contentReader := strings.NewReader(content)
 
 	search := opensearchapi.SearchRequest{
 		Index: []string{opensearch_entity.OpenSearchProductsIndex},
-		// Index: []string{"products_ml"},
-		Body: contentReader,
+		Body:  contentReader,
 	}
 
 	resp, err := search.Do(context.Background(), o.p.SearchOpenSearchDb)
@@ -285,49 +201,6 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 	return products, nil
 }
-
-// func (o opensearchRepo) UpdateProduct(p *entity.Product) error {
-// 	openS := o.p.SearchOpenSearchDb
-
-// 	pdt, err := json.Marshal(p)
-// 	documentID := p.ProductID
-
-// 	url := fmt.Sprintf("%s/%s/_update/%d", openS.DomainEndpoint, opensearch_entity.OpenSearchProductsIndex, documentID)
-
-// 	req, err := http.NewRequest("POST", url, strings.NewReader(string(pdt)))
-// 	if err != nil {
-// 		fmt.Println("Error creating request:", err)
-// 		return err
-// 	}
-
-// 	req.SetBasicAuth(openS.Username, openS.Password)
-// 	req.Header.Set("Content-Type", "application/json")
-
-// 	resp, err := openS.Client.Do(req)
-// 	if err != nil {
-// 		fmt.Println("Error sending request:", err)
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	// Check the response
-// 	if resp.StatusCode == 201 {
-// 		fmt.Println("Document updated successfully.", documentID)
-// 	} else {
-// 		// Read the response body
-// 		body, err := io.ReadAll(resp.Body)
-// 		if err != nil {
-// 			fmt.Println("Error reading response body:", err)
-// 			return err
-// 		}
-
-// 		// Convert the body to a string and print it
-// 		fmt.Printf("Failed to update document. Status code: %d\n Body: %s\n", resp.StatusCode, string(body))
-// 	}
-
-// 	return nil
-
-// }
 
 func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {
 	return &opensearchRepo{p}

@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"products-crud/application"
+	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
 	entity "products-crud/domain/entity/inventory_entity"
 	repository "products-crud/domain/repository/inventory_respository"
@@ -24,6 +25,16 @@ func NewInventoryController(p *base.Persistence) *InventoryHandler {
 	}
 }
 
+// @Summary Get inventory
+// @Description Get inventory details by product ID
+// @Tags Inventory
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} entity.Inventory "Inventory details"
+// @Failure 400 {object} response_entity.Response "Invalid product ID GetInventory"
+// @Failure 500 {object} response_entity.Response "Application GetInventory error"
+// @Router /inventory/{id} [get]
 func (p *InventoryHandler) GetInventory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -48,6 +59,17 @@ func (p *InventoryHandler) GetInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get inventory. ", product))
 }
 
+// @Summary Update stock
+// @Description Update stock details for a product by ID
+// @Tags Inventory
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Param Object body entity.InventoryStockOnly true "Stock details to update"
+// @Success 201 {object} response_entity.Response "Stock updated"
+// @Failure 400 {object} response_entity.Response "Invalid product ID UpdateStock or Invalid JSON"
+// @Failure 500 {object} response_entity.Response "Application UpdateStock error"
+// @Router /inventory/{id} [put]
 func (p *InventoryHandler) UpdateStock(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

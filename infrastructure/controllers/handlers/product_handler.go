@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"products-crud/application"
+	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
 	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
@@ -25,6 +26,16 @@ func NewProductController(p *base.Persistence) *ProductHandler {
 	}
 }
 
+// @Summary Create new product
+// @Description Adds a new product to the database
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param body body entity.ProductWithStockAndWarehouse true "Entity of the body request"
+// @Success 201 {object} response_entity.Response "Product created"
+// @Failure 422 {object} response_entity.Response "Parse input error"
+// @Failure 500 {object} response_entity.Response "Application AddProduct error"
+// @Router /products [post]
 func (p *ProductHandler) AddProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -43,6 +54,14 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Product created.", newProduct))
 }
 
+// @Summary Retrieve all products
+// @Description Retrieve all products from the database
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Success 200 {object} response_entity.Response "Product getted"
+// @Failure 500 {object} response_entity.Response "Application GetProducts error"
+// @Router /products [get]
 func (p *ProductHandler) GetProducts(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -58,6 +77,16 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get products.", products))
 }
 
+// @Summary Retrieve a product
+// @Description Retrieve a product from the database by ID
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} response_entity.Response "Product retrieved"
+// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 500 {object} response_entity.Response "Application GetProduct error"
+// @Router /products/{id} [get]
 func (p *ProductHandler) GetProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -81,6 +110,16 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get product.", product))
 }
 
+// @Summary Update a product
+// @Description Update a product in the database by ID
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 201 {object} response_entity.Response "Product updated"
+// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 500 {object} response_entity.Response "Application UpdateProduct error"
+// @Router /products/{id} [put]
 func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -118,6 +157,16 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Product updated. ", newProduct))
 }
 
+// @Summary Delete a product
+// @Description Delete a product from the database by ID
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} response_entity.Response "Product deleted"
+// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 500 {object} response_entity.Response "Application DeleteProduct error"
+// @Router /products/{id} [delete]
 func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -141,6 +190,15 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Product deleted", product))
 }
 
+// @Summary Search for products
+// @Description Search for products by keyword
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param name query string true "Search keyword for product name"
+// @Success 200 {object} response_entity.Response "Products searched"
+// @Failure 500 {object} response_entity.Response "Application SearchProducts error"
+// @Router /products/search [get]
 func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -158,6 +216,15 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Product searched.", products))
 }
 
+// @Summary Add products
+// @Description Add multiple products to the database
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param Object body []entity.ProductWithStockAndWarehouse true "Array of products to add"
+// @Success 201 {object} response_entity.Response "Products added"
+// @Failure 422 {object} response_entity.Response "Parse input error"
+// @Router /products [post]
 func (p *ProductHandler) AddProducts(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

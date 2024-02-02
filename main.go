@@ -3,10 +3,13 @@ package main
 import (
 	"log"
 
+	"os"
+	_ "products-crud/docs"
+	base "products-crud/infrastructure/persistences"
 	"products-crud/infrastructure/routes"
 
-	"os"
-	base "products-crud/infrastructure/persistences"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"products-crud/infrastructure/config"
 
@@ -45,6 +48,7 @@ func main() {
 
 	// Routes
 	r := routes.InitRouter(p)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//Starting the application
 	app_port := os.Getenv("PORT")

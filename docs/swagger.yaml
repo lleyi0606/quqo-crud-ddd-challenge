@@ -1,0 +1,359 @@
+definitions:
+  entity.Inventory:
+    properties:
+      product_id:
+        type: integer
+      stock:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  entity.InventoryStockOnly:
+    properties:
+      stock:
+        type: integer
+    type: object
+  entity.ProductWithStockAndWarehouse:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: integer
+      stock:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  entity.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Add an image to the database
+      parameters:
+      - description: Product ID
+        in: formData
+        name: product_id
+        required: true
+        type: integer
+      - description: Caption
+        in: formData
+        name: caption
+        type: string
+      - description: Image file
+        in: formData
+        name: image_file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Image created
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID format, Unable to parse form data, Unable
+            to get image from form
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application AddImage error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Add image
+      tags:
+      - Image
+  /images/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an image from the database by ID
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image deleted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid image ID DeleteImage
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application DeleteImage error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Delete image
+      tags:
+      - Image
+    get:
+      consumes:
+      - application/json
+      description: Get image details by product ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get images
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID GetImage
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetImage error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get images
+      tags:
+      - Image
+  /inventory/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get inventory details by product ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Inventory details
+          schema:
+            $ref: '#/definitions/entity.Inventory'
+        "400":
+          description: Invalid product ID GetInventory
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetInventory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get inventory
+      tags:
+      - Inventory
+    put:
+      consumes:
+      - application/json
+      description: Update stock details for a product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Stock details to update
+        in: body
+        name: Object
+        required: true
+        schema:
+          $ref: '#/definitions/entity.InventoryStockOnly'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Stock updated
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID UpdateStock or Invalid JSON
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application UpdateStock error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Update stock
+      tags:
+      - Inventory
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all products from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product getted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetProducts error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Retrieve all products
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Add multiple products to the database
+      parameters:
+      - description: Array of products to add
+        in: body
+        name: Object
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/entity.ProductWithStockAndWarehouse'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Products added
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "422":
+          description: Parse input error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Add products
+      tags:
+      - Product
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product from the database by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application DeleteProduct error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Delete a product
+      tags:
+      - Product
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a product from the database by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product retrieved
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetProduct error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Retrieve a product
+      tags:
+      - Product
+    put:
+      consumes:
+      - application/json
+      description: Update a product in the database by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product updated
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application UpdateProduct error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Update a product
+      tags:
+      - Product
+  /products/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for products by keyword
+      parameters:
+      - description: Search keyword for product name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Products searched
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application SearchProducts error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Search for products
+      tags:
+      - Product
+swagger: "2.0"
