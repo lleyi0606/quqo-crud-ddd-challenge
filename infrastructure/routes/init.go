@@ -25,4 +25,5 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 	InventoryRoutes(apiR, p)
 	ImageRoutes(apiR, p)
 	CategoryRoutes(apiR, p)
+	CustomerRoutes(apiR, p)
 }
