@@ -1,10 +1,12 @@
 package entity
 
 import (
-	entity "products-crud/domain/entity/inventory_entity"
+	"products-crud/domain/entity"
+	inventory_entity "products-crud/domain/entity/inventory_entity"
 )
 
 type ProductWithoutInventory struct {
+	entity.BaseModelWDelete
 	ProductID   uint64  `gorm:"primary_key;auto_increment" json:"product_id"`
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description *string `gorm:"size:255;" json:"description"`
@@ -13,6 +15,7 @@ type ProductWithoutInventory struct {
 }
 
 type ProductWithStockAndWarehouse struct {
+	entity.BaseModelWDelete
 	ProductID   uint64  `gorm:"primary_key;auto_increment" json:"product_id"`
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description string  `gorm:"size:255;" json:"description"`
@@ -23,12 +26,13 @@ type ProductWithStockAndWarehouse struct {
 }
 
 type Product struct {
-	ProductID   uint64           `gorm:"primary_key;auto_increment:false" json:"product_id"`
-	Name        string           `gorm:"size:100;" json:"name"`
-	Description string           `gorm:"size:255;" json:"description"`
-	Price       float64          `gorm:"type:numeric;" json:"price"`
-	Category    string           `gorm:"size:100;" json:"category"`
-	Inventory   entity.Inventory `gorm:"foreignkey:ProductID;references:ProductID" json:"inventory"`
+	entity.BaseModelWDelete
+	ProductID   uint64                     `gorm:"primary_key;auto_increment:false" json:"product_id"`
+	Name        string                     `gorm:"size:100;" json:"name"`
+	Description string                     `gorm:"size:255;" json:"description"`
+	Price       float64                    `gorm:"type:numeric;" json:"price"`
+	Category    string                     `gorm:"size:100;" json:"category"`
+	Inventory   inventory_entity.Inventory `gorm:"foreignkey:ProductID;references:ProductID" json:"inventory"`
 }
 
 type ProductAlgolia struct {

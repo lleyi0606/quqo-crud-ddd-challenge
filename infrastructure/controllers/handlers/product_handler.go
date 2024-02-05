@@ -74,7 +74,11 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
-	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get products.", products))
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get products.",
+		map[string]interface{}{
+			"result": products,
+		},
+	))
 }
 
 // @Summary Retrieve a product
@@ -213,7 +217,10 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
-	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Product searched.", products))
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Product searched.",
+		map[string]interface{}{
+			"result": products,
+		}))
 }
 
 // @Summary Add products
