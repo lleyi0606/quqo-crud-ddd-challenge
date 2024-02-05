@@ -11,7 +11,8 @@ type ProductWithoutInventory struct {
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description *string `gorm:"size:255;" json:"description"`
 	Price       float64 `gorm:"type:numeric;" json:"price"`
-	Category    string  `gorm:"size:100;" json:"category"`
+	Status      string  `gorm:"size:100;" json:"status"`
+	CategoryID  int64   `gorm:"type:numeric;" json:"category_id"`
 }
 
 type ProductWithStockAndWarehouse struct {
@@ -20,7 +21,8 @@ type ProductWithStockAndWarehouse struct {
 	Name        string  `gorm:"size:100;" json:"name"`
 	Description string  `gorm:"size:255;" json:"description"`
 	Price       float64 `gorm:"type:numeric;" json:"price"`
-	Category    string  `gorm:"size:100;" json:"category"`
+	Status      string  `gorm:"size:100;" json:"status"`
+	CategoryID  int64   `gorm:"type:numeric;" json:"category_id"`
 	WarehouseID int64   `gorm:"type:numeric" json:"warehouse_id"`
 	Stock       int     `gorm:"type:numeric;" json:"stock"`
 }
@@ -31,7 +33,8 @@ type Product struct {
 	Name        string                     `gorm:"size:100;" json:"name"`
 	Description string                     `gorm:"size:255;" json:"description"`
 	Price       float64                    `gorm:"type:numeric;" json:"price"`
-	Category    string                     `gorm:"size:100;" json:"category"`
+	Status      string                     `gorm:"size:100;" json:"status"`
+	CategoryID  int64                      `gorm:"type:numeric;" json:"category_id"`
 	Inventory   inventory_entity.Inventory `gorm:"foreignkey:ProductID;references:ProductID" json:"inventory"`
 }
 

@@ -7,7 +7,7 @@ func SqlProductToProductAloglia(p Product) ProductAlgolia {
 	product.Name = p.Name
 	product.Description = p.Description
 	product.Price = p.Price
-	product.Category = p.Category
+	product.CategoryID = p.CategoryID
 	product.ObjectID = p.ProductID
 	return product
 }

@@ -2,6 +2,7 @@ package base
 
 import (
 	"log"
+	category_entity "products-crud/domain/entity/category_entity"
 	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
 	product_entity "products-crud/domain/entity/product_entity"
@@ -88,10 +89,11 @@ func (p *Persistence) Close() error {
 	return nil
 }
 
-// This migrate all tables
+// This migrates all tables
 func (p *Persistence) Automigrate() error {
 	p.ProductDb.AutoMigrate(&inventory_entity.Inventory{})
 	p.ProductDb.AutoMigrate(&image_entity.Image{})
+	p.ProductDb.AutoMigrate(&category_entity.Category{})
 
 	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }

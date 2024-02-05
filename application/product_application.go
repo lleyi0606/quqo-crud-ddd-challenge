@@ -36,7 +36,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 		Name:        pdt.Name,
 		Description: pdt.Description,
 		Price:       pdt.Price,
-		Category:    pdt.Category,
+		CategoryID:  pdt.CategoryID,
 		Inventory:   *ivt,
 	}
 

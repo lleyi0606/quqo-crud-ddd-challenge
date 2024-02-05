@@ -8,7 +8,6 @@ import (
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/cache"
-	"products-crud/infrastructure/implementations/inventory"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
@@ -50,7 +49,7 @@ func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
-		err := r.p.ProductDb.Debug().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
+		err := r.p.ProductDb.Debug().Unscoped().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
 		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
 		if err != nil {
 			return nil, err
@@ -106,24 +105,27 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	var pdt entity.Product
-	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&pdt).Error
-	if err != nil {
-		return nil, err
+	res := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&pdt)
+	if res.Error != nil {
+		return nil, res.Error
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	// if errors.Is(err, gorm.ErrRecordNotFound) {
+	// 	return nil, errors.New("product not found")
+	// }
+	if res.RowsAffected == 0 {
 		return nil, errors.New("product not found")
 	}
 
 	// delete from inventory too
-	inventoryRepo := inventory.NewInventoryRepository(r.p)
-	_, err = inventoryRepo.DeleteInventory(id)
-	if err != nil {
-		return nil, err
-	}
+	// inventoryRepo := inventory.NewInventoryRepository(r.p)
+	// _, err := inventoryRepo.DeleteInventory(id)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// search repo
 	searchRepo := search.NewSearchRepository(r.p, "algolia")
-	err = searchRepo.DeleteProduct(id)
+	err := searchRepo.DeleteProduct(id)
 	if err != nil {
 		return nil, err
 	}
