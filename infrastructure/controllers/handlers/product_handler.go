@@ -134,8 +134,6 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// var pdt entity.Product
-
 	p.p_repo = application.NewProductApplication(p.Persistence)
 	pdt, _ := p.p_repo.GetProduct(productID)
 
@@ -144,15 +142,11 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// var newPdt entity.ProductUpdate
-	// newPdt = entity.SqlProductRToProductForUpdate(pdt, productID)
-
 	// Log the JSON input
 	log.Printf("Received JSON input for product update: %+v", pdt)
 
 	pdt.ProductID = productID
 
-	// p.p_repo = application.NewProductApplication(p.Persistence)
 	newProduct, err := p.p_repo.UpdateProduct(pdt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))

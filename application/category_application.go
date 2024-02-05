@@ -34,3 +34,20 @@ func (u *categoryApp) DeleteCategory(id uint64) error {
 	repoCategory := category.NewCategoryRepository(u.p)
 	return repoCategory.DeleteCategory(id)
 }
+
+func (u *categoryApp) GetCategoryChain(id uint64) ([]entity.Category, error) {
+	var chain []entity.Category
+	repoCategory := category.NewCategoryRepository(u.p)
+
+	for id != 0 {
+		temp, err := repoCategory.GetCategory(id)
+		if err != nil {
+			return nil, err
+		}
+		chain = append(chain, *temp)
+		id = uint64(temp.ParentID)
+	}
+
+	return chain, nil
+
+}

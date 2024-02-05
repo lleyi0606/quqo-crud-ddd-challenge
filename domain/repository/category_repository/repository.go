@@ -14,6 +14,7 @@ type CategoryRepository interface {
 type CategoryHandlerRepository interface {
 	AddCategory(*entity.Category) (*entity.Category, error)
 	GetCategory(uint64) (*entity.Category, error)
+	GetCategoryChain(uint64) ([]entity.Category, error)
 	UpdateCategory(*entity.Category) (*entity.Category, error)
 	DeleteCategory(uint64) error
 }

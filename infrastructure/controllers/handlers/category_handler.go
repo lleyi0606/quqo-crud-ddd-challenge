@@ -56,7 +56,7 @@ func (p *CategoryHandler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Category created.", newCategory))
 }
 
-// @Summary Get Categorys
+// @Summary Get Categories
 // @Description Get Category details by category ID
 // @Tags Category
 // @Accept json
@@ -81,6 +81,40 @@ func (p *CategoryHandler) GetCategory(c *gin.Context) {
 	// Call the service to get a single category by ID
 	p.repo = application.NewCategoryApplication(p.Persistence)
 	category, err := p.repo.GetCategory(categoryID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
+		return
+	}
+
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Successfully get Categories.", category))
+
+}
+
+// @Summary Get Categorys
+// @Description Get Category details by category ID
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param id path int true "category ID"
+// @Success 200 {object} response_entity.Response "Successfully get Categorys"
+// @Failure 400 {object} response_entity.Response "Invalid category ID GetCategory"
+// @Failure 500 {object} response_entity.Response "Application GetCategory error"
+// @Router /Categorys/{id} [get]
+func (p *CategoryHandler) GetCategoryChain(c *gin.Context) {
+	responseContextData := response_entity.ResponseContext{Ctx: c}
+
+	// Extract category ID from the URL parameter
+	categoryIDStr := c.Param("id")
+	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category ID GetCategory", ""))
+
+		return
+	}
+
+	// Call the service to get a single category by ID
+	p.repo = application.NewCategoryApplication(p.Persistence)
+	category, err := p.repo.GetCategoryChain(categoryID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
