@@ -3,7 +3,7 @@ package redis
 import (
 	"encoding/json"
 	"errors"
-	cache_repository "products-crud/domain/repository/cache_respository"
+	cache_repository "products-crud/domain/repository/cache_repository"
 	base "products-crud/infrastructure/persistences"
 	"time"
 

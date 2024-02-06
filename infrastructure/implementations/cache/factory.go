@@ -1,7 +1,7 @@
 package cache
 
 import (
-	cache_repository "products-crud/domain/repository/cache_respository"
+	cache_repository "products-crud/domain/repository/cache_repository"
 	"products-crud/infrastructure/implementations/cache/redis"
 	base "products-crud/infrastructure/persistences"
 )

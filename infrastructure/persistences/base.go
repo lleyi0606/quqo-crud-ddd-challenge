@@ -6,7 +6,9 @@ import (
 	customer_entity "products-crud/domain/entity/customer_entity"
 	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
+	order_entity "products-crud/domain/entity/order_entity"
 	product_entity "products-crud/domain/entity/product_entity"
+
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"
@@ -96,6 +98,7 @@ func (p *Persistence) Automigrate() error {
 	p.ProductDb.AutoMigrate(&image_entity.Image{})
 	p.ProductDb.AutoMigrate(&category_entity.Category{})
 	p.ProductDb.AutoMigrate(&customer_entity.Customer{})
+	p.ProductDb.AutoMigrate(&order_entity.Order{})
 
 	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }
