@@ -42,45 +42,17 @@ func (r orderedItemRepo) GetOrderedItems() ([]entity.OrderedItem, error) {
 	return orderedItem, nil
 }
 
-func (r orderedItemRepo) GetOrderedItem(id uint64) (*entity.OrderedItem, error) {
-	var orderedItem *entity.OrderedItem
+func (r orderedItemRepo) GetOrderedItemsByOrderId(id uint64) ([]entity.OrderedItem, error) {
+	var orderedItems []entity.OrderedItem
 
-	err := r.p.ProductDb.Debug().Unscoped().Where("orderedItem_id = ?", id).Take(&orderedItem).Error
+	err := r.p.ProductDb.Debug().Unscoped().Where("order_id = ?", id).Take(&orderedItems).Error
 	if err != nil {
 		return nil, err
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("orderedItem not found")
+		return nil, errors.New("orderedItems not found")
 	}
 
-	return orderedItem, nil
-}
-
-func (r orderedItemRepo) UpdateOrderedItem(cus *entity.OrderedItem) (*entity.OrderedItem, error) {
-	result := r.p.ProductDb.Debug().Where("order_id = ? AND product_id = ?", cus.OrderID, cus.ProductID).Updates(&cus)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, errors.New("orderedItem not found")
-	}
-
-	return cus, nil
-}
-
-func (r orderedItemRepo) DeleteOrderedItem(id uint64) error {
-	var orderedItem entity.OrderedItem
-	res := r.p.ProductDb.Debug().Where("orderedItem_id = ?", id).Delete(&orderedItem)
-	if res.Error != nil {
-		return res.Error
-	}
-
-	if res.RowsAffected == 0 {
-		return errors.New("orderedItem not found")
-	}
-
-	return nil
+	return orderedItems, nil
 }

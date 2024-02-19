@@ -20,17 +20,7 @@ func (u *OrderedItemApp) GetOrderedItems() ([]entity.OrderedItem, error) {
 	return repoOrderedItem.GetOrderedItems()
 }
 
-func (u *OrderedItemApp) GetOrderedItem(id uint64) (*entity.OrderedItem, error) {
+func (u *OrderedItemApp) GetOrderedItemsByOrderId(id uint64) ([]entity.OrderedItem, error) {
 	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
-	return repoOrderedItem.GetOrderedItem(id)
-}
-
-func (u *OrderedItemApp) UpdateOrderedItem(cat *entity.OrderedItem) (*entity.OrderedItem, error) {
-	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
-	return repoOrderedItem.UpdateOrderedItem(cat)
-}
-
-func (u *OrderedItemApp) DeleteOrderedItem(id uint64) error {
-	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
-	return repoOrderedItem.DeleteOrderedItem(id)
+	return repoOrderedItem.GetOrderedItemsByOrderId(id)
 }

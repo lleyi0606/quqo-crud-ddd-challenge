@@ -89,13 +89,10 @@ func (r inventoryRepo) UpdateInventory(ivt *entity.Inventory) (*entity.Inventory
 		return nil, err
 	}
 
-	// update search repo
-	// searchRepo := search.NewSearchRepository(r.p, "algolia")
-	// err = searchRepo.UpdateInventory(ivt)
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return nil, err
-	// }
+	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, ivt.ProductID))
+	if err != nil {
+		return nil, err
+	}
 
 	return ivt, nil
 }
@@ -127,13 +124,30 @@ func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
 	return &ivt, nil
 }
 
-// func (r inventoryRepo) SearchInventory(str string) ([]entity.Inventory, error) {
-
-// 	// new search repo
-// 	searchRepo := search.NewSearchRepository(r.p, "algolia")
-// 	ivts, err := searchRepo.SearchInventories(str)
+// func (r inventoryRepo) HasSufficientStock(id uint64, stock int) error {
+// 	ivt, err := r.GetInventory(id)
 // 	if err != nil {
-// 		return nil, err
+// 		return err
 // 	}
-// 	return ivts, nil
+// 	if ivt.Stock < stock {
+// 		return fmt.Errorf("insufficient stock for product_id %d", id)
+// 	}
+// 	return nil
 // }
+
+func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
+	ivt, err := r.GetInventory(id)
+	if err != nil {
+		return err
+	}
+	if ivt.Stock < qty {
+		return fmt.Errorf("insufficient stock for product_id %d", id)
+	}
+
+	ivt.Stock -= qty
+
+	log.Print(ivt)
+	_, err = r.UpdateInventory(ivt)
+
+	return err
+}

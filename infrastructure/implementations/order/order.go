@@ -30,7 +30,8 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
 	var order *entity.Order
 
-	err := r.p.ProductDb.Debug().Unscoped().Where("order_id = ?", id).Take(&order).Error
+	err := r.p.ProductDb.Debug().Unscoped().Preload("OrderedItems").Where("order_id = ?", id).Take(&order).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +69,4 @@ func (r orderRepo) DeleteOrder(id uint64) error {
 	}
 
 	return nil
-}
-
-func (r orderRepo) CalculateFees(amt float64) (float64, error) {
-	return 0.02 * amt, nil
 }

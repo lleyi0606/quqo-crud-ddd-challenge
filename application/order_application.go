@@ -5,6 +5,7 @@ import (
 	orderItem_entity "products-crud/domain/entity/orderedItem_entity"
 
 	repository "products-crud/domain/repository/order_repository"
+	"products-crud/infrastructure/implementations/inventory"
 	"products-crud/infrastructure/implementations/order"
 	"products-crud/infrastructure/implementations/orderedItem"
 	"products-crud/infrastructure/implementations/product"
@@ -21,6 +22,15 @@ func NewOrderApplication(p *base.Persistence) repository.OrderHandlerRepository 
 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
 	repoOrder := order.NewOrderRepository(u.p)
+
+	// update stock
+	repoInventory := inventory.NewInventoryRepository(u.p)
+	for _, orderedItemInput := range orderInput.OrderedItems {
+		err := repoInventory.DecreaseStock(orderedItemInput.ProductID, orderedItemInput.Quantity)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// add the orderedItems
 	var orderedItems []orderItem_entity.OrderedItem
@@ -49,7 +59,10 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		orderedItems = append(orderedItems, *orderedItem)
 	}
 
-	fees, _ := repoOrder.CalculateFees(cost)
+	// calculate fees
+	fees, _ := u.CalculateFees(cost)
+
+	// create and add order
 	order := &entity.Order{
 		OrderID:       orderInput.OrderID,
 		CustomerID:    orderInput.CustomerID,
@@ -76,4 +89,8 @@ func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
 func (u *OrderApp) DeleteOrder(id uint64) error {
 	repoOrder := order.NewOrderRepository(u.p)
 	return repoOrder.DeleteOrder(id)
+}
+
+func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
+	return 0.02 * amt, nil
 }

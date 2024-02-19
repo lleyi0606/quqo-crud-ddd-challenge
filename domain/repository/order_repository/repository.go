@@ -9,7 +9,6 @@ type OrderRepository interface {
 	GetOrder(uint64) (*entity.Order, error)
 	UpdateOrder(*entity.Order) (*entity.Order, error)
 	DeleteOrder(uint64) error
-	CalculateFees(float64) (float64, error)
 }
 
 type OrderHandlerRepository interface {
