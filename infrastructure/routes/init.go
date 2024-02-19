@@ -27,4 +27,5 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 	CategoryRoutes(apiR, p)
 	CustomerRoutes(apiR, p)
 	OrderRoutes(apiR, p)
+	OrderedItemRoutes(apiR, p)
 }

@@ -12,3 +12,9 @@ type OrderedItem struct {
 	UnitPrice  float64 `gorm:"type:numeric;" json:"unit_price"`
 	TotalPrice float64 `gorm:"type:numeric;" json:"total_price"`
 }
+
+type OrderedItemInput struct {
+	entity.BaseModelWDelete
+	ProductID uint64 `gorm:"type:numeric;" json:"product_id"`
+	Quantity  int    `gorm:"type:numeric;" json:"quantity"`
+}

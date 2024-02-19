@@ -150,3 +150,12 @@ func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 	}
 	return pdts, nil
 }
+
+func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float64, float64, error) {
+	pdt, err := r.GetProduct(id)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return pdt.Price, pdt.Price * float64(qty), nil
+}

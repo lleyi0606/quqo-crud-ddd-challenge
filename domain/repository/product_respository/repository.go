@@ -9,6 +9,7 @@ type ProductRepository interface {
 	UpdateProduct(*entity.Product) (*entity.Product, error)
 	DeleteProduct(uint64) (*entity.Product, error)
 	SearchProducts(string) ([]entity.Product, error)
+	CalculateProductPriceByQuantity(uint64, int) (float64, float64, error)
 	// GetProductsByInventory(uint64) ([]entity.Product, error)
 }
 

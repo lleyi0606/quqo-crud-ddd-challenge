@@ -41,14 +41,14 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	var cus entity.Order
-	if err := c.ShouldBindJSON(&cus); err != nil {
+	var order entity.OrderInput
+	if err := c.ShouldBindJSON(&order); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
 
 	p.repo = application.NewOrderApplication(p.Persistence)
-	newOrder, err := p.repo.AddOrder(&cus)
+	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return

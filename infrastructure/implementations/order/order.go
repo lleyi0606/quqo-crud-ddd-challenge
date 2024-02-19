@@ -18,13 +18,13 @@ func NewOrderRepository(p *base.Persistence) repository.OrderRepository {
 	return &orderRepo{p}
 }
 
-func (r orderRepo) AddOrder(cus *entity.Order) (*entity.Order, error) {
+func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 
-	if err := r.p.ProductDb.Debug().Create(&cus).Error; err != nil {
+	if err := r.p.ProductDb.Debug().Create(&order).Error; err != nil {
 		return nil, err
 	}
 
-	return cus, nil
+	return order, nil
 }
 
 func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
@@ -68,4 +68,8 @@ func (r orderRepo) DeleteOrder(id uint64) error {
 	}
 
 	return nil
+}
+
+func (r orderRepo) CalculateFees(amt float64) (float64, error) {
+	return 0.02 * amt, nil
 }
