@@ -21,13 +21,23 @@ func NewOrderApplication(p *base.Persistence) repository.OrderHandlerRepository 
 }
 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
+
+	tx := u.p.ProductDb.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	repoOrder := order.NewOrderRepository(u.p)
 
 	// update stock
 	repoInventory := inventory.NewInventoryRepository(u.p)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		err := repoInventory.DecreaseStock(orderedItemInput.ProductID, orderedItemInput.Quantity)
+		err := repoInventory.DecreaseStockTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 	}
@@ -39,8 +49,9 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
 	repoProduct := product.NewProductRepository(u.p)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		unitPrice, totalPrice, err := repoProduct.CalculateProductPriceByQuantity(orderedItemInput.ProductID, orderedItemInput.Quantity)
+		unitPrice, totalPrice, err := repoProduct.CalculateProductPriceByQuantityTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 		orderedItem := &orderItem_entity.OrderedItem{
@@ -51,7 +62,8 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 			TotalPrice: totalPrice, // You need to set the appropriate value
 		}
 
-		if _, err := repoOrderedItem.AddOrderedItem(orderedItem); err != nil {
+		if _, err := repoOrderedItem.AddOrderedItemTx(tx, orderedItem); err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -73,7 +85,13 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		TotalFees:     fees,
 		TotalCheckout: cost + fees,
 	}
-	return repoOrder.AddOrder(order)
+	res, err := repoOrder.AddOrderTx(tx, order)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return res, tx.Commit().Error
 }
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {

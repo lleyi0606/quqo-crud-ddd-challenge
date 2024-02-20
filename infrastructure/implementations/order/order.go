@@ -27,6 +27,15 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 	return order, nil
 }
 
+func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, error) {
+
+	if err := tx.Debug().Create(&order).Error; err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
 func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
 	var order *entity.Order
 

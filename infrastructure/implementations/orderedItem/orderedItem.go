@@ -27,6 +27,15 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 	return item, nil
 }
 
+func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
+
+	if err := tx.Debug().Create(&item).Error; err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 func (r orderedItemRepo) GetOrderedItems() ([]entity.OrderedItem, error) {
 	var orderedItem []entity.OrderedItem
 

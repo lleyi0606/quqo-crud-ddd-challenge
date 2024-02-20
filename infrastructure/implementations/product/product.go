@@ -159,3 +159,35 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 
 	return pdt.Price, pdt.Price * float64(qty), nil
 }
+
+func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
+	pdt, err := r.GetProductTx(tx, id)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return pdt.Price, pdt.Price * float64(qty), nil
+}
+
+func (r productRepo) GetProductTx(tx *gorm.DB, id uint64) (*entity.Product, error) {
+	var pdt *entity.Product
+
+	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+
+	if pdt == nil {
+		err := tx.Debug().Unscoped().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
+		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
+		if err != nil {
+			return nil, err
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("product not found")
+		}
+
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+	}
+
+	return pdt, nil
+}
