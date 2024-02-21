@@ -56,7 +56,7 @@ func (r inventoryRepo) GetInventory(id uint64) (*entity.Inventory, error) {
 			return nil, errors.New("inventory not found")
 		}
 
-		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id), ivt, redis_entity.RedisExpirationGlobal)
+		// _ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id), ivt, redis_entity.RedisExpirationGlobal)
 	}
 
 	return ivt, nil
@@ -232,6 +232,7 @@ func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
 	}
 
 	err = tx.Exec("UPDATE inventories SET stock = ? WHERE product_id = ?", gorm.Expr("stock - ?", qty), id)
+
 	return err.Error
 
 }
