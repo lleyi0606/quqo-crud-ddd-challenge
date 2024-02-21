@@ -65,8 +65,22 @@ func (r inventoryRepo) GetInventory(id uint64) (*entity.Inventory, error) {
 func (r inventoryRepo) GetInventoryTx(tx *gorm.DB, id uint64) (*entity.Inventory, error) {
 	var ivt *entity.Inventory
 
-	// cacheRepo := cache.NewCacheRepository(r.p, "redis")
-	// _ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id), &ivt)
+	if tx == nil {
+		tx = r.p.ProductDb.Begin()
+		var errTx error
+		defer func() {
+			if r := recover(); r != nil {
+				tx.Rollback()
+			} else if errTx != nil {
+				tx.Rollback()
+			} else {
+				errC := tx.Commit().Error
+				if errC != nil {
+					tx.Rollback()
+				}
+			}
+		}()
+	}
 
 	if ivt == nil {
 		log.Print("inventory not found in redis")

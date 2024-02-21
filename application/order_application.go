@@ -23,10 +23,18 @@ func NewOrderApplication(p *base.Persistence) repository.OrderHandlerRepository 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
 
 	tx := u.p.ProductDb.Begin()
+	var errTx error
 
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
+		} else if errTx != nil {
+			tx.Rollback()
+		} else {
+			errC := tx.Commit().Error
+			if errC != nil {
+				tx.Rollback()
+			}
 		}
 	}()
 
@@ -35,10 +43,9 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 	// update stock
 	repoInventory := inventory.NewInventoryRepository(u.p)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		err := repoInventory.DecreaseStockTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
+		errTx = repoInventory.DecreaseStockTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
+		if errTx != nil {
+			return nil, errTx
 		}
 	}
 
@@ -49,10 +56,9 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
 	repoProduct := product.NewProductRepository(u.p)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		unitPrice, totalPrice, err := repoProduct.CalculateProductPriceByQuantityTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
+		unitPrice, totalPrice, errTx := repoProduct.CalculateProductPriceByQuantityTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
+		if errTx != nil {
+			return nil, errTx
 		}
 		orderedItem := &orderItem_entity.OrderedItem{
 			OrderID:    orderInput.OrderID,
@@ -62,9 +68,8 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 			TotalPrice: totalPrice, // You need to set the appropriate value
 		}
 
-		if _, err := repoOrderedItem.AddOrderedItemTx(tx, orderedItem); err != nil {
-			tx.Rollback()
-			return nil, err
+		if _, errTx = repoOrderedItem.AddOrderedItemTx(tx, orderedItem); errTx != nil {
+			return nil, errTx
 		}
 
 		cost += totalPrice
@@ -85,13 +90,12 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		TotalFees:     fees,
 		TotalCheckout: cost + fees,
 	}
-	res, err := repoOrder.AddOrderTx(tx, order)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
+	res, errTx := repoOrder.AddOrderTx(tx, order)
+	if errTx != nil {
+		return nil, errTx
 	}
 
-	return res, tx.Commit().Error
+	return res, nil
 }
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
