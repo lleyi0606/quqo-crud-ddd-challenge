@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"os"
 	"products-crud/domain/entity"
 	"products-crud/infrastructure/implementations/authorization"
 	"strings"
@@ -31,13 +32,8 @@ func AuthHandler() gin.HandlerFunc {
 			return
 		}
 
-		// Validate token
-
-		// TODO
-		// v1, err := authorization.ValidateToken(t[1], qrew_entity_auth.SigningKey) //OLD 2019
-
 		auth := authorization.NewAuthorizatiionRepository()
-		key := "NWHFrG3pQpBXZ1q4unJB3yXkvOI4tmFE4qloxBYvxiyz9zGN0E0eIFXOBPF3W9M"
+		key := os.Getenv("DATABASE_URL")
 		v, err := auth.ValidateToken(t[1], key)
 
 		// keyJWT := os.Getenv("KeyAuth")

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"os"
 	entity "products-crud/domain/entity/customer_entity"
 	repository "products-crud/domain/repository/authorization_repository"
 	"products-crud/infrastructure/implementations/authorization"
@@ -26,7 +27,7 @@ func (u *authorizationApp) Login(user *entity.Customer) (string, *entity.Custome
 	}
 
 	repoAuthorization := authorization.NewAuthorizatiionRepository()
-	key := []byte("NWHFrG3pQpBXZ1q4unJB3yXkvOI4tmFE4qloxBYvxiyz9zGN0E0eIFXOBPF3W9M")
+	key := []byte(os.Getenv("DATABASE_URL"))
 
 	ts, tErr := repoAuthorization.GenerateToken(key, int64(cus.CustomerID), cus.Password)
 	if tErr != nil {
