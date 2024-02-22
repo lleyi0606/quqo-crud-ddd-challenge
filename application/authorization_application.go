@@ -26,7 +26,8 @@ func (u *authorizationApp) Login(user *entity.Customer) (string, *entity.Custome
 		return "", nil, userErr
 	}
 
-	repoAuthorization := authorization.NewAuthorizatiionRepository()
+	repoAuthorization := authorization.NewAuthorizationRepository(u.p)
+
 	key := []byte(os.Getenv("DATABASE_URL"))
 
 	ts, tErr := repoAuthorization.GenerateToken(key, int64(cus.CustomerID), cus.Password)
@@ -37,18 +38,9 @@ func (u *authorizationApp) Login(user *entity.Customer) (string, *entity.Custome
 	return ts, cus, nil
 }
 
-// func (u *authorizationApp) Logout(c *gin.Context) {
-// 	//check is the user is authenticated first
-// 	metadata, err := au.tk.ExtractTokenMetadata(c.Request)
-// 	if err != nil {
-// 		c.JSON(http.StatusUnauthorized, "Unauthorized")
-// 		return
-// 	}
-// 	//if the access token exist and it is still valid, then delete both the access token and the refresh token
-// 	deleteErr := au.rd.DeleteTokens(metadata)
-// 	if deleteErr != nil {
-// 		c.JSON(http.StatusUnauthorized, deleteErr.Error())
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, "Successfully logged out")
-// }
+func (u *authorizationApp) Logout(tokenString string) error {
+	repoAuthorization := authorization.NewAuthorizationRepository(u.p)
+
+	err := repoAuthorization.AddTokenToBlacklist(tokenString)
+	return err
+}

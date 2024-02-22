@@ -49,3 +49,18 @@ func (ah *AuthorizationHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Log in success.", userData))
 }
+
+func (ah *AuthorizationHandler) Logout(c *gin.Context) {
+	responseContextData := response_entity.ResponseContext{Ctx: c}
+
+	authorizationHeader := c.Request.Header.Get("Authorization")
+	ah.repo = application.NewAuthorizationApplication(ah.Persistence)
+	err := ah.repo.Logout(authorizationHeader)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
+		return
+	}
+
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Log out success.", ""))
+
+}

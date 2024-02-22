@@ -47,6 +47,13 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		return
 	}
 
+	cusID, exists := c.Get("userID")
+	if exists {
+		if userID, ok := cusID.(uint64); ok {
+			order.CustomerID = userID
+		}
+	}
+
 	p.repo = application.NewOrderApplication(p.Persistence)
 	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {

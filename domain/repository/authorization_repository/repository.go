@@ -8,7 +8,7 @@ import (
 
 type AuthorizationRepository interface {
 	// Login(*entity.Customer) error
-	// Logout() error
+	AddTokenToBlacklist(string) error
 	// Refresh() error
 	GenerateToken([]byte, int64, string) (string, error)
 
@@ -17,6 +17,6 @@ type AuthorizationRepository interface {
 
 type AuthorizationHandlerRepository interface {
 	Login(*entity.Customer) (string, *entity.Customer, error)
-	// Logout() error
+	Logout(string) error
 	// Refresh() error
 }

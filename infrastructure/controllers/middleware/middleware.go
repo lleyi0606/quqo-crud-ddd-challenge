@@ -6,13 +6,14 @@ import (
 	"os"
 	"products-crud/domain/entity"
 	"products-crud/infrastructure/implementations/authorization"
+	base "products-crud/infrastructure/persistences"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthHandler() gin.HandlerFunc {
+func AuthHandler(p *base.Persistence) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -32,7 +33,7 @@ func AuthHandler() gin.HandlerFunc {
 			return
 		}
 
-		auth := authorization.NewAuthorizatiionRepository()
+		auth := authorization.NewAuthorizationRepository(p)
 		key := os.Getenv("DATABASE_URL")
 		v, err := auth.ValidateToken(t[1], key)
 
