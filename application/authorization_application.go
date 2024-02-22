@@ -1,7 +1,6 @@
 package application
 
 import (
-	"log"
 	entity "products-crud/domain/entity/customer_entity"
 	repository "products-crud/domain/repository/authorization_repository"
 	"products-crud/infrastructure/implementations/authorization"
@@ -23,18 +22,14 @@ func (u *authorizationApp) Login(user *entity.Customer) (string, *entity.Custome
 	repoCustomer := customer.NewCustomerRepository(u.p)
 	cus, userErr := repoCustomer.GetCustomerByUsernameAndPassword(user)
 	if userErr != nil {
-		// c.JSON(http.StatusInternalServerError, userErr)
 		return "", nil, userErr
 	}
-	log.Println("user: ", user, "|| cus: ", cus)
 
 	repoAuthorization := authorization.NewAuthorizatiionRepository()
 	key := []byte("NWHFrG3pQpBXZ1q4unJB3yXkvOI4tmFE4qloxBYvxiyz9zGN0E0eIFXOBPF3W9M")
 
 	ts, tErr := repoAuthorization.GenerateToken(key, int64(cus.CustomerID), cus.Password)
 	if tErr != nil {
-		// tokenErr["token_error"] = tErr.Error()
-		// c.JSON(http.StatusUnprocessableEntity, tErr.Error())
 		return "", cus, tErr
 	}
 

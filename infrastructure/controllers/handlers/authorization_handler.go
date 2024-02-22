@@ -41,6 +41,7 @@ func (ah *AuthorizationHandler) Login(c *gin.Context) {
 
 	userData := make(map[string]interface{})
 	userData["access_token"] = ts
+	// userData["refresh_token"] = ts.RefreshToken
 	userData["id"] = user.ID
 	userData["name"] = user.Name
 
