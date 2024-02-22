@@ -7,7 +7,9 @@ import (
 	repository "products-crud/domain/repository/customer_repository"
 
 	base "products-crud/infrastructure/persistences"
+	"products-crud/infrastructure/utils"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -67,4 +69,28 @@ func (r customerRepo) DeleteCustomer(id uint64) error {
 	}
 
 	return nil
+}
+
+func (r customerRepo) GetCustomerByUsernameAndPassword(cus *entity.Customer) (*entity.Customer, error) {
+
+	// dbErr := map[string]string{}
+	var cusFrDb entity.Customer
+	err := r.p.ProductDb.Debug().Where("username = ?", cus.Username).Take(&cusFrDb).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// dbErr["no_user"] = "user not found"
+		return nil, err
+	}
+
+	if err != nil {
+		// dbErr["db_error"] = "database error"
+		return nil, err
+	}
+	//Verify the password
+	err = utils.VerifyPassword(cusFrDb.Password, cus.Password)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		log.Print("password mismatch", cusFrDb.Password)
+		return nil, err
+	}
+	return &cusFrDb, nil
+
 }

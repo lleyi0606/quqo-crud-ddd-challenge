@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"products-crud/infrastructure/controllers/middleware"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -20,12 +21,20 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 
 	apiR := r.Group("")
 
-	// List Injection
-	ProductRoutes(apiR, p)
-	InventoryRoutes(apiR, p)
-	ImageRoutes(apiR, p)
-	CategoryRoutes(apiR, p)
-	CustomerRoutes(apiR, p)
-	OrderRoutes(apiR, p)
-	OrderedItemRoutes(apiR, p)
+	// Public routes without middleware
+	LoginRoutes(apiR, p)
+
+	// Protected routes with middleware
+	protectedRoutes := apiR.Group("")
+	protectedRoutes.Use(middleware.AuthHandler())
+	{
+		ProductRoutes(protectedRoutes, p)
+		InventoryRoutes(protectedRoutes, p)
+		ImageRoutes(protectedRoutes, p)
+		CategoryRoutes(protectedRoutes, p)
+		CustomerRoutes(protectedRoutes, p)
+		OrderRoutes(protectedRoutes, p)
+		OrderedItemRoutes(protectedRoutes, p)
+	}
+
 }

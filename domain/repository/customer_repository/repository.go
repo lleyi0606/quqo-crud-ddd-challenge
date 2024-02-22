@@ -9,6 +9,7 @@ type CustomerRepository interface {
 	GetCustomer(uint64) (*entity.Customer, error)
 	UpdateCustomer(*entity.Customer) (*entity.Customer, error)
 	DeleteCustomer(uint64) error
+	GetCustomerByUsernameAndPassword(*entity.Customer) (*entity.Customer, error)
 }
 
 type CustomerHandlerRepository interface {
