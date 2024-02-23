@@ -26,18 +26,16 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 	}
 }
 
-// @Summary Add Order
-// @Description Add an Order to the database
+// @Summary Add order
+// @Description Add an order to the database
 // @Tags Order
-// @Accept mpfd
+// @Accept json
 // @Produce json
-// @Param Order_id formData int64 true "Order ID"
-// @Param caption formData string false "Caption"
-// @Param Order_file formData file true "Order file"
+// @Param order body entity.OrderInput true "Order data"
 // @Success 201 {object} response_entity.Response "Order created"
-// @Failure 400 {object} response_entity.Response "Invalid Order ID format, Unable to parse form data, Unable to get Order from form"
+// @Failure 400 {object} response_entity.Response "Invalid order_id format, Unable to parse form data, Unable to get Order from form"
 // @Failure 500 {object} response_entity.Response "Application AddOrder error"
-// @Router /Orders [post]
+// @Router /orders [post]
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -47,12 +45,24 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		return
 	}
 
-	cusID, exists := c.Get("userID")
-	if exists {
-		if userID, ok := cusID.(uint64); ok {
-			order.CustomerID = userID
-		}
+	cusIDString := c.GetString("userID")
+	// Convert string to int64
+	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
+	if err != nil {
+		// Handle the error if the conversion fails
+		log.Println("Error converting cusIDString to int64:", err)
+	} else {
+		// Now cusID is of type uint64
+		order.CustomerID = cusID
 	}
+
+	log.Print("id from context: ", cusID)
+	// if exists {
+	// 	if userID, ok := cusID.(uint64); ok {
+	// 		log.Print("customer ID set from context", cusID)
+	// 		order.CustomerID = userID
+	// 	}
+	// }
 
 	p.repo = application.NewOrderApplication(p.Persistence)
 	newOrder, err := p.repo.AddOrder(&order)
@@ -63,24 +73,24 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Order created.", newOrder))
 }
 
-// @Summary Get orders
-// @Description Get Order details by Order ID
+// @Summary Get order
+// @Description Get Order details by order_id
 // @Tags Order
 // @Accept json
 // @Produce json
-// @Param id path int true "Order ID"
-// @Success 200 {object} response_entity.Response "Successfully get Orders"
-// @Failure 400 {object} response_entity.Response "Invalid Order ID GetOrder"
+// @Param id path int true "order_id"
+// @Success 200 {object} response_entity.Response "Successfully get Order"
+// @Failure 400 {object} response_entity.Response "Invalid order_id GetOrder"
 // @Failure 500 {object} response_entity.Response "Application GetOrder error"
-// @Router /Orders/{id} [get]
+// @Router /orders/{id} [get]
 func (p *OrderHandler) GetOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract Order ID from the URL parameter
+	// Extract order_id from the URL parameter
 	orderIDStr := c.Param("id")
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Order ID GetOrder", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id GetOrder", ""))
 
 		return
 	}
@@ -98,22 +108,23 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 }
 
 // @Summary Update order
-// @Description Update a Order in the database by ID
+// @Description Update an order in the database by ID
 // @Tags Order
 // @Accept json
 // @Produce json
-// @Param id path int true "Order ID"
+// @Param id path int true "order_id"
+// @Param order body entity.OrderInput true "Order data"
 // @Success 201 {object} response_entity.Response "Order updated"
-// @Failure 400 {object} response_entity.Response "Invalid Order ID"
+// @Failure 400 {object} response_entity.Response "Invalid order_id"
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
-// @Router /Orders/{id} [put]
+// @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	orderIDStr := c.Param("id")
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Order ID UpdateOrder", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id UpdateOrder", ""))
 		return
 	}
 
@@ -138,24 +149,24 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Order updated. ", newOrder))
 }
 
-// @Summary Delete Order
+// @Summary Delete order
 // @Description Delete an Order from the database by ID
 // @Tags Order
 // @Accept json
 // @Produce json
-// @Param id path int true "Order ID"
+// @Param id path int true "order_id"
 // @Success 200 {object} response_entity.Response "Order deleted"
-// @Failure 400 {object} response_entity.Response "Invalid Order ID DeleteOrder"
+// @Failure 400 {object} response_entity.Response "Invalid order_id DeleteOrder"
 // @Failure 500 {object} response_entity.Response "Application DeleteOrder error"
-// @Router /Orders/{id} [delete]
+// @Router /orders/{id} [delete]
 func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract Order ID from the URL parameter
+	// Extract order_id from the URL parameter
 	orderIDStr := c.Param("id")
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Order ID DeleteOrder", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id DeleteOrder", ""))
 		return
 	}
 

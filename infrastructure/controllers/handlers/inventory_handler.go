@@ -34,7 +34,7 @@ func NewInventoryController(p *base.Persistence) *InventoryHandler {
 // @Success 200 {object} entity.Inventory "Inventory details"
 // @Failure 400 {object} response_entity.Response "Invalid product ID GetInventory"
 // @Failure 500 {object} response_entity.Response "Application GetInventory error"
-// @Router /inventory/{id} [get]
+// @Router /inventories/{id} [get]
 func (p *InventoryHandler) GetInventory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -69,7 +69,7 @@ func (p *InventoryHandler) GetInventory(c *gin.Context) {
 // @Success 201 {object} response_entity.Response "Stock updated"
 // @Failure 400 {object} response_entity.Response "Invalid product ID UpdateStock or Invalid JSON"
 // @Failure 500 {object} response_entity.Response "Application UpdateStock error"
-// @Router /inventory/{id} [put]
+// @Router /inventories/{id} [put]
 func (p *InventoryHandler) UpdateStock(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

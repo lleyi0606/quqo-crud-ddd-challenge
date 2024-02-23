@@ -29,10 +29,11 @@ func (a authorizationRepo) GenerateToken(key []byte, userId int64, credential st
 
 	// Claims
 	claims := make(jwt.MapClaims)
-	claims["user_id"] = userId
+	claims["user_id"] = fmt.Sprint(userId)
 	claims["credential"] = credential
 	claims["exp"] = time.Now().Add(time.Hour*240).UnixNano() / int64(time.Millisecond)
 
+	log.Println("in generate token: ", userId, claims["user_id"])
 	//Set user roles
 	//claims["roles"] = roles
 

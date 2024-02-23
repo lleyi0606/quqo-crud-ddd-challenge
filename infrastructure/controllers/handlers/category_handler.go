@@ -26,18 +26,16 @@ func NewCategoryController(p *base.Persistence) *CategoryHandler {
 	}
 }
 
-// @Summary Add Category
-// @Description Add an Category to the database
+// @Summary Add category
+// @Description Create a new category in the database
 // @Tags Category
-// @Accept mpfd
+// @Accept json
 // @Produce json
-// @Param category_id formData int64 true "category ID"
-// @Param caption formData string false "Caption"
-// @Param Category_file formData file true "Category file"
+// @Param category body entity.Category true "Category data"
 // @Success 201 {object} response_entity.Response "Category created"
-// @Failure 400 {object} response_entity.Response "Invalid category ID format, Unable to parse form data, Unable to get Category from form"
+// @Failure 400 {object} response_entity.Response "Invalid category_id format, Unable to parse form data, Unable to get Category from form"
 // @Failure 500 {object} response_entity.Response "Application AddCategory error"
-// @Router /Categorys [post]
+// @Router /categories [post]
 func (p *CategoryHandler) AddCategory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -56,24 +54,24 @@ func (p *CategoryHandler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Category created.", newCategory))
 }
 
-// @Summary Get Categories
-// @Description Get Category details by category ID
+// @Summary Get category
+// @Description Get Category details by category_id
 // @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path int true "category ID"
-// @Success 200 {object} response_entity.Response "Successfully get Categorys"
-// @Failure 400 {object} response_entity.Response "Invalid category ID GetCategory"
+// @Param category_id path int true "category_id"
+// @Success 200 {object} response_entity.Response "Successfully get Category"
+// @Failure 400 {object} response_entity.Response "Invalid category_id GetCategory"
 // @Failure 500 {object} response_entity.Response "Application GetCategory error"
-// @Router /Categorys/{id} [get]
+// @Router /categories/{id} [get]
 func (p *CategoryHandler) GetCategory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract category ID from the URL parameter
+	// Extract category_id from the URL parameter
 	categoryIDStr := c.Param("id")
 	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category ID GetCategory", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category_id GetCategory", ""))
 
 		return
 	}
@@ -90,24 +88,24 @@ func (p *CategoryHandler) GetCategory(c *gin.Context) {
 
 }
 
-// @Summary Get Categorys
-// @Description Get Category details by category ID
+// @Summary Get category chain
+// @Description Get category details including all parent categories by category_id
 // @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path int true "category ID"
-// @Success 200 {object} response_entity.Response "Successfully get Categorys"
-// @Failure 400 {object} response_entity.Response "Invalid category ID GetCategory"
+// @Param id path int true "category_id"
+// @Success 200 {object} response_entity.Response "Successfully get Category chain"
+// @Failure 400 {object} response_entity.Response "Invalid category_id GetCategory"
 // @Failure 500 {object} response_entity.Response "Application GetCategory error"
-// @Router /Categorys/{id} [get]
+// @Router /categories/{id}/chain [get]
 func (p *CategoryHandler) GetCategoryChain(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract category ID from the URL parameter
+	// Extract category_id from the URL parameter
 	categoryIDStr := c.Param("id")
 	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category ID GetCategory", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category_id GetCategory", ""))
 
 		return
 	}
@@ -124,23 +122,23 @@ func (p *CategoryHandler) GetCategoryChain(c *gin.Context) {
 
 }
 
-// @Summary Update a
+// @Summary Update a category
 // @Description Update a category in the database by ID
-// @Tags category
+// @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path int true "category ID"
+// @Param id path int true "category_id"
 // @Success 201 {object} response_entity.Response "category updated"
-// @Failure 400 {object} response_entity.Response "Invalid category ID"
-// @Failure 500 {object} response_entity.Response "Application Updatecategory error"
-// @Router /categorys/{id} [put]
+// @Failure 400 {object} response_entity.Response "Invalid category_id"
+// @Failure 500 {object} response_entity.Response "Application UpdatCategory error"
+// @Router /categories/{id} [put]
 func (p *CategoryHandler) UpdateCategory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	categoryIDStr := c.Param("id")
 	categoryID, err := strconv.ParseUint(categoryIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category ID Updatecategory", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category_id Updatecategory", ""))
 		return
 	}
 
@@ -165,24 +163,24 @@ func (p *CategoryHandler) UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "category updated. ", newcategory))
 }
 
-// @Summary Delete Category
+// @Summary Delete category
 // @Description Delete an Category from the database by ID
 // @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path int true "Category ID"
+// @Param id path int true "category_id"
 // @Success 200 {object} response_entity.Response "Category deleted"
-// @Failure 400 {object} response_entity.Response "Invalid Category ID DeleteCategory"
+// @Failure 400 {object} response_entity.Response "Invalid category_id DeleteCategory"
 // @Failure 500 {object} response_entity.Response "Application DeleteCategory error"
-// @Router /Categorys/{id} [delete]
+// @Router /categories/{id} [delete]
 func (p *CategoryHandler) DeleteCategory(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract category ID from the URL parameter
+	// Extract category_id from the URL parameter
 	CategoryIDStr := c.Param("id")
 	CategoryID, err := strconv.ParseUint(CategoryIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category ID DeleteCategory", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid category_id DeleteCategory", ""))
 		return
 	}
 

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"log"
 	"os"
 	entity "products-crud/domain/entity/customer_entity"
 	repository "products-crud/domain/repository/authorization_repository"
@@ -25,6 +26,8 @@ func (u *authorizationApp) Login(user *entity.Customer) (string, *entity.Custome
 	if userErr != nil {
 		return "", nil, userErr
 	}
+
+	log.Print("cus in Login", cus, "id : ", cus.CustomerID)
 
 	repoAuthorization := authorization.NewAuthorizationRepository(u.p)
 

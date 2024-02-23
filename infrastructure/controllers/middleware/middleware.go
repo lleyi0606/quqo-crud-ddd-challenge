@@ -52,14 +52,17 @@ func AuthHandler(p *base.Persistence) gin.HandlerFunc {
 			tokenCatches = *v
 		}
 
-		userID := tokenCatches.Claims.(jwt.MapClaims)["user_id"]
-		//fmt.Println(userID)
-		if userID == nil || userID == 0 {
-			c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization token", "status": entity.StatusError, "data": nil})
-			c.Abort()
-			return
+		userIDInterface := tokenCatches.Claims.(jwt.MapClaims)["user_id"]
+		if userID, ok := userIDInterface.(string); ok {
+			// Now userID is of type string
+			log.Println("!!! USER ID IS: ", userID)
+			if userID == "" || userID == "0" {
+				c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization token", "status": entity.StatusError, "data": nil})
+				c.Abort()
+				return
+			}
+			c.Set("userID", userID)
 		}
-		c.Set("userID", userID)
 
 		c.Next()
 

@@ -19,25 +19,23 @@ type CustomerHandler struct {
 	Persistence *base.Persistence
 }
 
-// Customers constructor
+// customers constructor
 func NewCustomerController(p *base.Persistence) *CustomerHandler {
 	return &CustomerHandler{
 		Persistence: p,
 	}
 }
 
-// @Summary Add Customer
+// @Summary Add customer
 // @Description Add an Customer to the database
 // @Tags Customer
-// @Accept mpfd
+// @Accept json
 // @Produce json
-// @Param Customer_id formData int64 true "Customer ID"
-// @Param caption formData string false "Caption"
-// @Param Customer_file formData file true "Customer file"
+// @Param customer body entity.Customer true "Customer data"
 // @Success 201 {object} response_entity.Response "Customer created"
-// @Failure 400 {object} response_entity.Response "Invalid Customer ID format, Unable to parse form data, Unable to get Customer from form"
+// @Failure 400 {object} response_entity.Response "Invalid customer_id format, Unable to parse form data, Unable to get Customer from form"
 // @Failure 500 {object} response_entity.Response "Application AddCustomer error"
-// @Router /Customers [post]
+// @Router /customers [post]
 func (p *CustomerHandler) AddCustomer(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -57,23 +55,23 @@ func (p *CustomerHandler) AddCustomer(c *gin.Context) {
 }
 
 // @Summary Get customers
-// @Description Get Customer details by Customer ID
+// @Description Get Customer details by customer_id
 // @Tags Customer
 // @Accept json
 // @Produce json
-// @Param id path int true "Customer ID"
-// @Success 200 {object} response_entity.Response "Successfully get Customers"
-// @Failure 400 {object} response_entity.Response "Invalid Customer ID GetCustomer"
+// @Param id path int true "customer_id"
+// @Success 200 {object} response_entity.Response "Successfully get customers"
+// @Failure 400 {object} response_entity.Response "Invalid customer_id GetCustomer"
 // @Failure 500 {object} response_entity.Response "Application GetCustomer error"
-// @Router /Customers/{id} [get]
+// @Router /customers/{id} [get]
 func (p *CustomerHandler) GetCustomer(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract Customer ID from the URL parameter
+	// Extract customer_id from the URL parameter
 	customerIDStr := c.Param("id")
 	customerID, err := strconv.ParseUint(customerIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Customer ID GetCustomer", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid customer_id GetCustomer", ""))
 
 		return
 	}
@@ -95,18 +93,19 @@ func (p *CustomerHandler) GetCustomer(c *gin.Context) {
 // @Tags Customer
 // @Accept json
 // @Produce json
-// @Param id path int true "Customer ID"
+// @Param id path int true "customer_id"
+// @Param customer body entity.Customer true "Customer data"
 // @Success 201 {object} response_entity.Response "Customer updated"
-// @Failure 400 {object} response_entity.Response "Invalid Customer ID"
+// @Failure 400 {object} response_entity.Response "Invalid customer_id"
 // @Failure 500 {object} response_entity.Response "Application UpdateCustomer error"
-// @Router /Customers/{id} [put]
+// @Router /customers/{id} [put]
 func (p *CustomerHandler) UpdateCustomer(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	customerIDStr := c.Param("id")
 	customerID, err := strconv.ParseUint(customerIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Customer ID UpdateCustomer", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid customer_id UpdateCustomer", ""))
 		return
 	}
 
@@ -131,24 +130,24 @@ func (p *CustomerHandler) UpdateCustomer(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Customer updated. ", newCustomer))
 }
 
-// @Summary Delete Customer
-// @Description Delete an Customer from the database by ID
+// @Summary Delete customer
+// @Description Delete a customer from the database by ID
 // @Tags Customer
 // @Accept json
 // @Produce json
-// @Param id path int true "Customer ID"
+// @Param id path int true "customer_id"
 // @Success 200 {object} response_entity.Response "Customer deleted"
-// @Failure 400 {object} response_entity.Response "Invalid Customer ID DeleteCustomer"
+// @Failure 400 {object} response_entity.Response "Invalid customer_id DeleteCustomer"
 // @Failure 500 {object} response_entity.Response "Application DeleteCustomer error"
-// @Router /Customers/{id} [delete]
+// @Router /customers/{id} [delete]
 func (p *CustomerHandler) DeleteCustomer(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract Customer ID from the URL parameter
+	// Extract customer_id from the URL parameter
 	customerIDStr := c.Param("id")
 	customerID, err := strconv.ParseUint(customerIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid Customer ID DeleteCustomer", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid customer_id DeleteCustomer", ""))
 		return
 	}
 

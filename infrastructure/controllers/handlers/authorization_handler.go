@@ -23,6 +23,16 @@ func NewAuthorizationController(p *base.Persistence) *AuthorizationHandler {
 	}
 }
 
+// @Summary User login
+// @Description Log in with user credentials and obtain an access token.
+// @Tags Authorization
+// @Accept json
+// @Produce json
+// @Param body body entity.Customer true "User credentials for login"
+// @Success 200 {object} response_entity.Response "Successful login"
+// @Failure 422 {object} response_entity.Response "Invalid JSON provided"
+// @Failure 500 {object} response_entity.Response "Internal Server Error"
+// @Router /login [post]
 func (ah *AuthorizationHandler) Login(c *gin.Context) {
 	var cus *entity.Customer
 	responseContextData := response_entity.ResponseContext{Ctx: c}
@@ -42,7 +52,7 @@ func (ah *AuthorizationHandler) Login(c *gin.Context) {
 	userData := make(map[string]interface{})
 	userData["access_token"] = ts
 	// userData["refresh_token"] = ts.RefreshToken
-	userData["id"] = user.ID
+	userData["id"] = user.CustomerID
 	userData["name"] = user.Name
 
 	c.Header("Authorization", "Bearer "+ts)
@@ -50,6 +60,15 @@ func (ah *AuthorizationHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Log in success.", userData))
 }
 
+// @Summary User logout
+// @Description Log out and invalidate the user token.
+// @Tags Authorization
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer Token" default(Bearer <token>) "Access token for authentication"
+// @Success 200 {object} response_entity.Response "Successful logout"
+// @Failure 500 {object} response_entity.Response "Internal Server Error"
+// @Router /logout [post]
 func (ah *AuthorizationHandler) Logout(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

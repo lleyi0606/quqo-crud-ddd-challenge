@@ -86,19 +86,19 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param id path int true "Product ID"
+// @Param id path int true "product_id"
 // @Success 200 {object} response_entity.Response "Product retrieved"
-// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 400 {object} response_entity.Response "Invalid product_id"
 // @Failure 500 {object} response_entity.Response "Application GetProduct error"
 // @Router /products/{id} [get]
 func (p *ProductHandler) GetProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract product ID from the URL parameter
+	// Extract product_id from the URL parameter
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID GetProduct", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id GetProduct", ""))
 		return
 	}
 
@@ -119,9 +119,9 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param id path int true "Product ID"
+// @Param id path int true "product_id"
 // @Success 201 {object} response_entity.Response "Product updated"
-// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 400 {object} response_entity.Response "Invalid product_id"
 // @Failure 500 {object} response_entity.Response "Application UpdateProduct error"
 // @Router /products/{id} [put]
 func (p *ProductHandler) UpdateProduct(c *gin.Context) {
@@ -130,7 +130,7 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID UpdateProduct", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id UpdateProduct", ""))
 		return
 	}
 
@@ -160,19 +160,19 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param id path int true "Product ID"
+// @Param id path int true "product_id"
 // @Success 200 {object} response_entity.Response "Product deleted"
-// @Failure 400 {object} response_entity.Response "Invalid product ID"
+// @Failure 400 {object} response_entity.Response "Invalid product_id"
 // @Failure 500 {object} response_entity.Response "Application DeleteProduct error"
 // @Router /products/{id} [delete]
 func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// Extract product ID from the URL parameter
+	// Extract product_id from the URL parameter
 	productIDStr := c.Param("id")
 	productID, err := strconv.ParseUint(productIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID DeleteProduct", ""))
+		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id DeleteProduct", ""))
 		return
 	}
 

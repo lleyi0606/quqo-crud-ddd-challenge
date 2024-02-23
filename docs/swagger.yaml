@@ -1,10 +1,48 @@
 definitions:
+  categoryentity.Category:
+    properties:
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  customerentity.Customer:
+    properties:
+      address:
+        type: string
+      customer_id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   entity.Inventory:
     properties:
+      created_at:
+        type: string
+      id:
+        type: integer
       product_id:
         type: integer
       stock:
         type: integer
+      updated_at:
+        type: string
       warehouse_id:
         type: integer
     type: object
@@ -13,20 +51,62 @@ definitions:
       stock:
         type: integer
     type: object
+  entity.OrderInput:
+    properties:
+      created_at:
+        type: string
+      customer_id:
+        type: integer
+      id:
+        type: integer
+      order_id:
+        type: integer
+      ordered_items:
+        items:
+          $ref: '#/definitions/entity.OrderedItemInput'
+        type: array
+      status:
+        type: string
+      updated_at:
+        type: string
+      warehouse_id:
+        type: integer
+    type: object
+  entity.OrderedItemInput:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   entity.ProductWithStockAndWarehouse:
     properties:
-      category:
+      category_id:
+        type: integer
+      created_at:
         type: string
       description:
         type: string
+      id:
+        type: integer
       name:
         type: string
       price:
         type: number
       product_id:
         type: integer
+      status:
+        type: string
       stock:
         type: integer
+      updated_at:
+        type: string
       warehouse_id:
         type: integer
     type: object
@@ -41,6 +121,273 @@ definitions:
 info:
   contact: {}
 paths:
+  /categories:
+    post:
+      consumes:
+      - application/json
+      description: Create a new category in the database
+      parameters:
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/categoryentity.Category'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Category created
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid category_id format, Unable to parse form data, Unable
+            to get Category from form
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application AddCategory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Add category
+      tags:
+      - Category
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an Category from the database by ID
+      parameters:
+      - description: category_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category deleted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid category_id DeleteCategory
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application DeleteCategory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Delete category
+      tags:
+      - Category
+    get:
+      consumes:
+      - application/json
+      description: Get Category details by category_id
+      parameters:
+      - description: category_id
+        in: path
+        name: category_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get Category
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid category_id GetCategory
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetCategory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get category
+      tags:
+      - Category
+    put:
+      consumes:
+      - application/json
+      description: Update a category in the database by ID
+      parameters:
+      - description: category_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: category updated
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid category_id
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application UpdatCategory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Update a category
+      tags:
+      - Category
+  /categories/{id}/chain:
+    get:
+      consumes:
+      - application/json
+      description: Get category details including all parent categories by category_id
+      parameters:
+      - description: category_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get Category chain
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid category_id GetCategory
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetCategory error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get category chain
+      tags:
+      - Category
+  /customers:
+    post:
+      consumes:
+      - application/json
+      description: Add an Customer to the database
+      parameters:
+      - description: Customer data
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/customerentity.Customer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Customer created
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid customer_id format, Unable to parse form data, Unable
+            to get Customer from form
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application AddCustomer error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Add customer
+      tags:
+      - Customer
+  /customers/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a customer from the database by ID
+      parameters:
+      - description: customer_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Customer deleted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid customer_id DeleteCustomer
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application DeleteCustomer error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Delete customer
+      tags:
+      - Customer
+    get:
+      consumes:
+      - application/json
+      description: Get Customer details by customer_id
+      parameters:
+      - description: customer_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get customers
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid customer_id GetCustomer
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetCustomer error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get customers
+      tags:
+      - Customer
+    put:
+      consumes:
+      - application/json
+      description: Update a Customer in the database by ID
+      parameters:
+      - description: customer_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Customer data
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/customerentity.Customer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Customer updated
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid customer_id
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application UpdateCustomer error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Update customer
+      tags:
+      - Customer
   /images:
     post:
       consumes:
@@ -86,7 +433,7 @@ paths:
       - application/json
       description: Delete an image from the database by ID
       parameters:
-      - description: Image ID
+      - description: image_id
         in: path
         name: id
         required: true
@@ -112,9 +459,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get image details by product ID
+      description: Get image details by image_id
       parameters:
-      - description: Product ID
+      - description: image_id
         in: path
         name: id
         required: true
@@ -127,17 +474,17 @@ paths:
           schema:
             $ref: '#/definitions/entity.Response'
         "400":
-          description: Invalid product ID GetImage
+          description: Invalid image_id GetImage
           schema:
             $ref: '#/definitions/entity.Response'
         "500":
           description: Application GetImage error
           schema:
             $ref: '#/definitions/entity.Response'
-      summary: Get images
+      summary: Get image
       tags:
       - Image
-  /inventory/{id}:
+  /inventories/{id}:
     get:
       consumes:
       - application/json
@@ -200,6 +547,232 @@ paths:
       summary: Update stock
       tags:
       - Inventory
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Log in with user credentials and obtain an access token.
+      parameters:
+      - description: User credentials for login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customerentity.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "422":
+          description: Invalid JSON provided
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: User login
+      tags:
+      - Authorization
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Log out and invalidate the user token.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful logout
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: User logout
+      tags:
+      - Authorization
+  /orderedItems:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all ordered items from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ordered items getted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetOrderedItems error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Retrieve all ordered items
+      tags:
+      - Ordered Item
+  /orderedItems/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get OrderedItem details by Order ID
+      parameters:
+      - description: OrderedItem ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get OrderedItemsByOrderId
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid Order ID GetOrderedItemsByOrderId
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetOrderedItemsByOrderId error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get orderedItems
+      tags:
+      - OrderedItem
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Add an order to the database
+      parameters:
+      - description: Order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/entity.OrderInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Order created
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid order_id format, Unable to parse form data, Unable
+            to get Order from form
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application AddOrder error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Add order
+      tags:
+      - Order
+  /orders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an Order from the database by ID
+      parameters:
+      - description: order_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order deleted
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid order_id DeleteOrder
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application DeleteOrder error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Delete order
+      tags:
+      - Order
+    get:
+      consumes:
+      - application/json
+      description: Get Order details by order_id
+      parameters:
+      - description: order_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get Order
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid order_id GetOrder
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application GetOrder error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Get order
+      tags:
+      - Order
+    put:
+      consumes:
+      - application/json
+      description: Update an order in the database by ID
+      parameters:
+      - description: order_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/entity.OrderInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Order updated
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "400":
+          description: Invalid order_id
+          schema:
+            $ref: '#/definitions/entity.Response'
+        "500":
+          description: Application UpdateOrder error
+          schema:
+            $ref: '#/definitions/entity.Response'
+      summary: Update order
+      tags:
+      - Order
   /products:
     get:
       consumes:
@@ -252,7 +825,7 @@ paths:
       - application/json
       description: Delete a product from the database by ID
       parameters:
-      - description: Product ID
+      - description: product_id
         in: path
         name: id
         required: true
@@ -265,7 +838,7 @@ paths:
           schema:
             $ref: '#/definitions/entity.Response'
         "400":
-          description: Invalid product ID
+          description: Invalid product_id
           schema:
             $ref: '#/definitions/entity.Response'
         "500":
@@ -280,7 +853,7 @@ paths:
       - application/json
       description: Retrieve a product from the database by ID
       parameters:
-      - description: Product ID
+      - description: product_id
         in: path
         name: id
         required: true
@@ -293,7 +866,7 @@ paths:
           schema:
             $ref: '#/definitions/entity.Response'
         "400":
-          description: Invalid product ID
+          description: Invalid product_id
           schema:
             $ref: '#/definitions/entity.Response'
         "500":
@@ -308,7 +881,7 @@ paths:
       - application/json
       description: Update a product in the database by ID
       parameters:
-      - description: Product ID
+      - description: product_id
         in: path
         name: id
         required: true
@@ -321,7 +894,7 @@ paths:
           schema:
             $ref: '#/definitions/entity.Response'
         "400":
-          description: Invalid product ID
+          description: Invalid product_id
           schema:
             $ref: '#/definitions/entity.Response'
         "500":

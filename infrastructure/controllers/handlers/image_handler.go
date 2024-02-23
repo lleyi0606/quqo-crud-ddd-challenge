@@ -87,14 +87,14 @@ func (p *ImageHandler) AddImage(c *gin.Context) {
 
 }
 
-// @Summary Get images
-// @Description Get image details by product ID
+// @Summary Get image
+// @Description Get image details by image_id
 // @Tags Image
 // @Accept json
 // @Produce json
-// @Param id path int true "Product ID"
+// @Param id path int true "image_id"
 // @Success 200 {object} response_entity.Response "Successfully get images"
-// @Failure 400 {object} response_entity.Response "Invalid product ID GetImage"
+// @Failure 400 {object} response_entity.Response "Invalid image_id GetImage"
 // @Failure 500 {object} response_entity.Response "Application GetImage error"
 // @Router /images/{id} [get]
 func (p *ImageHandler) GetImage(c *gin.Context) {
@@ -126,7 +126,7 @@ func (p *ImageHandler) GetImage(c *gin.Context) {
 // @Tags Image
 // @Accept json
 // @Produce json
-// @Param id path int true "Image ID"
+// @Param id path int true "image_id"
 // @Success 200 {object} response_entity.Response "Image deleted"
 // @Failure 400 {object} response_entity.Response "Invalid image ID DeleteImage"
 // @Failure 500 {object} response_entity.Response "Application DeleteImage error"
