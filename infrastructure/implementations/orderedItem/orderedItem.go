@@ -39,7 +39,7 @@ func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem)
 func (r orderedItemRepo) GetOrderedItems() ([]entity.OrderedItem, error) {
 	var orderedItem []entity.OrderedItem
 
-	err := r.p.ProductDb.Debug().Take(&orderedItem).Error
+	err := r.p.ProductDb.Debug().Find(&orderedItem).Error
 	if err != nil {
 		return nil, err
 	}
