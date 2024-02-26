@@ -54,7 +54,7 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 	apiR := r.Group("")
 
 	// Public routes with only honeycomb middleware
-	apiR.Use(middleware.HoneycombHandler())
+	apiR.Use()
 	LoginRoutes(apiR, p)
 
 	// Protected routes with middleware

@@ -83,14 +83,12 @@ func (p *InventoryHandler) UpdateStock(c *gin.Context) {
 	var ivt entity.InventoryStockOnly
 
 	p.p_repo = application.NewInventoryApplication(p.Persistence)
-	// ivtFull, _ := p.p_repo.GetInventory(productID)
 
 	if err := c.ShouldBindJSON(&ivt); err != nil {
 		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid json", ""))
 		return
 	}
 
-	// p.p_repo = application.NewInventoryApplication(p.Persistence)
 	newProduct, err := p.p_repo.UpdateStock(productID, &ivt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))

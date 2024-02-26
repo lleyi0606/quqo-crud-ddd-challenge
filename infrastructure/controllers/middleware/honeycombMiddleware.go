@@ -22,9 +22,9 @@ func HoneycombHandler() gin.HandlerFunc {
 			log.Fatalf("error setting up OTel SDK - %s", err)
 		}
 		defer otelShutdown()
-		// This is where you can put any custom logic you want to apply to all requests.
-		// In this case, we’re wrapping the request with OpenTelemetry instrumentation.
+
 		otelgin.Middleware("gin-server")(c)
+
 		c.Next()
 	}
 }

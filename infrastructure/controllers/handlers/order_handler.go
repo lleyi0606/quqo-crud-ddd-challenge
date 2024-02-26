@@ -39,6 +39,12 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
+	// tracer := otel.Tracer("your-tracer")
+
+	// // Start the main span for the HTTP request
+	// _, span := tracer.Start(c, "http-request")
+	// defer span.End()
+
 	var order entity.OrderInput
 	if err := c.ShouldBindJSON(&order); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
@@ -70,7 +76,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
-	c.JSON(http.StatusCreated, responseContextData.ResponseData(response_entity.StatusSuccess, "Order created.", newOrder))
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Order created.", newOrder))
 }
 
 // @Summary Get order
