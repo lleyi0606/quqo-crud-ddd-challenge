@@ -778,7 +778,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "OrderedItem"
+                    "Ordered Item"
                 ],
                 "summary": "Get orderedItems",
                 "parameters": [

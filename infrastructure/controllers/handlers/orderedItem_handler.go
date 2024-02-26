@@ -54,7 +54,7 @@ func (p *OrderedItemHandler) GetOrderedItems(c *gin.Context) {
 
 // @Summary Get orderedItems
 // @Description Get OrderedItem details by Order ID
-// @Tags OrderedItem
+// @Tags Ordered Item
 // @Accept json
 // @Produce json
 // @Param id path int true "OrderedItem ID"

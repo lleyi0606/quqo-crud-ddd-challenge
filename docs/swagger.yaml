@@ -650,7 +650,7 @@ paths:
             $ref: '#/definitions/entity.Response'
       summary: Get orderedItems
       tags:
-      - OrderedItem
+      - Ordered Item
   /orders:
     post:
       consumes:
