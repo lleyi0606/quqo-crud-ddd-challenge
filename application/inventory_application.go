@@ -21,7 +21,7 @@ func NewInventoryApplication(p *base.Persistence) repository.InventoryHandlerRep
 // }
 
 func (u *inventoryApp) GetInventory(ivtId uint64) (*entity.Inventory, error) {
-	repoInventory := inventory.NewInventoryRepository(u.p)
+	repoInventory := inventory.NewInventoryRepository(u.p, nil)
 	return repoInventory.GetInventory(ivtId)
 }
 
@@ -36,7 +36,7 @@ func (u *inventoryApp) GetInventory(ivtId uint64) (*entity.Inventory, error) {
 // }
 
 func (u *inventoryApp) UpdateStock(id uint64, ivt *entity.InventoryStockOnly) (*entity.Inventory, error) {
-	repoInventory := inventory.NewInventoryRepository(u.p)
+	repoInventory := inventory.NewInventoryRepository(u.p, nil)
 
 	// var inventory entity.Inventory
 	invent, err := repoInventory.GetInventory(id)

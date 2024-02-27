@@ -16,10 +16,11 @@ import (
 
 type orderedItemRepo struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewOrderedItemRepository(p *base.Persistence) repository.OrderedItemRepository {
-	return &orderedItemRepo{p}
+func NewOrderedItemRepository(p *base.Persistence, c *context.Context) repository.OrderedItemRepository {
+	return &orderedItemRepo{p, c}
 }
 
 func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.OrderedItem, error) {
@@ -31,12 +32,12 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 	return item, nil
 }
 
-func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem, ctx context.Context) (*entity.OrderedItem, error) {
+func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
 
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
-	_, span := tracer.Start(ctx, "implementation/AddOrderedItemTx",
+	_, span := tracer.Start(*r.c, "implementation/AddOrderedItemTx",
 		trace.WithAttributes(
 			attribute.String("Description", "AddOrderedItemTx in implementation"),
 		),

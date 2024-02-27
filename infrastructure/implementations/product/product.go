@@ -20,10 +20,11 @@ import (
 
 type productRepo struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewProductRepository(p *base.Persistence) repository.ProductRepository {
-	return &productRepo{p}
+func NewProductRepository(p *base.Persistence, c *context.Context) repository.ProductRepository {
+	return &productRepo{p, c}
 }
 
 // productRepo implements the repository.ProductRepository interface
@@ -164,11 +165,11 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 	return pdt.Price, pdt.Price * float64(qty), nil
 }
 
-func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int, ctx context.Context) (float64, float64, error) {
+func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
-	_, span := tracer.Start(ctx, "implementation/CalculateProductPriceByQuantityTx",
+	_, span := tracer.Start(*r.c, "implementation/CalculateProductPriceByQuantityTx",
 		trace.WithAttributes(
 			attribute.String("Description", "CalculateProductPriceByQuantityTx in implementation"),
 		),

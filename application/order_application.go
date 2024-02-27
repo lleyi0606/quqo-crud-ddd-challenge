@@ -19,18 +19,19 @@ import (
 
 type OrderApp struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewOrderApplication(p *base.Persistence) repository.OrderHandlerRepository {
-	return &OrderApp{p}
+func NewOrderApplication(p *base.Persistence, c *context.Context) repository.OrderHandlerRepository {
+	return &OrderApp{p, c}
 }
 
-func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) (*entity.Order, error) {
+func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
 
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
-	context, span := tracer.Start(ctx, "application/AddOrder",
+	context, span := tracer.Start(*u.c, "application/AddOrder",
 		trace.WithAttributes(
 			attribute.String("Description", "AddOrder in application"),
 		),
@@ -55,12 +56,12 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) 
 		}
 	}()
 
-	repoOrder := order.NewOrderRepository(u.p)
+	repoOrder := order.NewOrderRepository(u.p, &context)
 
 	// update stock
-	repoInventory := inventory.NewInventoryRepository(u.p)
+	repoInventory := inventory.NewInventoryRepository(u.p, &context)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		errTx = repoInventory.DecreaseStockTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity, context)
+		errTx = repoInventory.DecreaseStockTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
 		if errTx != nil {
 			span.RecordError(errTx)
 			return nil, errTx
@@ -71,10 +72,10 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) 
 	var orderedItems []orderItem_entity.OrderedItem
 	cost := 0.0
 
-	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
-	repoProduct := product.NewProductRepository(u.p)
+	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p, &context)
+	repoProduct := product.NewProductRepository(u.p, &context)
 	for _, orderedItemInput := range orderInput.OrderedItems {
-		unitPrice, totalPrice, errTx := repoProduct.CalculateProductPriceByQuantityTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity, context)
+		unitPrice, totalPrice, errTx := repoProduct.CalculateProductPriceByQuantityTx(tx, orderedItemInput.ProductID, orderedItemInput.Quantity)
 		if errTx != nil {
 			span.RecordError(errTx)
 			return nil, errTx
@@ -87,7 +88,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) 
 			TotalPrice: totalPrice, // You need to set the appropriate value
 		}
 
-		if _, errTx = repoOrderedItem.AddOrderedItemTx(tx, orderedItem, context); errTx != nil {
+		if _, errTx = repoOrderedItem.AddOrderedItemTx(tx, orderedItem); errTx != nil {
 			span.RecordError(errTx)
 			return nil, errTx
 		}
@@ -110,7 +111,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) 
 		TotalFees:     fees,
 		TotalCheckout: cost + fees,
 	}
-	res, errTx := repoOrder.AddOrderTx(tx, order, context)
+	res, errTx := repoOrder.AddOrderTx(tx, order)
 	if errTx != nil {
 		span.RecordError(errTx)
 		return nil, errTx
@@ -120,17 +121,17 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput, ctx context.Context) 
 }
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
-	repoOrder := order.NewOrderRepository(u.p)
+	repoOrder := order.NewOrderRepository(u.p, nil)
 	return repoOrder.GetOrder(id)
 }
 
 func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
-	repoOrder := order.NewOrderRepository(u.p)
+	repoOrder := order.NewOrderRepository(u.p, nil)
 	return repoOrder.UpdateOrder(cat)
 }
 
 func (u *OrderApp) DeleteOrder(id uint64) error {
-	repoOrder := order.NewOrderRepository(u.p)
+	repoOrder := order.NewOrderRepository(u.p, nil)
 	return repoOrder.DeleteOrder(id)
 }
 

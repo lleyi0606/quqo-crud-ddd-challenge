@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	entity "products-crud/domain/entity/inventory_entity"
 
 	"gorm.io/gorm"
@@ -17,7 +16,7 @@ type InventoryRepository interface {
 	DeleteInventory(uint64) (*entity.Inventory, error)
 	// HasSufficientStock(uint64, int) error
 	DecreaseStock(uint64, int) error
-	DecreaseStockTx(*gorm.DB, uint64, int, context.Context) error
+	DecreaseStockTx(*gorm.DB, uint64, int) error
 
 	// SearchInventory(string) ([]entity.Inventory, error)
 }

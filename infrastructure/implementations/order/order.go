@@ -16,10 +16,11 @@ import (
 
 type orderRepo struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewOrderRepository(p *base.Persistence) repository.OrderRepository {
-	return &orderRepo{p}
+func NewOrderRepository(p *base.Persistence, c *context.Context) repository.OrderRepository {
+	return &orderRepo{p, c}
 }
 
 func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
@@ -31,12 +32,12 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 	return order, nil
 }
 
-func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order, ctx context.Context) (*entity.Order, error) {
+func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, error) {
 
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
-	_, span := tracer.Start(ctx, "implementation/AddOrderTx",
+	_, span := tracer.Start(*r.c, "implementation/AddOrderTx",
 		trace.WithAttributes(
 			attribute.String("Description", "AddOrderTx in implementation"),
 		),

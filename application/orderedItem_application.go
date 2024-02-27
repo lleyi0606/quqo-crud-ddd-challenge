@@ -16,11 +16,11 @@ func NewOrderedItemApplication(p *base.Persistence) repository.OrderedItemHandle
 }
 
 func (u *OrderedItemApp) GetOrderedItems() ([]entity.OrderedItem, error) {
-	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
+	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p, nil)
 	return repoOrderedItem.GetOrderedItems()
 }
 
 func (u *OrderedItemApp) GetOrderedItemsByOrderId(id uint64) ([]entity.OrderedItem, error) {
-	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p)
+	repoOrderedItem := orderedItem.NewOrderedItemRepository(u.p, nil)
 	return repoOrderedItem.GetOrderedItemsByOrderId(id)
 }

@@ -19,10 +19,11 @@ import (
 
 type inventoryRepo struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewInventoryRepository(p *base.Persistence) repository.InventoryRepository {
-	return &inventoryRepo{p}
+func NewInventoryRepository(p *base.Persistence, c *context.Context) repository.InventoryRepository {
+	return &inventoryRepo{p, c}
 }
 
 func (r inventoryRepo) AddInventory(ivt *entity.Inventory) (*entity.Inventory, error) {
@@ -210,12 +211,12 @@ func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
 	return err
 }
 
-func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int, ctx context.Context) error {
+func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
 
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
-	_, span := tracer.Start(ctx, "implementation/DecreaseStockTx",
+	_, span := tracer.Start(*r.c, "implementation/DecreaseStockTx",
 		trace.WithAttributes(
 			attribute.String("Description", "DecreaseStockTx in implementation"),
 		),

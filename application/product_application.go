@@ -18,14 +18,14 @@ func NewProductApplication(p *base.Persistence) repository.ProductHandlerReposit
 }
 
 func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 
 	i := &inventory_entity.Inventory{
 		WarehouseID: pdt.WarehouseID,
 		Stock:       pdt.Stock,
 	}
 
-	repoInventory := inventory.NewInventoryRepository(u.p)
+	repoInventory := inventory.NewInventoryRepository(u.p, nil)
 	ivt, err := repoInventory.AddInventory(i)
 	if err != nil {
 		return nil, err
@@ -44,26 +44,26 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 }
 
 func (u *productApp) GetProduct(pdtId uint64) (*entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.GetProduct(pdtId)
 }
 
 func (u *productApp) GetProducts() ([]entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.GetProducts()
 }
 
 func (u *productApp) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.UpdateProduct(pdt)
 }
 
 func (u *productApp) DeleteProduct(pdtId uint64) (*entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.DeleteProduct(pdtId)
 }
 
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p)
+	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.SearchProducts(str)
 }

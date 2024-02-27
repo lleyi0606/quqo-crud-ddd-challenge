@@ -43,12 +43,9 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	tracer := otel.Tracer("quqo")
-
-	// Start a new span for the function
 	context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
 		trace.WithAttributes(
 			attribute.String("Description", "AddOrder in handler"),
-			// Add other relevant attributes as needed
 		),
 	)
 	defer span.End()
@@ -72,17 +69,8 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		order.CustomerID = cusID
 	}
 
-	log.Print("id from context: ", cusID)
-	// if exists {
-	// 	if userID, ok := cusID.(uint64); ok {
-	// 		log.Print("customer ID set from context", cusID)
-	// 		order.CustomerID = userID
-	// 	}
-	// }
-
-	p.repo = application.NewOrderApplication(p.Persistence)
-	// newOrder, err := p.repo.AddOrder(&order, c.Request.Context())
-	newOrder, err := p.repo.AddOrder(&order, context)
+	p.repo = application.NewOrderApplication(p.Persistence, &context)
+	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {
 		span.RecordError(err)
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -114,7 +102,7 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence)
+	p.repo = application.NewOrderApplication(p.Persistence, nil)
 	order, err := p.repo.GetOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -146,7 +134,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	p.repo = application.NewOrderApplication(p.Persistence)
+	p.repo = application.NewOrderApplication(p.Persistence, nil)
 	cus, _ := p.repo.GetOrder(orderID)
 
 	if err := c.ShouldBindJSON(&cus); err != nil {
@@ -189,7 +177,7 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence)
+	p.repo = application.NewOrderApplication(p.Persistence, nil)
 	err = p.repo.DeleteOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))

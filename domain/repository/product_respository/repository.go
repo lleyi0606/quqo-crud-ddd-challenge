@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	entity "products-crud/domain/entity/product_entity"
 
 	"gorm.io/gorm"
@@ -15,7 +14,7 @@ type ProductRepository interface {
 	DeleteProduct(uint64) (*entity.Product, error)
 	SearchProducts(string) ([]entity.Product, error)
 	CalculateProductPriceByQuantity(uint64, int) (float64, float64, error)
-	CalculateProductPriceByQuantityTx(*gorm.DB, uint64, int, context.Context) (float64, float64, error)
+	CalculateProductPriceByQuantityTx(*gorm.DB, uint64, int) (float64, float64, error)
 	// GetProductsByInventory(uint64) ([]entity.Product, error)
 }
 
