@@ -29,11 +29,9 @@ func NewOrderApplication(p *base.Persistence, c *context.Context) repository.Ord
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
 
 	tracer := otel.Tracer("quqo")
-
-	// Start a new span for the function
 	context, span := tracer.Start(*u.c, "application/AddOrder",
 		trace.WithAttributes(
-			attribute.String("Description", "AddOrder in application"),
+			attribute.String("Description", "AddOrder in order application"),
 		),
 	)
 	defer span.End()
@@ -121,20 +119,54 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 }
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
-	repoOrder := order.NewOrderRepository(u.p, nil)
+
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(*u.c, "application/GetOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "GetOrder in order application"),
+		),
+	)
+	defer span.End()
+
+	repoOrder := order.NewOrderRepository(u.p, &context)
 	return repoOrder.GetOrder(id)
 }
 
 func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
-	repoOrder := order.NewOrderRepository(u.p, nil)
+
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(*u.c, "application/UpdateOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "UpdateOrder in order application"),
+		),
+	)
+	defer span.End()
+
+	repoOrder := order.NewOrderRepository(u.p, &context)
 	return repoOrder.UpdateOrder(cat)
 }
 
 func (u *OrderApp) DeleteOrder(id uint64) error {
-	repoOrder := order.NewOrderRepository(u.p, nil)
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(*u.c, "application/DeleteOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "DeleteOrder in order application"),
+		),
+	)
+	defer span.End()
+
+	repoOrder := order.NewOrderRepository(u.p, &context)
 	return repoOrder.DeleteOrder(id)
 }
 
 func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
+	tracer := otel.Tracer("quqo")
+	_, span := tracer.Start(*u.c, "application/CalculateFees",
+		trace.WithAttributes(
+			attribute.String("Description", "CalculateFees in order application"),
+		),
+	)
+	defer span.End()
+
 	return 0.02 * amt, nil
 }

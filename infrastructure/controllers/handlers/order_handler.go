@@ -90,6 +90,14 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application GetOrder error"
 // @Router /orders/{id} [get]
 func (p *OrderHandler) GetOrder(c *gin.Context) {
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(c.Request.Context(), "handlers/GetOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "GetOrder in handler"),
+		),
+	)
+	defer span.End()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -102,7 +110,7 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence, nil)
+	p.repo = application.NewOrderApplication(p.Persistence, &context)
 	order, err := p.repo.GetOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -125,6 +133,14 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
 // @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(c.Request.Context(), "handlers/UpdateOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "UpdateOrder in handler"),
+		),
+	)
+	defer span.End()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	orderIDStr := c.Param("id")
@@ -134,7 +150,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	p.repo = application.NewOrderApplication(p.Persistence, nil)
+	p.repo = application.NewOrderApplication(p.Persistence, &context)
 	cus, _ := p.repo.GetOrder(orderID)
 
 	if err := c.ShouldBindJSON(&cus); err != nil {
@@ -166,6 +182,14 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application DeleteOrder error"
 // @Router /orders/{id} [delete]
 func (p *OrderHandler) DeleteOrder(c *gin.Context) {
+	tracer := otel.Tracer("quqo")
+	context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "AddOrder in handler"),
+		),
+	)
+	defer span.End()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -177,7 +201,7 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence, nil)
+	p.repo = application.NewOrderApplication(p.Persistence, &context)
 	err = p.repo.DeleteOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
