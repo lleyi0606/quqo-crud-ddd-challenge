@@ -12,6 +12,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type OrderHandler struct {
@@ -39,6 +42,32 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
+	// honeycombContext, exists := c.Get("honeycombContext")
+	// if !exists {
+	// 	// Log an error or handle the case where the context is not found
+	// 	log.Print("Honeycomb context not found in Gin context.")
+	// 	honeycombContext = context.Background()
+	// }
+
+	// // Assert the context to context.Context
+	// ctx, ok := honeycombContext.(context.Context)
+	// if !ok {
+	// 	// Log an error or handle the case where the assertion fails
+	// 	log.Print("Failed to assert Honeycomb context to context.Context.")
+	// 	ctx = context.Background()
+	// }
+
+	tracer := otel.Tracer("quqo")
+
+	// Start a new span for the function
+	context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
+		trace.WithAttributes(
+			attribute.String("Description", "AddOrder in handler"),
+			// Add other relevant attributes as needed
+		),
+	)
+	defer span.End()
+
 	// tracer := otel.Tracer("your-tracer")
 
 	// // Start the main span for the HTTP request
@@ -47,6 +76,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 
 	var order entity.OrderInput
 	if err := c.ShouldBindJSON(&order); err != nil {
+		span.RecordError(err)
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
@@ -56,6 +86,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
 	if err != nil {
 		// Handle the error if the conversion fails
+		span.RecordError(err)
 		log.Println("Error converting cusIDString to int64:", err)
 	} else {
 		// Now cusID is of type uint64
@@ -71,8 +102,10 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	// }
 
 	p.repo = application.NewOrderApplication(p.Persistence)
-	newOrder, err := p.repo.AddOrder(&order)
+	// newOrder, err := p.repo.AddOrder(&order, c.Request.Context())
+	newOrder, err := p.repo.AddOrder(&order, context)
 	if err != nil {
+		span.RecordError(err)
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}

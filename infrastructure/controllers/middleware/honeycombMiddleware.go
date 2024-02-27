@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,10 @@ func HoneycombHandler() gin.HandlerFunc {
 			log.Fatalf("error setting up OTel SDK - %s", err)
 		}
 		defer otelShutdown()
+
+		// Store the context in gin.Context
+		ctx := context.Background() // Replace with your actual context
+		c.Set("honeycombContext", ctx)
 
 		otelgin.Middleware("gin-server")(c)
 

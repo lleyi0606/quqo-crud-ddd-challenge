@@ -1,6 +1,7 @@
 package product
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,6 +12,9 @@ import (
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -160,9 +164,20 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 	return pdt.Price, pdt.Price * float64(qty), nil
 }
 
-func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
+func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int, ctx context.Context) (float64, float64, error) {
+	tracer := otel.Tracer("quqo")
+
+	// Start a new span for the function
+	_, span := tracer.Start(ctx, "implementation/CalculateProductPriceByQuantityTx",
+		trace.WithAttributes(
+			attribute.String("Description", "CalculateProductPriceByQuantityTx in implementation"),
+		),
+	)
+	defer span.End()
+
 	pdt, err := r.GetProductTx(tx, id)
 	if err != nil {
+		span.RecordError(err)
 		return 0, 0, err
 	}
 

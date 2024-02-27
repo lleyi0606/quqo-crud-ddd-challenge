@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,9 @@ import (
 	"products-crud/infrastructure/implementations/cache"
 	base "products-crud/infrastructure/persistences"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -206,21 +210,17 @@ func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
 	return err
 }
 
-func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
-	// ivt, err := r.GetInventoryTx(tx, id)
-	// if err != nil {
-	// 	return err
-	// }
-	// if ivt.Stock < qty {
-	// 	return fmt.Errorf("insufficient stock for product_id %d", id)
-	// }
+func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int, ctx context.Context) error {
 
-	// ivt.Stock -= qty
+	tracer := otel.Tracer("quqo")
 
-	// log.Print(ivt)
-	// _, err = r.UpdateInventoryTx(tx, ivt)
-
-	// return err
+	// Start a new span for the function
+	_, span := tracer.Start(ctx, "implementation/DecreaseStockTx",
+		trace.WithAttributes(
+			attribute.String("Description", "DecreaseStockTx in implementation"),
+		),
+	)
+	defer span.End()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)

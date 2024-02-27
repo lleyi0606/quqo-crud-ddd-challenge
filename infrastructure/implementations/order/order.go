@@ -1,12 +1,16 @@
 package order
 
 import (
+	"context"
 	"errors"
 	entity "products-crud/domain/entity/order_entity"
 	repository "products-crud/domain/repository/order_repository"
 
 	base "products-crud/infrastructure/persistences"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -27,9 +31,20 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 	return order, nil
 }
 
-func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, error) {
+func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order, ctx context.Context) (*entity.Order, error) {
+
+	tracer := otel.Tracer("quqo")
+
+	// Start a new span for the function
+	_, span := tracer.Start(ctx, "implementation/AddOrderTx",
+		trace.WithAttributes(
+			attribute.String("Description", "AddOrderTx in implementation"),
+		),
+	)
+	defer span.End()
 
 	if err := tx.Debug().Create(&order).Error; err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
