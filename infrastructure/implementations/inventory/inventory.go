@@ -225,10 +225,13 @@ func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int, ctx cont
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)
 	if err.Error != nil {
+		span.RecordError(err.Error)
 		return err.Error
 	}
 	if stock < qty {
-		return fmt.Errorf("insufficient stock for product_id %d", id)
+		stockErr := fmt.Errorf("insufficient stock for product_id %d", id)
+		span.RecordError(stockErr)
+		return stockErr
 	}
 
 	err = tx.Exec("UPDATE inventories SET stock = ? WHERE product_id = ?", gorm.Expr("stock - ?", qty), id)

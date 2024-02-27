@@ -42,21 +42,6 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	// honeycombContext, exists := c.Get("honeycombContext")
-	// if !exists {
-	// 	// Log an error or handle the case where the context is not found
-	// 	log.Print("Honeycomb context not found in Gin context.")
-	// 	honeycombContext = context.Background()
-	// }
-
-	// // Assert the context to context.Context
-	// ctx, ok := honeycombContext.(context.Context)
-	// if !ok {
-	// 	// Log an error or handle the case where the assertion fails
-	// 	log.Print("Failed to assert Honeycomb context to context.Context.")
-	// 	ctx = context.Background()
-	// }
-
 	tracer := otel.Tracer("quqo")
 
 	// Start a new span for the function
@@ -67,12 +52,6 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		),
 	)
 	defer span.End()
-
-	// tracer := otel.Tracer("your-tracer")
-
-	// // Start the main span for the HTTP request
-	// _, span := tracer.Start(c, "http-request")
-	// defer span.End()
 
 	var order entity.OrderInput
 	if err := c.ShouldBindJSON(&order); err != nil {
