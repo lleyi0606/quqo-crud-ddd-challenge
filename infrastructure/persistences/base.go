@@ -12,6 +12,7 @@ import (
 
 	"products-crud/infrastructure/persistences/db"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	storage_go "github.com/supabase-community/storage-go"
@@ -30,6 +31,7 @@ type Persistence struct {
 	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch.Client
 	ImageSupabaseDB    *storage_go.Client
+	HoneycombTracer    *trace.Tracer
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -64,6 +66,12 @@ func NewPersistence() (*Persistence, error) {
 		zap.S().Error("SUPABASES NOT INITIALIZED", "error", errSupabase)
 	}
 
+	// Honeycomb
+	honeycombTracer, errHoneycomb := db.NewHoneycombDB()
+	if errHoneycomb != nil {
+		zap.S().Error("HONEYCOMB NOT INITIALIZED", "error", errHoneycomb)
+	}
+
 	return &Persistence{
 		ProductDb:          productEngine.DB,
 		ProductRedisDb:     redisClient,
@@ -71,6 +79,7 @@ func NewPersistence() (*Persistence, error) {
 		InventoryAlgoliaDb: algoliaInventoryIndex,
 		SearchOpenSearchDb: opensearchIndex,
 		ImageSupabaseDB:    supabaseEngine.Client,
+		HoneycombTracer:    honeycombTracer,
 	}, nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/honeycombio/honeycomb-opentelemetry-go"
 	"github.com/honeycombio/otel-config-go/otelconfig"
-	// "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func InitRouter(p *base.Persistence) *gin.Engine {
@@ -26,11 +25,6 @@ func InitRouter(p *base.Persistence) *gin.Engine {
 	}
 	defer otelShutdown()
 
-	// Initialize HTTP handler instrumentation
-	// handler := http.HandlerFunc(httpHandler)
-	// wrappedHandler := otelhttp.NewHandler(handler, "hello")
-	// http.Handle("/hello", wrappedHandler)
-
 	r := gin.New()
 
 	r.Use(gin.Recovery())
@@ -40,21 +34,12 @@ func InitRouter(p *base.Persistence) *gin.Engine {
 	return r
 }
 
-// func WrapHandler(handler gin.HandlerFunc, routeName string) gin.HandlerFunc {
-// 	wrappedHandler := otelhttp.NewHandler(http.HandlerFunc(handler), routeName)
-// 	return func(c *gin.Context) {
-// 		wrappedHandler.ServeHTTP(c.Writer, c.Request)
-// 	}
-
-// 	otelgin.Middleware()
-// }
-
 func Routes(r *gin.Engine, p *base.Persistence) {
 
 	apiR := r.Group("")
 
 	// Public routes with only honeycomb middleware
-	apiR.Use(middleware.HoneycombHandler())
+	apiR.Use(middleware.CORSMiddleware(), middleware.HoneycombHandler())
 	LoginRoutes(apiR, p)
 
 	// Protected routes with middleware

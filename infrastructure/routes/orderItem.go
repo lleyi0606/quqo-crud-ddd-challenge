@@ -11,7 +11,7 @@ func OrderedItemRoutes(r *gin.RouterGroup, p *base.Persistence) {
 
 	OrderedItemHandler := handlers.NewOrderedItemController(p)
 
-	r.GET("/orderedItems", OrderedItemHandler.GetOrderedItems)
-	r.GET("/orderedItems/:id", OrderedItemHandler.GetOrderedItemsByOrderId)
+	r.GET("/ordereditems", OrderedItemHandler.GetOrderedItems)
+	r.GET("/ordereditems/:id", OrderedItemHandler.GetOrderedItemsByOrderId)
 
 }

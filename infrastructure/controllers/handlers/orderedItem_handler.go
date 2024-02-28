@@ -32,7 +32,7 @@ func NewOrderedItemController(p *base.Persistence) *OrderedItemHandler {
 // @Produce json
 // @Success 200 {object} response_entity.Response "Ordered items getted"
 // @Failure 500 {object} response_entity.Response "Application GetOrderedItems error"
-// @Router /orderedItems [get]
+// @Router /ordereditems [get]
 func (p *OrderedItemHandler) GetOrderedItems(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -61,7 +61,7 @@ func (p *OrderedItemHandler) GetOrderedItems(c *gin.Context) {
 // @Success 200 {object} response_entity.Response "Successfully get OrderedItemsByOrderId"
 // @Failure 400 {object} response_entity.Response "Invalid Order ID GetOrderedItemsByOrderId"
 // @Failure 500 {object} response_entity.Response "Application GetOrderedItemsByOrderId error"
-// @Router /orderedItems/{id} [get]
+// @Router /ordereditems/{id} [get]
 func (p *OrderedItemHandler) GetOrderedItemsByOrderId(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

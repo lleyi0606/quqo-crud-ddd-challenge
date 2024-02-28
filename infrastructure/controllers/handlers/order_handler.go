@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"products-crud/application"
 	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
 	entity "products-crud/domain/entity/order_entity"
+	loggerentity "products-crud/domain/entity/span_entity"
+	"products-crud/domain/repository/logger_repository"
 	repository "products-crud/domain/repository/order_repository"
 	base "products-crud/infrastructure/persistences"
 	"strconv"
@@ -19,6 +22,7 @@ import (
 
 type OrderHandler struct {
 	repo        repository.OrderHandlerRepository
+	logger_repo logger_repository.LoggerRepository
 	Persistence *base.Persistence
 }
 
@@ -42,27 +46,49 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	tracer := otel.Tracer("quqo")
-	context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
-		trace.WithAttributes(
-			attribute.String("Description", "AddOrder in handler"),
-		),
-	)
-	defer span.End()
+	// tracer := otel.Tracer("quqo")
+	// context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "AddOrder in handler"),
+	// 	),
+	// )
+
+	ctx := c.Request.Context()
+	p.logger_repo = application.NewLoggerApplication(p.Persistence, &ctx)
+	newSpan := loggerentity.Span{
+		FunctionName: "AddOrder",
+		Path:         "/infrastructure/controllers/handlers",
+		Description:  "AddOrder in handler",
+	}
+	context, span := p.logger_repo.NewSpan(&newSpan)
+	defer p.logger_repo.EndSpan(span)
 
 	var order entity.OrderInput
 	if err := c.ShouldBindJSON(&order); err != nil {
-		span.RecordError(err)
+		p.logger_repo.LogError(span, err)
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
+
+	// Convert order to JSON
+	orderJSON, err := json.Marshal(order)
+	if err != nil {
+		log.Println("Error marshaling order to JSON:", err)
+		p.logger_repo.LogError(span, err)
+		// Handle the error, if needed
+	}
+	log.Print("order json is ", orderJSON)
+
+	span.AddEvent("Sending JSON data to Honeycomb", trace.WithAttributes(
+		attribute.String("json_data", string(orderJSON)),
+	))
 
 	cusIDString := c.GetString("userID")
 	// Convert string to int64
 	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
 	if err != nil {
 		// Handle the error if the conversion fails
-		span.RecordError(err)
+		p.logger_repo.LogError(span, err)
 		log.Println("Error converting cusIDString to int64:", err)
 	} else {
 		// Now cusID is of type uint64
@@ -72,7 +98,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	p.repo = application.NewOrderApplication(p.Persistence, &context)
 	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {
-		span.RecordError(err)
+		p.logger_repo.LogError(span, err)
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
