@@ -6,13 +6,13 @@ import (
 	customer_entity "products-crud/domain/entity/customer_entity"
 	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	order_entity "products-crud/domain/entity/order_entity"
 	orderedItem_entity "products-crud/domain/entity/orderedItem_entity"
 	product_entity "products-crud/domain/entity/product_entity"
 
 	"products-crud/infrastructure/persistences/db"
 
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	storage_go "github.com/supabase-community/storage-go"
@@ -31,7 +31,7 @@ type Persistence struct {
 	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch.Client
 	ImageSupabaseDB    *storage_go.Client
-	HoneycombTracer    *trace.Tracer
+	Logger             *loggerentity.Logger
 }
 
 func NewPersistence() (*Persistence, error) {
@@ -66,10 +66,10 @@ func NewPersistence() (*Persistence, error) {
 		zap.S().Error("SUPABASES NOT INITIALIZED", "error", errSupabase)
 	}
 
-	// Honeycomb
-	honeycombTracer, errHoneycomb := db.NewHoneycombDB()
-	if errHoneycomb != nil {
-		zap.S().Error("HONEYCOMB NOT INITIALIZED", "error", errHoneycomb)
+	// Logger
+	logger, errLogger := db.NewLoggerDB()
+	if errLogger != nil {
+		zap.S().Error("HONEYCOMB NOT INITIALIZED", "error", errLogger)
 	}
 
 	return &Persistence{
@@ -79,7 +79,7 @@ func NewPersistence() (*Persistence, error) {
 		InventoryAlgoliaDb: algoliaInventoryIndex,
 		SearchOpenSearchDb: opensearchIndex,
 		ImageSupabaseDB:    supabaseEngine.Client,
-		HoneycombTracer:    honeycombTracer,
+		Logger:             logger,
 	}, nil
 }
 

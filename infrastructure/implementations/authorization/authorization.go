@@ -79,10 +79,8 @@ func (a authorizationRepo) IsTokenInBlacklist(tokenString string) (bool, error) 
 	err := cacheRepo.GetKey(fmt.Sprintf("%s%s", redis_entity.RedisJWTData, tokenString), &token)
 
 	if token == nil {
-		log.Print("token not found", fmt.Sprintf("%s%s", redis_entity.RedisJWTData, tokenString))
 		return false, err
 	}
 
-	log.Print("token found", fmt.Sprintf("%s%s", redis_entity.RedisJWTData, tokenString))
 	return true, err
 }

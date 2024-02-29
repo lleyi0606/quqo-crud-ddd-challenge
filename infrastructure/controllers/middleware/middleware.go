@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"products-crud/domain/entity"
@@ -19,7 +18,6 @@ func AuthHandler(p *base.Persistence) gin.HandlerFunc {
 
 		token := c.Request.Header.Get("Authorization")
 
-		log.Print("token in middleware: ", token)
 		b := "Bearer "
 		if !strings.Contains(token, b) {
 			c.JSON(http.StatusForbidden, gin.H{"message": "Your request is not authorized", "status": entity.StatusError, "data": nil})
@@ -55,7 +53,6 @@ func AuthHandler(p *base.Persistence) gin.HandlerFunc {
 		userIDInterface := tokenCatches.Claims.(jwt.MapClaims)["user_id"]
 		if userID, ok := userIDInterface.(string); ok {
 			// Now userID is of type string
-			log.Println("!!! USER ID IS: ", userID)
 			if userID == "" || userID == "0" {
 				c.JSON(http.StatusForbidden, gin.H{"message": "Invalid authorization token", "status": entity.StatusError, "data": nil})
 				c.Abort()

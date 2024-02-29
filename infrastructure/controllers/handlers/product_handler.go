@@ -6,8 +6,10 @@ import (
 	"products-crud/application"
 	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
+	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 	"strconv"
 
@@ -37,17 +39,31 @@ func NewProductController(p *base.Persistence) *ProductHandler {
 // @Failure 500 {object} response_entity.Response "Application AddProduct error"
 // @Router /products [post]
 func (p *ProductHandler) AddProduct(c *gin.Context) {
+
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddProduct",
+		Path:         "infrastructure/handlers/",
+		Description:  "Handles JSON input of AddProduct",
+		Body:         nil,
+	}
+	ctx := c.Request.Context()
+	logger := logger.NewLoggerRepositories(p.Persistence, &ctx, info, "honeycomb", "zap")
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	var pdt entity.ProductWithStockAndWarehouse
 	if err := c.ShouldBindJSON(&pdt); err != nil {
+		logger.Error("invalid json", map[string]interface{}{})
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	logger.Info("add product in handlers", map[string]interface{}{"input": pdt})
+
+	p.p_repo = application.NewProductApplication(p.Persistence, logger.Context)
 	newProduct, err := p.p_repo.AddProduct(&pdt)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
@@ -68,7 +84,7 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 	var products []entity.Product
 	var err error
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	products, err = p.p_repo.GetProducts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -103,7 +119,7 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 	}
 
 	// Call the service to get a single product by ID
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	product, err := p.p_repo.GetProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -134,7 +150,7 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	pdt, _ := p.p_repo.GetProduct(productID)
 
 	if err := c.ShouldBindJSON(&pdt); err != nil {
@@ -177,7 +193,7 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	}
 
 	// Call the service to get a single product by ID
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	product, err := p.p_repo.DeleteProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -205,7 +221,7 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	var products []entity.Product
 	var err error
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	products, err = p.p_repo.SearchProducts(keyword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -235,7 +251,7 @@ func (p *ProductHandler) AddProducts(c *gin.Context) {
 		return
 	}
 
-	p.p_repo = application.NewProductApplication(p.Persistence)
+	p.p_repo = application.NewProductApplication(p.Persistence, nil)
 	for _, pdt := range pdts {
 		_, err := p.p_repo.AddProduct(&pdt)
 		if err != nil {

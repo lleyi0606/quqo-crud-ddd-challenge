@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/cache"
+	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
@@ -32,7 +34,16 @@ func NewProductRepository(p *base.Persistence, c *context.Context) repository.Pr
 func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	log.Println("Adding new product ", pdt.Name, "...")
 
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddProduct",
+		Path:         "infrastructure/implementations/",
+		Description:  "Adds product to SQL database",
+		Body:         pdt,
+	}
+	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+
 	if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"input": pdt})
 		return nil, err
 	}
 

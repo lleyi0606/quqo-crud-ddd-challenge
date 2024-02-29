@@ -1,24 +1,37 @@
 package application
 
 import (
+	"context"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/inventory"
+	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/product"
 	base "products-crud/infrastructure/persistences"
 )
 
 type productApp struct {
 	p *base.Persistence
+	c *context.Context
 }
 
-func NewProductApplication(p *base.Persistence) repository.ProductHandlerRepository {
-	return &productApp{p}
+func NewProductApplication(p *base.Persistence, c *context.Context) repository.ProductHandlerRepository {
+	return &productApp{p, c}
 }
 
 func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p, nil)
+
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddProduct",
+		Path:         "application/",
+		Description:  "Application of AddProduct",
+		Body:         pdt,
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+
+	repoProduct := product.NewProductRepository(u.p, logger.Context)
 
 	i := &inventory_entity.Inventory{
 		WarehouseID: pdt.WarehouseID,
@@ -28,6 +41,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 	repoInventory := inventory.NewInventoryRepository(u.p, nil)
 	ivt, err := repoInventory.AddInventory(i)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 

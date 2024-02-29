@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	entity "products-crud/domain/entity/order_entity"
-	loggerentity "products-crud/domain/entity/span_entity"
 	repository "products-crud/domain/repository/order_repository"
 
-	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"gorm.io/gorm"
@@ -32,17 +30,17 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 	// )
 	// defer span.End()
 
-	logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	newSpan := loggerentity.Span{
-		FunctionName: "AddOrder",
-		Path:         "infrastructure/implementations/order/",
-		Description:  "AddOrder in implementation",
-	}
-	_, span := logger.NewSpan(&newSpan)
-	defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
+	// newSpan := loggerentity.Span{
+	// 	FunctionName: "AddOrder",
+	// 	Path:         "infrastructure/implementations/order/",
+	// 	Description:  "AddOrder in implementation",
+	// }
+	// _, span := logger.NewSpan(&newSpan)
+	// defer logger.EndSpan(span)
 
 	if err := r.p.ProductDb.Debug().Create(&order).Error; err != nil {
-		logger.LogError(span, err)
+		// logger.LogError(span, err)
 		return nil, err
 	}
 
@@ -61,17 +59,17 @@ func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, 
 	// )
 	// defer span.End()
 
-	logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	newSpan := loggerentity.Span{
-		FunctionName: "AddOrderTx",
-		Path:         "infrastructure/implementations/order/",
-		Description:  "AddOrderTx in implementation",
-	}
-	_, span := logger.NewSpan(&newSpan)
-	defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
+	// newSpan := loggerentity.Span{
+	// 	FunctionName: "AddOrderTx",
+	// 	Path:         "infrastructure/implementations/order/",
+	// 	Description:  "AddOrderTx in implementation",
+	// }
+	// _, span := logger.NewSpan(&newSpan)
+	// defer logger.EndSpan(span)
 
 	if err := tx.Debug().Create(&order).Error; err != nil {
-		logger.LogError(span, err)
+		// logger.LogError(span, err)
 		return nil, err
 	}
 
@@ -88,26 +86,26 @@ func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
 	// )
 	// defer span.End()
 
-	logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	newSpan := loggerentity.Span{
-		FunctionName: "GetOrder",
-		Path:         "infrastructure/implementations/order/",
-		Description:  "GetOrder in implementation",
-	}
-	_, span := logger.NewSpan(&newSpan)
-	defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
+	// newSpan := loggerentity.Span{
+	// 	FunctionName: "GetOrder",
+	// 	Path:         "infrastructure/implementations/order/",
+	// 	Description:  "GetOrder in implementation",
+	// }
+	// _, span := logger.NewSpan(&newSpan)
+	// defer logger.EndSpan(span)
 
 	var order *entity.Order
 
 	err := r.p.ProductDb.Debug().Unscoped().Preload("OrderedItems").Where("order_id = ?", id).Take(&order).Error
 
 	if err != nil {
-		logger.LogError(span, err)
+		// logger.LogError(span, err)
 		return nil, err
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		logger.LogError(span, errors.New("order not found"))
+		// logger.LogError(span, errors.New("order not found"))
 		return nil, errors.New("order not found")
 	}
 
@@ -124,24 +122,24 @@ func (r orderRepo) UpdateOrder(cus *entity.Order) (*entity.Order, error) {
 	// )
 	// defer span.End()
 
-	logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	newSpan := loggerentity.Span{
-		FunctionName: "UpdateOrder",
-		Path:         "infrastructure/implementations/order/",
-		Description:  "UpdateOrder in implementation",
-	}
-	_, span := logger.NewSpan(&newSpan)
-	defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
+	// newSpan := loggerentity.Span{
+	// 	FunctionName: "UpdateOrder",
+	// 	Path:         "infrastructure/implementations/order/",
+	// 	Description:  "UpdateOrder in implementation",
+	// }
+	// _, span := logger.NewSpan(&newSpan)
+	// defer logger.EndSpan(span)
 
 	result := r.p.ProductDb.Debug().Where("order_id = ?", cus.OrderID).Updates(&cus)
 
 	if result.Error != nil {
-		logger.LogError(span, result.Error)
+		// logger.LogError(span, result.Error)
 		return nil, result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		logger.LogError(span, errors.New("order not found"))
+		// logger.LogError(span, errors.New("order not found"))
 		return nil, errors.New("order not found")
 	}
 
@@ -158,24 +156,24 @@ func (r orderRepo) DeleteOrder(id uint64) error {
 	// )
 	// defer span.End()
 
-	logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	newSpan := loggerentity.Span{
-		FunctionName: "DeleteOrder",
-		Path:         "infrastructure/implementations/order/",
-		Description:  "DeleteOrder in implementation",
-	}
-	_, span := logger.NewSpan(&newSpan)
-	defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
+	// newSpan := loggerentity.Span{
+	// 	FunctionName: "DeleteOrder",
+	// 	Path:         "infrastructure/implementations/order/",
+	// 	Description:  "DeleteOrder in implementation",
+	// }
+	// _, span := logger.NewSpan(&newSpan)
+	// defer logger.EndSpan(span)
 
 	var order entity.Order
 	res := r.p.ProductDb.Debug().Where("order_id = ?", id).Delete(&order)
 	if res.Error != nil {
-		logger.LogError(span, res.Error)
+		// logger.LogError(span, res.Error)
 		return res.Error
 	}
 
 	if res.RowsAffected == 0 {
-		logger.LogError(span, errors.New("order not found"))
+		// logger.LogError(span, errors.New("order not found"))
 		return errors.New("order not found")
 	}
 
