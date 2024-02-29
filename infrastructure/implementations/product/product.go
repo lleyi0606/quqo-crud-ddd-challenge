@@ -41,6 +41,8 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 		Body:         pdt,
 	}
 	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	span := trace.SpanFromContext(*logger.Context)
+	defer span.End()
 
 	if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
 		logger.Error(err.Error(), map[string]interface{}{"input": pdt})

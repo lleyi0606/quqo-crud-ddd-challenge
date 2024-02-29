@@ -47,7 +47,7 @@ func NewHoneycombRepository(p *base.Persistence, c *context.Context, info logger
 		))
 
 	// Defer the end of the span
-	defer span.End()
+	// defer span.End()
 
 	// Return a new repository instance with the tracer and context
 	return &HoneycombRepo{p.Logger.HoneycombTracer, context, span}

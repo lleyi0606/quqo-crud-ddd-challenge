@@ -14,6 +14,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ProductHandler struct {
@@ -48,6 +49,8 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 	}
 	ctx := c.Request.Context()
 	logger := logger.NewLoggerRepositories(p.Persistence, &ctx, info, "honeycomb", "zap")
+	span := trace.SpanFromContext(*logger.Context)
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

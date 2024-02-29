@@ -10,6 +10,8 @@ import (
 	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/product"
 	base "products-crud/infrastructure/persistences"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 type productApp struct {
@@ -30,6 +32,8 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 		Body:         pdt,
 	}
 	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	span := trace.SpanFromContext(*logger.Context)
+	defer span.End()
 
 	repoProduct := product.NewProductRepository(u.p, logger.Context)
 
