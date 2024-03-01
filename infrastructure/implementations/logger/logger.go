@@ -10,6 +10,7 @@ import (
 	base "products-crud/infrastructure/persistences"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -18,14 +19,14 @@ const (
 	Zap       = "ZAP"
 )
 
-type orderRepo struct {
+type loggerRepo struct {
 	p       *base.Persistence
-	Context *context.Context
+	c       *gin.Context
 	loggers []logger_repository.LoggerRepository
 }
 
-// func NewLoggerRepositories(p *base.Persistence, c *context.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
-func NewLoggerRepositories(p *base.Persistence, c *context.Context, info loggerentity.FunctionInfo, providers ...string) orderRepo {
+// func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
+func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) loggerRepo {
 
 	log.Print("!!! new logger repo called")
 	var loggers []logger_repository.LoggerRepository
@@ -44,20 +45,20 @@ func NewLoggerRepositories(p *base.Persistence, c *context.Context, info loggere
 		}
 	}
 
-	return orderRepo{
+	return loggerRepo{
 		p:       p,
-		Context: &hcRepo.Ctx,
+		c:       c,
 		loggers: loggers,
 	}
 }
 
-func (l *orderRepo) Debug(msg string, fields map[string]interface{}) {
+func (l *loggerRepo) Debug(msg string, fields map[string]interface{}) {
 	for _, logger := range l.loggers {
 		logger.Debug(msg, fields)
 	}
 }
 
-func (l *orderRepo) Info(msg string, fields map[string]interface{}) {
+func (l *loggerRepo) Info(msg string, fields map[string]interface{}) {
 
 	log.Print("!!! info called")
 
@@ -67,28 +68,37 @@ func (l *orderRepo) Info(msg string, fields map[string]interface{}) {
 	}
 }
 
-func (l *orderRepo) Warn(msg string, fields map[string]interface{}) {
+func (l *loggerRepo) Warn(msg string, fields map[string]interface{}) {
 
 	for _, logger := range l.loggers {
 		logger.Warn(msg, fields)
 	}
 }
 
-func (l *orderRepo) Error(msg string, fields map[string]interface{}) {
+func (l *loggerRepo) Error(msg string, fields map[string]interface{}) {
 
 	for _, logger := range l.loggers {
 		logger.Error(msg, fields)
 	}
 }
 
-func (l *orderRepo) Fatal(msg string, fields map[string]interface{}) {
+func (l *loggerRepo) Fatal(msg string, fields map[string]interface{}) {
 
 	for _, logger := range l.loggers {
 		logger.Fatal(msg, fields)
 	}
 }
 
-func (l *orderRepo) End() {
-	span := trace.SpanFromContext(*l.Context)
+func (l *loggerRepo) End() {
+	var ctx context.Context
+	if storedCtx, exists := l.c.Get("otel-context"); exists {
+		log.Println("otel-context FOUND in End")
+		ctx = storedCtx.(context.Context)
+	} else {
+		log.Println("otel-context NOT FOUND in End")
+		ctx = l.c.Request.Context()
+	}
+
+	span := trace.SpanFromContext(ctx)
 	defer span.End()
 }

@@ -46,8 +46,8 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 		Description:  "Handles JSON input of AddProduct",
 		Body:         nil,
 	}
-	ctx := c.Request.Context()
-	logger := logger.NewLoggerRepositories(p.Persistence, &ctx, info, "honeycomb", "zap")
+
+	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
 	defer logger.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
@@ -61,7 +61,7 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 
 	logger.Info("add product in handlers", map[string]interface{}{"input": pdt})
 
-	p.p_repo = application.NewProductApplication(p.Persistence, logger.Context)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	newProduct, err := p.p_repo.AddProduct(&pdt)
 	if err != nil {
 		logger.Error(err.Error(), map[string]interface{}{"error": err})

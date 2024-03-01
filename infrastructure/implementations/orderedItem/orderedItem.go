@@ -1,25 +1,22 @@
 package orderedItem
 
 import (
-	"context"
 	"errors"
 	entity "products-crud/domain/entity/orderedItem_entity"
 	repository "products-crud/domain/repository/orderedItem_repository"
 
 	base "products-crud/infrastructure/persistences"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type orderedItemRepo struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewOrderedItemRepository(p *base.Persistence, c *context.Context) repository.OrderedItemRepository {
+func NewOrderedItemRepository(p *base.Persistence, c *gin.Context) repository.OrderedItemRepository {
 	return &orderedItemRepo{p, c}
 }
 
@@ -34,15 +31,15 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 
 func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
 
-	tracer := otel.Tracer("quqo")
+	// tracer := otel.Tracer("quqo")
 
-	// Start a new span for the function
-	_, span := tracer.Start(*r.c, "implementation/AddOrderedItemTx",
-		trace.WithAttributes(
-			attribute.String("Description", "AddOrderedItemTx in implementation"),
-		),
-	)
-	defer span.End()
+	// // Start a new span for the function
+	// _, span := tracer.Start(*r.c, "implementation/AddOrderedItemTx",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "AddOrderedItemTx in implementation"),
+	// 	),
+	// )
+	// defer span.End()
 
 	if err := tx.Debug().Create(&item).Error; err != nil {
 		return nil, err

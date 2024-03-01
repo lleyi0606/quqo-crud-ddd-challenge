@@ -1,7 +1,6 @@
 package product
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -14,18 +13,16 @@ import (
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type productRepo struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewProductRepository(p *base.Persistence, c *context.Context) repository.ProductRepository {
+func NewProductRepository(p *base.Persistence, c *gin.Context) repository.ProductRepository {
 	return &productRepo{p, c}
 }
 
@@ -44,7 +41,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	defer logger.End()
 
 	if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
-		logger.Error(err.Error(), map[string]interface{}{"input": pdt})
+		// logger.Error(err.Error(), map[string]interface{}{"input": pdt})
 		return nil, err
 	}
 
@@ -178,19 +175,19 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 }
 
 func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
-	tracer := otel.Tracer("quqo")
+	// tracer := otel.Tracer("quqo")
 
-	// Start a new span for the function
-	_, span := tracer.Start(*r.c, "implementation/CalculateProductPriceByQuantityTx",
-		trace.WithAttributes(
-			attribute.String("Description", "CalculateProductPriceByQuantityTx in implementation"),
-		),
-	)
-	defer span.End()
+	// // Start a new span for the function
+	// _, span := tracer.Start(*r.c, "implementation/CalculateProductPriceByQuantityTx",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "CalculateProductPriceByQuantityTx in implementation"),
+	// 	),
+	// )
+	// defer span.End()
 
 	pdt, err := r.GetProductTx(tx, id)
 	if err != nil {
-		span.RecordError(err)
+		// span.RecordError(err)
 		return 0, 0, err
 	}
 

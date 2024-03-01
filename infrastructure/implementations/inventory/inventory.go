@@ -1,7 +1,6 @@
 package inventory
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,18 +10,16 @@ import (
 	"products-crud/infrastructure/implementations/cache"
 	base "products-crud/infrastructure/persistences"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type inventoryRepo struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewInventoryRepository(p *base.Persistence, c *context.Context) repository.InventoryRepository {
+func NewInventoryRepository(p *base.Persistence, c *gin.Context) repository.InventoryRepository {
 	return &inventoryRepo{p, c}
 }
 
@@ -213,25 +210,25 @@ func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
 
 func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
 
-	tracer := otel.Tracer("quqo")
+	// tracer := otel.Tracer("quqo")
 
-	// Start a new span for the function
-	_, span := tracer.Start(*r.c, "implementation/DecreaseStockTx",
-		trace.WithAttributes(
-			attribute.String("Description", "DecreaseStockTx in implementation"),
-		),
-	)
-	defer span.End()
+	// // Start a new span for the function
+	// _, span := tracer.Start(*r.c, "implementation/DecreaseStockTx",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "DecreaseStockTx in implementation"),
+	// 	),
+	// )
+	// defer span.End()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)
 	if err.Error != nil {
-		span.RecordError(err.Error)
+		// span.RecordError(err.Error)
 		return err.Error
 	}
 	if stock < qty {
 		stockErr := fmt.Errorf("insufficient stock for product_id %d", id)
-		span.RecordError(stockErr)
+		// span.RecordError(stockErr)
 		return stockErr
 	}
 

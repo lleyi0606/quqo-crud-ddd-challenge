@@ -1,7 +1,6 @@
 package application
 
 import (
-	"context"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
@@ -10,14 +9,16 @@ import (
 	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/product"
 	base "products-crud/infrastructure/persistences"
+
+	"github.com/gin-gonic/gin"
 )
 
 type productApp struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewProductApplication(p *base.Persistence, c *context.Context) repository.ProductHandlerRepository {
+func NewProductApplication(p *base.Persistence, c *gin.Context) repository.ProductHandlerRepository {
 	return &productApp{p, c}
 }
 
@@ -34,7 +35,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 	// defer span.End()
 	defer logger.End()
 
-	repoProduct := product.NewProductRepository(u.p, logger.Context)
+	repoProduct := product.NewProductRepository(u.p, u.c)
 
 	i := &inventory_entity.Inventory{
 		WarehouseID: pdt.WarehouseID,

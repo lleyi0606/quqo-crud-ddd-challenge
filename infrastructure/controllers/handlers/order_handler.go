@@ -7,16 +7,15 @@ import (
 	"products-crud/application"
 	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
 	"products-crud/domain/repository/logger_repository"
 	repository "products-crud/domain/repository/order_repository"
+	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type OrderHandler struct {
@@ -44,6 +43,15 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 // @Router /orders [post]
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddOrder",
+		Path:         "infrastructure/handlers/",
+		Description:  "Handles JSON input to add order",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
+	defer logger.End()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	var order entity.OrderInput
@@ -60,10 +68,6 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	}
 	log.Print("order json is ", orderJSON)
 
-	// span.AddEvent("Sending JSON data to Honeycomb", trace.WithAttributes(
-	// 	attribute.String("json_data", string(orderJSON)),
-	// ))
-
 	cusIDString := c.GetString("userID")
 	// Convert string to int64
 	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
@@ -75,8 +79,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		order.CustomerID = cusID
 	}
 
-	ctx := c.Request.Context()
-	p.repo = application.NewOrderApplication(p.Persistence, &ctx)
+	p.repo = application.NewOrderApplication(p.Persistence, c)
 	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -96,13 +99,13 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application GetOrder error"
 // @Router /orders/{id} [get]
 func (p *OrderHandler) GetOrder(c *gin.Context) {
-	tracer := otel.Tracer("quqo")
-	context, span := tracer.Start(c.Request.Context(), "handlers/GetOrder",
-		trace.WithAttributes(
-			attribute.String("Description", "GetOrder in handler"),
-		),
-	)
-	defer span.End()
+	// tracer := otel.Tracer("quqo")
+	// context, span := tracer.Start(c.Request.Context(), "handlers/GetOrder",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "GetOrder in handler"),
+	// 	),
+	// )
+	// defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -116,7 +119,7 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence, &context)
+	p.repo = application.NewOrderApplication(p.Persistence, c)
 	order, err := p.repo.GetOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -139,13 +142,13 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
 // @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
-	tracer := otel.Tracer("quqo")
-	context, span := tracer.Start(c.Request.Context(), "handlers/UpdateOrder",
-		trace.WithAttributes(
-			attribute.String("Description", "UpdateOrder in handler"),
-		),
-	)
-	defer span.End()
+	// tracer := otel.Tracer("quqo")
+	// context, span := tracer.Start(c.Request.Context(), "handlers/UpdateOrder",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "UpdateOrder in handler"),
+	// 	),
+	// )
+	// defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -156,7 +159,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	p.repo = application.NewOrderApplication(p.Persistence, &context)
+	p.repo = application.NewOrderApplication(p.Persistence, c)
 	cus, _ := p.repo.GetOrder(orderID)
 
 	if err := c.ShouldBindJSON(&cus); err != nil {
@@ -188,13 +191,13 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application DeleteOrder error"
 // @Router /orders/{id} [delete]
 func (p *OrderHandler) DeleteOrder(c *gin.Context) {
-	tracer := otel.Tracer("quqo")
-	context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
-		trace.WithAttributes(
-			attribute.String("Description", "AddOrder in handler"),
-		),
-	)
-	defer span.End()
+	// tracer := otel.Tracer("quqo")
+	// context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
+	// 	trace.WithAttributes(
+	// 		attribute.String("Description", "AddOrder in handler"),
+	// 	),
+	// )
+	// defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -207,7 +210,7 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	}
 
 	// Call the service to get a single Order by ID
-	p.repo = application.NewOrderApplication(p.Persistence, &context)
+	p.repo = application.NewOrderApplication(p.Persistence, c)
 	err = p.repo.DeleteOrder(orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))

@@ -1,28 +1,40 @@
 package application
 
 import (
-	"context"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
 	orderItem_entity "products-crud/domain/entity/orderedItem_entity"
 
 	repository "products-crud/domain/repository/order_repository"
 	"products-crud/infrastructure/implementations/inventory"
+	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/order"
 	"products-crud/infrastructure/implementations/orderedItem"
 	"products-crud/infrastructure/implementations/product"
 	base "products-crud/infrastructure/persistences"
+
+	"github.com/gin-gonic/gin"
 )
 
 type OrderApp struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewOrderApplication(p *base.Persistence, c *context.Context) repository.OrderHandlerRepository {
+func NewOrderApplication(p *base.Persistence, c *gin.Context) repository.OrderHandlerRepository {
 	return &OrderApp{p, c}
 }
 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
+
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddOrder",
+		Path:         "application/",
+		Description:  "Application of add order",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	tx := u.p.ProductDb.Begin()
 	var errTx error

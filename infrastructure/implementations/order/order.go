@@ -1,22 +1,22 @@
 package order
 
 import (
-	"context"
 	"errors"
 	entity "products-crud/domain/entity/order_entity"
 	repository "products-crud/domain/repository/order_repository"
 
 	base "products-crud/infrastructure/persistences"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type orderRepo struct {
 	p *base.Persistence
-	c *context.Context
+	c *gin.Context
 }
 
-func NewOrderRepository(p *base.Persistence, c *context.Context) repository.OrderRepository {
+func NewOrderRepository(p *base.Persistence, c *gin.Context) repository.OrderRepository {
 	return &orderRepo{p, c}
 }
 
@@ -30,14 +30,14 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 	// )
 	// defer span.End()
 
-	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	// newSpan := loggerentity.Span{
+	// info := loggerentity.FunctionInfo{
 	// 	FunctionName: "AddOrder",
-	// 	Path:         "infrastructure/implementations/order/",
-	// 	Description:  "AddOrder in implementation",
+	// 	Path:         "infrastructure/implementations/",
+	// 	Description:  "Adds order to SQL database",
+	// 	Body:         order,
 	// }
-	// _, span := logger.NewSpan(&newSpan)
-	// defer logger.EndSpan(span)
+	// logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	// defer logger.End()
 
 	if err := r.p.ProductDb.Debug().Create(&order).Error; err != nil {
 		// logger.LogError(span, err)
