@@ -2,9 +2,11 @@ package order
 
 import (
 	"errors"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
 	repository "products-crud/domain/repository/order_repository"
 
+	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -49,24 +51,14 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 
 func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, error) {
 
-	// tracer := otel.Tracer("quqo")
-
-	// // Start a new span for the function
-	// _, span := tracer.Start(*r.c, "implementation/AddOrderTx",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "AddOrderTx in order implementation"),
-	// 	),
-	// )
-	// defer span.End()
-
-	// logger := logger.NewLoggerRepository(r.p, r.c, "Honeycomb")
-	// newSpan := loggerentity.Span{
-	// 	FunctionName: "AddOrderTx",
-	// 	Path:         "infrastructure/implementations/order/",
-	// 	Description:  "AddOrderTx in implementation",
-	// }
-	// _, span := logger.NewSpan(&newSpan)
-	// defer logger.EndSpan(span)
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddOrderTx",
+		Path:         "infrastructure/implementations/",
+		Description:  "Add order into DB",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	if err := tx.Debug().Create(&order).Error; err != nil {
 		// logger.LogError(span, err)

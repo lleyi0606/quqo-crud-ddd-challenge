@@ -9,7 +9,6 @@ import (
 	response_entity "products-crud/domain/entity"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
-	"products-crud/domain/repository/logger_repository"
 	repository "products-crud/domain/repository/order_repository"
 	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
@@ -20,7 +19,6 @@ import (
 
 type OrderHandler struct {
 	repo        repository.OrderHandlerRepository
-	logger_repo logger_repository.LoggerRepository
 	Persistence *base.Persistence
 }
 
@@ -56,13 +54,16 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 
 	var order entity.OrderInput
 	if err := c.ShouldBindJSON(&order); err != nil {
+		logger.Error("invalid JSON", map[string]interface{}{"error": err})
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
+	logger.Info("Json input taken in", map[string]interface{}{"json_data": order})
 
 	// Convert order to JSON
 	orderJSON, err := json.Marshal(order)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"error": err})
 		log.Println("Error marshaling order to JSON:", err)
 		// Handle the error, if needed
 	}
@@ -73,6 +74,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
 	if err != nil {
 		// Handle the error if the conversion fails
+		logger.Error(err.Error(), map[string]interface{}{"error": err})
 		log.Println("Error converting cusIDString to int64:", err)
 	} else {
 		// Now cusID is of type uint64
@@ -82,6 +84,7 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	p.repo = application.NewOrderApplication(p.Persistence, c)
 	newOrder, err := p.repo.AddOrder(&order)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"error": err})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}

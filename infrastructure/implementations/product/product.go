@@ -175,15 +175,15 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 }
 
 func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
-	// tracer := otel.Tracer("quqo")
 
-	// // Start a new span for the function
-	// _, span := tracer.Start(*r.c, "implementation/CalculateProductPriceByQuantityTx",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "CalculateProductPriceByQuantityTx in implementation"),
-	// 	),
-	// )
-	// defer span.End()
+	info := loggerentity.FunctionInfo{
+		FunctionName: "CalculateProductPriceByQuantityTx",
+		Path:         "infrastructure/implementations/",
+		Description:  "Calculate price of a product",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	pdt, err := r.GetProductTx(tx, id)
 	if err != nil {

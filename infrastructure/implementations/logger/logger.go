@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"log"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	"products-crud/domain/repository/logger_repository"
@@ -22,6 +21,7 @@ const (
 type loggerRepo struct {
 	p       *base.Persistence
 	c       *gin.Context
+	span    trace.Span
 	loggers []logger_repository.LoggerRepository
 }
 
@@ -48,6 +48,7 @@ func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentit
 	return loggerRepo{
 		p:       p,
 		c:       c,
+		span:    hcRepo.Span,
 		loggers: loggers,
 	}
 }
@@ -90,15 +91,18 @@ func (l *loggerRepo) Fatal(msg string, fields map[string]interface{}) {
 }
 
 func (l *loggerRepo) End() {
-	var ctx context.Context
-	if storedCtx, exists := l.c.Get("otel-context"); exists {
-		log.Println("otel-context FOUND in End")
-		ctx = storedCtx.(context.Context)
-	} else {
-		log.Println("otel-context NOT FOUND in End")
-		ctx = l.c.Request.Context()
-	}
 
-	span := trace.SpanFromContext(ctx)
-	defer span.End()
+	l.span.End()
+	// var ctx context.Context
+	// if storedCtx, exists := l.c.Get("otel-context"); exists {
+	// 	log.Println("otel-context FOUND in End")
+	// 	ctx = storedCtx.(context.Context)
+	// } else {
+	// 	log.Println("otel-context NOT FOUND in End")
+	// 	ctx = l.c.Request.Context()
+	// }
+
+	// span := trace.SpanFromContext(ctx)
+	// defer span.End()
+
 }

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	entity "products-crud/domain/entity/inventory_entity"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/inventory_respository"
 	"products-crud/infrastructure/implementations/cache"
+	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -210,15 +212,14 @@ func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
 
 func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
 
-	// tracer := otel.Tracer("quqo")
-
-	// // Start a new span for the function
-	// _, span := tracer.Start(*r.c, "implementation/DecreaseStockTx",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "DecreaseStockTx in implementation"),
-	// 	),
-	// )
-	// defer span.End()
+	info := loggerentity.FunctionInfo{
+		FunctionName: "DecreaseStockTx",
+		Path:         "infrastructure/implementations/",
+		Description:  "Decrease stock of a product",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)

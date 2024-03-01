@@ -31,7 +31,6 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		FunctionName: "AddOrder",
 		Path:         "application/",
 		Description:  "Application of add order",
-		Body:         nil,
 	}
 	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
 	defer logger.End()
@@ -51,8 +50,6 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 			}
 		}
 	}()
-
-	repoOrder := order.NewOrderRepository(u.p, u.c)
 
 	// update stock
 	repoInventory := inventory.NewInventoryRepository(u.p, u.c)
@@ -94,7 +91,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 	fees, _ := u.CalculateFees(cost)
 
 	// create and add order
-	order := &entity.Order{
+	newOrder := &entity.Order{
 		OrderID:       orderInput.OrderID,
 		CustomerID:    orderInput.CustomerID,
 		WarehouseID:   orderInput.WarehouseID,
@@ -104,7 +101,9 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		TotalFees:     fees,
 		TotalCheckout: cost + fees,
 	}
-	res, errTx := repoOrder.AddOrderTx(tx, order)
+
+	repoOrder := order.NewOrderRepository(u.p, u.c)
+	res, errTx := repoOrder.AddOrderTx(tx, newOrder)
 	if errTx != nil {
 		return nil, errTx
 	}

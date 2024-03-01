@@ -2,9 +2,11 @@ package orderedItem
 
 import (
 	"errors"
+	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/orderedItem_entity"
 	repository "products-crud/domain/repository/orderedItem_repository"
 
+	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -31,15 +33,14 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 
 func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
 
-	// tracer := otel.Tracer("quqo")
-
-	// // Start a new span for the function
-	// _, span := tracer.Start(*r.c, "implementation/AddOrderedItemTx",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "AddOrderedItemTx in implementation"),
-	// 	),
-	// )
-	// defer span.End()
+	info := loggerentity.FunctionInfo{
+		FunctionName: "AddOrderedItemTx",
+		Path:         "infrastructure/implementations/",
+		Description:  "Add ordered item into DB",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	if err := tx.Debug().Create(&item).Error; err != nil {
 		return nil, err
