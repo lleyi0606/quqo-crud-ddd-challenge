@@ -9,6 +9,8 @@ import (
 	"products-crud/infrastructure/implementations/logger/zap"
 	base "products-crud/infrastructure/persistences"
 	"strings"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -84,4 +86,9 @@ func (l *orderRepo) Fatal(msg string, fields map[string]interface{}) {
 	for _, logger := range l.loggers {
 		logger.Fatal(msg, fields)
 	}
+}
+
+func (l *orderRepo) End() {
+	span := trace.SpanFromContext(*l.Context)
+	defer span.End()
 }

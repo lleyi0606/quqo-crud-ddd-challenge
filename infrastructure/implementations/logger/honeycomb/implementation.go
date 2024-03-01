@@ -25,15 +25,6 @@ type HoneycombRepo struct {
 }
 
 func NewHoneycombRepository(p *base.Persistence, c *context.Context, info loggerentity.FunctionInfo) *HoneycombRepo {
-	// log.Print("!!! new honeycomb called ", info.Path+info.FunctionName)
-	// context, span := p.Logger.HoneycombTracer.Start(*c, info.Path+info.FunctionName,
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", info.Description),
-	// 	))
-	// c = &context
-	// defer span.End()
-
-	// return &HoneycombRepo{p.Logger.HoneycombTracer, context}
 
 	log.Printf("!!! new honeycomb called %s", info.Path+info.FunctionName)
 
