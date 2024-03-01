@@ -64,7 +64,7 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 	p.p_repo = application.NewProductApplication(p.Persistence, logger.Context)
 	newProduct, err := p.p_repo.AddProduct(&pdt)
 	if err != nil {
-		logger.Error(err.Error(), map[string]interface{}{})
+		logger.Error(err.Error(), map[string]interface{}{"error": err})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}

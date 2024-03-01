@@ -3,12 +3,15 @@ package honeycomb
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	base "products-crud/infrastructure/persistences"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -42,7 +45,6 @@ func NewHoneycombRepository(p *base.Persistence, c *context.Context, info logger
 
 	// Return a new repository instance with the tracer and context
 	return &HoneycombRepo{p.Logger.HoneycombTracer, context, span}
-
 }
 
 func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
@@ -52,37 +54,69 @@ func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
 
 func (l *HoneycombRepo) Info(msg string, fields map[string]interface{}) {
 
-	// l.logger.Info("", zap.Any("args", fields))
-
-	// span.AddEvent("Sending JSON data to Honeycomb", trace.WithAttributes(
-	// 	attribute.String("json_data", string(orderJSON)),
-	// ))
-
-	// Convert order to JSON
-
 	log.Print("!!! info in honeycomb")
-	orderJSON, err := json.Marshal(fields)
+	jsonObj, err := json.Marshal(fields)
 	if err != nil {
-		log.Println("Error marshaling order to JSON:", err)
+		log.Println("Error marshaling data to JSON in Info:", err)
 	}
-	l.Span.AddEvent("Sending JSON data to Honeycomb", trace.WithAttributes(
-		attribute.String("json_data", string(orderJSON)),
+	l.Span.AddEvent(msg, trace.WithAttributes(
+		attribute.String("level", "info"),
+		attribute.String("data", string(jsonObj)),
 	))
 }
 
 func (l *HoneycombRepo) Warn(msg string, fields map[string]interface{}) {
 
-	// l.logger.Warn("", zap.Any("args", fields))
+	log.Print("!!! warn in honeycomb")
+	jsonObj, err := json.Marshal(fields)
+	if err != nil {
+		log.Println("Error marshaling data to JSON in Warn:", err)
+	}
+	l.Span.AddEvent(msg, trace.WithAttributes(
+		attribute.String("level", "warn"),
+		attribute.String("data", string(jsonObj)),
+	))
 }
 
 func (l *HoneycombRepo) Error(msg string, fields map[string]interface{}) {
 
-	// l.logger.Error("", zap.Any("args", fields))
+	log.Print("!!! info in honeycomb")
+	jsonObj, err := json.Marshal(fields)
+	if err != nil {
+		log.Println("Error marshaling data to JSON in Error:", err)
+		// l.Span.RecordError(fmt.Errorf("Error marshaling data to JSON: %v", err))
+		return
+	}
+	l.Span.AddEvent(msg, trace.WithAttributes(
+		attribute.String("level", "error"),
+		attribute.String("data", string(jsonObj)),
+	))
+	l.Span.RecordError(fmt.Errorf("Error: %s", string(jsonObj)))
+	l.Span.SetStatus(codes.Error, msg)
 }
 
 func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 
 	// l.logger.Fatal("", zap.Any("args", fields))
+	log.Print("!!! fatal in honeycomb")
+	// Convert the fields to JSON
+	jsonObj, err := json.Marshal(fields)
+	if err != nil {
+		log.Println("Error marshaling data to JSON in Fatal:", err)
+	}
+
+	// Add an event with the error details
+	l.Span.AddEvent(msg, trace.WithAttributes(
+		attribute.String("level", "fatal"),
+		attribute.String("data", string(jsonObj)),
+	))
+
+	// Record an error to make sure it's captured by OpenTelemetry
+	l.Span.RecordError(fmt.Errorf("Fatal error: %s", msg))
+	l.Span.SetStatus(codes.Error, msg)
+
+	// Terminate the application
+	os.Exit(1)
 }
 
 // func (r HoneycombRepo) NewSpan(span *loggerentity.Span) (context.Context, trace.Span) {
