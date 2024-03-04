@@ -32,13 +32,6 @@ func (r inventoryRepo) AddInventory(ivt *entity.Inventory) (*entity.Inventory, e
 		return nil, err
 	}
 
-	// add to search repo
-	// searchRepo := search.NewSearchRepository(r.p, "algolia")
-	// err := searchRepo.AddInventory(ivt)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	log.Println(ivt.ProductID, " created.")
 	return ivt, nil
 }
@@ -165,13 +158,6 @@ func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("inventory not found")
 	}
-
-	// search repo
-	// searchRepo := search.NewSearchRepository(r.p, "algolia")
-	// err = searchRepo.DeleteInventory(id)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, "redis")

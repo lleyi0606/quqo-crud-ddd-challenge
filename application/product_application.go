@@ -1,6 +1,7 @@
 package application
 
 import (
+	"os"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
@@ -85,7 +86,7 @@ func (u *productApp) DeleteProduct(pdtId uint64) (*entity.Product, error) {
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
 	// repoProduct := product.NewProductRepository(u.p, nil)
 	// return repoProduct.SearchProducts(str)
-
-	repoSearch := search.NewSearchRepository(u.p, "algolia")
+	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
+	repoSearch := search.NewSearchRepository(u.p, searchTechnology)
 	return repoSearch.SearchProducts(str)
 }

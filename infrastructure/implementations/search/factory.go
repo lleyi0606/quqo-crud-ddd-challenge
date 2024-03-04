@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	Aloglia    = "algolia"
+	Algolia    = "algolia"
 	OpenSearch = "opensearch"
 )
 
 func NewSearchRepository(p *base.Persistence, provider string) search_repository.SearchRepository {
 	switch provider {
-	case Aloglia:
+	case Algolia:
 		return algolia.NewAlgoliaRepository(p)
 	case OpenSearch:
 		return opensearch.NewOpensearchRepository(p)
