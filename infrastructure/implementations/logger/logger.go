@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"log"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	"products-crud/domain/repository/logger_repository"
@@ -19,10 +20,11 @@ const (
 )
 
 type loggerRepo struct {
-	p       *base.Persistence
-	c       *gin.Context
-	span    trace.Span
-	loggers []logger_repository.LoggerRepository
+	p            *base.Persistence
+	c            *gin.Context
+	span         trace.Span
+	loggers      []logger_repository.LoggerRepository
+	Otel_context *context.Context
 }
 
 // func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
@@ -46,10 +48,11 @@ func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentit
 	}
 
 	return loggerRepo{
-		p:       p,
-		c:       c,
-		span:    hcRepo.Span,
-		loggers: loggers,
+		p:            p,
+		c:            c,
+		span:         hcRepo.Span,
+		loggers:      loggers,
+		Otel_context: hcRepo.Otel_context,
 	}
 }
 
@@ -92,6 +95,7 @@ func (l *loggerRepo) Fatal(msg string, fields map[string]interface{}) {
 
 func (l *loggerRepo) End() {
 
+	// defer l.c.Set("otel-context", l.Otel_context)
 	l.span.End()
 	// var ctx context.Context
 	// if storedCtx, exists := l.c.Get("otel-context"); exists {

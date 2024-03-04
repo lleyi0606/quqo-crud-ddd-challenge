@@ -23,9 +23,10 @@ import (
 // }
 
 type HoneycombRepo struct {
-	p    *base.Persistence
-	c    *gin.Context
-	Span trace.Span
+	p            *base.Persistence
+	c            *gin.Context
+	Span         trace.Span
+	Otel_context *context.Context
 }
 
 func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo) *HoneycombRepo {
@@ -51,7 +52,6 @@ func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerenti
 		))
 
 	// c.Set("otel-context", context)
-	c.Set("otel-context", context)
 
 	log.Println("otel-context SET")
 
@@ -59,7 +59,7 @@ func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerenti
 	// defer span.End()
 
 	// Return a new repository instance with the tracer and context
-	return &HoneycombRepo{p, c, span}
+	return &HoneycombRepo{p, c, span, &context}
 }
 
 func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {

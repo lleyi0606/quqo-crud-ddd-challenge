@@ -8,6 +8,7 @@ import (
 	"products-crud/infrastructure/implementations/inventory"
 	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/product"
+	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -82,6 +83,9 @@ func (u *productApp) DeleteProduct(pdtId uint64) (*entity.Product, error) {
 }
 
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
-	repoProduct := product.NewProductRepository(u.p, nil)
-	return repoProduct.SearchProducts(str)
+	// repoProduct := product.NewProductRepository(u.p, nil)
+	// return repoProduct.SearchProducts(str)
+
+	repoSearch := search.NewSearchRepository(u.p, "algolia")
+	return repoSearch.SearchProducts(str)
 }
