@@ -113,17 +113,40 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
 
+	info := loggerentity.FunctionInfo{
+		FunctionName: "GetOrder",
+		Path:         "application/",
+		Description:  "Application of get order",
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	defer logger.End()
+
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.GetOrder(id)
 }
 
 func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
 
+	info := loggerentity.FunctionInfo{
+		FunctionName: "UpdateOrder",
+		Path:         "application/",
+		Description:  "Application of update order",
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	defer logger.End()
+
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.UpdateOrder(cat)
 }
 
 func (u *OrderApp) DeleteOrder(id uint64) error {
+	info := loggerentity.FunctionInfo{
+		FunctionName: "DeleteOrder",
+		Path:         "application/",
+		Description:  "Application of delete order",
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.DeleteOrder(id)

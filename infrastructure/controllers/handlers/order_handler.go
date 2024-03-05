@@ -102,14 +102,14 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application GetOrder error"
 // @Router /orders/{id} [get]
 func (p *OrderHandler) GetOrder(c *gin.Context) {
-	// tracer := otel.Tracer("quqo")
-	// context, span := tracer.Start(c.Request.Context(), "handlers/GetOrder",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "GetOrder in handler"),
-	// 	),
-	// )
-	// defer span.End()
-
+	info := loggerentity.FunctionInfo{
+		FunctionName: "GetOrder",
+		Path:         "infrastructure/handlers/",
+		Description:  "Handles JSON input to get order",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
+	defer logger.End()
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -145,13 +145,14 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
 // @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
-	// tracer := otel.Tracer("quqo")
-	// context, span := tracer.Start(c.Request.Context(), "handlers/UpdateOrder",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "UpdateOrder in handler"),
-	// 	),
-	// )
-	// defer span.End()
+	info := loggerentity.FunctionInfo{
+		FunctionName: "UpdateOrder",
+		Path:         "infrastructure/handlers/",
+		Description:  "Handles JSON input to update order",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
+	defer logger.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -194,14 +195,14 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application DeleteOrder error"
 // @Router /orders/{id} [delete]
 func (p *OrderHandler) DeleteOrder(c *gin.Context) {
-	// tracer := otel.Tracer("quqo")
-	// context, span := tracer.Start(c.Request.Context(), "handlers/AddOrder",
-	// 	trace.WithAttributes(
-	// 		attribute.String("Description", "AddOrder in handler"),
-	// 	),
-	// )
-	// defer span.End()
-
+	info := loggerentity.FunctionInfo{
+		FunctionName: "DeleteOrder",
+		Path:         "infrastructure/handlers/",
+		Description:  "Handles JSON input to delete order",
+		Body:         nil,
+	}
+	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
+	defer logger.End()
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
