@@ -8,6 +8,7 @@ import (
 	"products-crud/infrastructure/implementations/logger/honeycomb"
 	"products-crud/infrastructure/implementations/logger/zap"
 	base "products-crud/infrastructure/persistences"
+	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,8 @@ type loggerRepo struct {
 // func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
 func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) loggerRepo {
 
-	log.Print("!!! new logger repo called")
+	_, callerInfo, _, _ := runtime.Caller(1)
+	log.Printf("!!! new logger repo called, %s", callerInfo)
 	var loggers []logger_repository.LoggerRepository
 
 	var hcRepo *honeycomb.HoneycombRepo
@@ -48,11 +50,10 @@ func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentit
 	}
 
 	return loggerRepo{
-		p:            p,
-		c:            c,
-		span:         hcRepo.Span,
-		loggers:      loggers,
-		Otel_context: hcRepo.Otel_context,
+		p:       p,
+		c:       c,
+		span:    hcRepo.Span,
+		loggers: loggers,
 	}
 }
 
@@ -95,8 +96,10 @@ func (l *loggerRepo) Fatal(msg string, fields map[string]interface{}) {
 
 func (l *loggerRepo) End() {
 
-	// defer l.c.Set("otel-context", l.Otel_context)
+	// l.c.Set("otel-context", l.Otel_context)
 	l.span.End()
+	// log.Print("otel context set in End()")
+
 	// var ctx context.Context
 	// if storedCtx, exists := l.c.Get("otel-context"); exists {
 	// 	log.Println("otel-context FOUND in End")

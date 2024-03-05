@@ -26,7 +26,7 @@ func NewLoggerDB() (*loggerentity.Logger, error) {
 	defer undo()
 
 	logger := loggerentity.Logger{
-		HoneycombTracer: &tracer,
+		HoneycombTracer: tracer,
 		ZapLogger:       zapLogger,
 	}
 

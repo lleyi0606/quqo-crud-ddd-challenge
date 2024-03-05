@@ -6,7 +6,7 @@ import (
 )
 
 type Logger struct {
-	HoneycombTracer *trace.Tracer
+	HoneycombTracer trace.Tracer
 	ZapLogger       *zap.Logger
 }
 
