@@ -130,6 +130,12 @@ func (u *OrderApp) DeleteOrder(id uint64) error {
 }
 
 func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
-
+	info := loggerentity.FunctionInfo{
+		FunctionName: "CalculateFees",
+		Path:         "application/",
+		Description:  "CalculateFees in Application",
+	}
+	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
+	defer logger.End()
 	return 0.02 * amt, nil
 }
