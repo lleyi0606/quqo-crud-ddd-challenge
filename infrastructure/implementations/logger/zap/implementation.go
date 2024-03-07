@@ -51,6 +51,9 @@ func (l *zapRepo) Fatal(msg string, fields map[string]interface{}) {
 	l.p.Logger.ZapLogger.Fatal("", zap.Any("args", fields))
 }
 
+func (l *zapRepo) End() {
+}
+
 // func (l *zapRepo) addContextCommonFields(fields map[string]interface{}) {
 // 	if fields == nil || l.ctx == nil {
 // 		return // Do nothing if either fields or l.ctx is nil

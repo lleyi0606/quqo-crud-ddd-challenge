@@ -47,8 +47,8 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		Description:  "Handles JSON input to add order",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -108,8 +108,8 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 		Description:  "Handles JSON input to get order",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -117,7 +117,7 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id GetOrder", ""))
-
+		logger.Error(err.Error(), map[string]interface{}{})
 		return
 	}
 
@@ -151,8 +151,8 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 		Description:  "Handles JSON input to update order",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -160,6 +160,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id UpdateOrder", ""))
+		logger.Error(err.Error(), map[string]interface{}{})
 		return
 	}
 
@@ -176,6 +177,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 
 	cus.OrderID = orderID
 
+	logger.SetContextFromSpan()
 	newOrder, err := p.repo.UpdateOrder(cus)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -201,8 +203,8 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 		Description:  "Handles JSON input to delete order",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -210,6 +212,7 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id DeleteOrder", ""))
+		logger.Error(err.Error(), map[string]interface{}{})
 		return
 	}
 

@@ -6,4 +6,5 @@ type LoggerRepository interface {
 	Warn(msg string, fields map[string]interface{})
 	Error(msg string, fields map[string]interface{})
 	Fatal(msg string, fields map[string]interface{})
+	End()
 }

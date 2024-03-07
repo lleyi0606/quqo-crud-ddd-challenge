@@ -39,10 +39,11 @@ func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem)
 		Description:  "Add ordered item into DB",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	if err := tx.Debug().Create(&item).Error; err != nil {
+		logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 

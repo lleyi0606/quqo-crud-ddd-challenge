@@ -32,8 +32,8 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		Path:         "application/",
 		Description:  "Application of add order",
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	tx := u.p.ProductDb.Begin()
 	var errTx error
@@ -46,6 +46,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		} else {
 			errC := tx.Commit().Error
 			if errC != nil {
+				logger.Error(errC.Error(), map[string]interface{}{"data": orderInput})
 				tx.Rollback()
 			}
 		}
@@ -108,6 +109,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		return nil, errTx
 	}
 
+	endFunc()
 	return res, nil
 }
 
@@ -118,8 +120,8 @@ func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
 		Path:         "application/",
 		Description:  "Application of get order",
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	defer logger.End()
+	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.GetOrder(id)
@@ -132,8 +134,8 @@ func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
 		Path:         "application/",
 		Description:  "Application of update order",
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	defer logger.End()
+	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.UpdateOrder(cat)
@@ -145,8 +147,8 @@ func (u *OrderApp) DeleteOrder(id uint64) error {
 		Path:         "application/",
 		Description:  "Application of delete order",
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	defer logger.End()
+	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.DeleteOrder(id)
@@ -158,7 +160,7 @@ func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
 		Path:         "application/",
 		Description:  "CalculateFees in Application",
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	defer logger.End()
+	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 	return 0.02 * amt, nil
 }

@@ -47,8 +47,8 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 		Body:         nil,
 	}
 
-	logger := logger.NewLoggerRepositories(p.Persistence, c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

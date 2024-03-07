@@ -204,18 +204,18 @@ func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
 		Description:  "Decrease stock of a product",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)
 	if err.Error != nil {
-		// span.RecordError(err.Error)
+		logger.Error(err.Error.Error(), map[string]interface{}{})
 		return err.Error
 	}
 	if stock < qty {
 		stockErr := fmt.Errorf("insufficient stock for product_id %d", id)
-		// span.RecordError(stockErr)
+		logger.Error(err.Error.Error(), map[string]interface{}{})
 		return stockErr
 	}
 

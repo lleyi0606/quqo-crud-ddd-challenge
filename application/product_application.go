@@ -32,10 +32,8 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 		Description:  "Application of AddProduct",
 		Body:         pdt,
 	}
-	logger := logger.NewLoggerRepositories(u.p, u.c, info, "honeycomb", "zap")
-	// span := trace.SpanFromContext(*logger.Context)
-	// defer span.End()
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer endFunc()
 
 	repoProduct := product.NewProductRepository(u.p, u.c)
 
@@ -60,6 +58,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 		Inventory:   *ivt,
 	}
 
+	// logger.End()
 	return repoProduct.AddProduct(p)
 }
 

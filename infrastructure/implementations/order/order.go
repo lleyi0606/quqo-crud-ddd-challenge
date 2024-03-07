@@ -29,14 +29,14 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 		Path:         "infrastructure/implementations/",
 		Description:  "Add order into DB",
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	if err := r.p.ProductDb.Debug().Create(&order).Error; err != nil {
 		logger.Error(err.Error(), map[string]interface{}{"data": order})
 		return nil, err
 	}
-
+	logger.End()
 	return order, nil
 }
 
@@ -48,8 +48,8 @@ func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, 
 		Description:  "Add order into DB",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	if err := tx.Debug().Create(&order).Error; err != nil {
 		logger.Error(err.Error(), map[string]interface{}{"data": order})
@@ -66,8 +66,8 @@ func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
 		Path:         "infrastructure/implementations/",
 		Description:  "Get order from DB",
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	var order *entity.Order
 
@@ -93,8 +93,8 @@ func (r orderRepo) UpdateOrder(order *entity.Order) (*entity.Order, error) {
 		Path:         "infrastructure/implementations/",
 		Description:  "Update order from DB",
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	result := r.p.ProductDb.Debug().Where("order_id = ?", order.OrderID).Updates(&order)
 
@@ -118,8 +118,8 @@ func (r orderRepo) DeleteOrder(id uint64) error {
 		Path:         "infrastructure/implementations/",
 		Description:  "Delete order from DB",
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	var order entity.Order
 	res := r.p.ProductDb.Debug().Where("order_id = ?", id).Delete(&order)

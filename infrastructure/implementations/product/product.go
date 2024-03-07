@@ -38,11 +38,12 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 		Description:  "Adds product to SQL database",
 		Body:         pdt,
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+
+	defer endFunc()
 
 	if err := r.p.ProductDb.Debug().Create(&pdt).Error; err != nil {
-		// logger.Error(err.Error(), map[string]interface{}{"input": pdt})
+		logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 
@@ -55,6 +56,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	}
 
 	log.Println(pdt.Name, " created.")
+	// logger.End()
 	return pdt, nil
 }
 
@@ -186,12 +188,12 @@ func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, q
 		Description:  "Calculate price of a product",
 		Body:         nil,
 	}
-	logger := logger.NewLoggerRepositories(r.p, r.c, info, "honeycomb", "zap")
-	defer logger.End()
+	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
 
 	pdt, err := r.GetProductTx(tx, id)
 	if err != nil {
-		// span.RecordError(err)
+		logger.Error(err.Error(), map[string]interface{}{})
 		return 0, 0, err
 	}
 

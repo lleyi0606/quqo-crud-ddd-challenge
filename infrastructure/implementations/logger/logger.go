@@ -8,7 +8,6 @@ import (
 	"products-crud/infrastructure/implementations/logger/honeycomb"
 	"products-crud/infrastructure/implementations/logger/zap"
 	base "products-crud/infrastructure/persistences"
-	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -28,11 +27,41 @@ type loggerRepo struct {
 	Otel_context *context.Context
 }
 
-// func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
-func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) loggerRepo {
+type Option func(*loggerRepo)
 
-	_, callerInfo, _, _ := runtime.Caller(1)
-	log.Printf("!!! new logger repo called, %s", callerInfo)
+// func NewLoggerRepositoriesOld(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) loggerRepo {
+
+// 	_, callerInfo, _, _ := runtime.Caller(1)
+// 	log.Printf("!!! new logger repo called, %s", callerInfo)
+// 	var loggers []logger_repository.LoggerRepository
+
+// 	var hcRepo *honeycomb.HoneycombRepo
+// 	for _, provider := range providers {
+// 		switch strings.ToUpper(provider) {
+// 		case Zap:
+// 			loggers = append(loggers, zap.NewZapRepository(p, c))
+// 		case Honeycomb:
+// 			hcRepo = honeycomb.NewHoneycombRepository(p, c, info)
+// 			loggers = append(loggers, hcRepo)
+// 		default:
+// 			hcRepo = honeycomb.NewHoneycombRepository(p, c, info)
+// 			loggers = append(loggers, hcRepo)
+// 		}
+// 	}
+
+// 	return loggerRepo{
+// 		p:       p,
+// 		c:       c,
+// 		span:    hcRepo.Span,
+// 		loggers: loggers,
+// 	}
+// }
+
+// func NewLoggerRepositoriesOld(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers ...string) []logger_repository.LoggerRepository {
+func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo, providers []string, options ...Option) (loggerRepo, func()) {
+
+	// _, callerInfo, _, _ := runtime.Caller(1)
+	// log.Printf("!!! new logger repo called, %s", callerInfo)
 	var loggers []logger_repository.LoggerRepository
 
 	var hcRepo *honeycomb.HoneycombRepo
@@ -49,11 +78,25 @@ func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentit
 		}
 	}
 
-	return loggerRepo{
+	// defer func() {
+	// 	log.Print("span ended ", info.Path+info.FunctionName)
+	// 	hcRepo.Span.End()
+	// }()
+
+	loggerR := loggerRepo{
 		p:       p,
 		c:       c,
 		span:    hcRepo.Span,
 		loggers: loggers,
+	}
+
+	for _, opt := range options {
+		opt(&loggerR)
+	}
+
+	return loggerR, func() {
+		log.Print("span ended ", info.Path+info.FunctionName)
+		hcRepo.Span.End()
 	}
 }
 
@@ -94,10 +137,29 @@ func (l *loggerRepo) Fatal(msg string, fields map[string]interface{}) {
 	}
 }
 
+func SetNewOtelContext() Option {
+	return func(c *loggerRepo) {
+		for _, logger := range c.loggers {
+			if honeycombRepo, ok := logger.(*honeycomb.HoneycombRepo); ok {
+				honeycombRepo.SetNewOtelContext()
+			}
+		}
+	}
+}
+
+func (l *loggerRepo) SetContextFromSpan() {
+	newCtx := trace.ContextWithSpan(l.c.Request.Context(), l.span)
+	l.c.Set("otel-context", newCtx)
+}
+
 func (l *loggerRepo) End() {
 
+	for _, logger := range l.loggers {
+		logger.End()
+	}
+
 	// l.c.Set("otel-context", l.Otel_context)
-	l.span.End()
+	// l.span.End()
 	// log.Print("otel context set in End()")
 
 	// var ctx context.Context
