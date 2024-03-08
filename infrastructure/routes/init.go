@@ -54,6 +54,7 @@ func Routes(r *gin.Engine, p *base.Persistence) {
 		CustomerRoutes(protectedRoutes, p)
 		OrderRoutes(protectedRoutes, p)
 		OrderedItemRoutes(protectedRoutes, p)
+		WarehouseRoutes(protectedRoutes, p)
 		protectedRoutes.POST("/logout", AuthHandler.Logout)
 	}
 

@@ -10,6 +10,7 @@ import (
 	order_entity "products-crud/domain/entity/order_entity"
 	orderedItem_entity "products-crud/domain/entity/orderedItem_entity"
 	product_entity "products-crud/domain/entity/product_entity"
+	"products-crud/domain/entity/warehouse_entity"
 
 	"products-crud/infrastructure/persistences/db"
 
@@ -110,5 +111,6 @@ func (p *Persistence) Automigrate() error {
 	p.ProductDb.AutoMigrate(&customer_entity.Customer{})
 	p.ProductDb.AutoMigrate(&order_entity.Order{})
 	p.ProductDb.AutoMigrate(&orderedItem_entity.OrderedItem{})
+	p.ProductDb.AutoMigrate(&warehouse_entity.Warehouse{})
 	return p.ProductDb.AutoMigrate(&product_entity.Product{})
 }
