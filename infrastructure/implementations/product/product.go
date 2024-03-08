@@ -64,11 +64,10 @@ func (r productRepo) GetProduct(id string) (*entity.Product, error) {
 	var pdt *entity.Product
 
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
-	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%s", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
 		err := r.p.ProductDb.Debug().Unscoped().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
-		// err := r.p.ProductDb.Debug().Where("product_id = ?", id).Take(&pdt).Error
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +76,7 @@ func (r productRepo) GetProduct(id string) (*entity.Product, error) {
 			return nil, errors.New("product not found")
 		}
 
-		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%s", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 	}
 
 	return pdt, nil
@@ -85,7 +84,7 @@ func (r productRepo) GetProduct(id string) (*entity.Product, error) {
 
 func (r productRepo) GetProducts() ([]entity.Product, error) {
 	var pdts []entity.Product
-	err := r.p.ProductDb.Debug().Find(&pdts).Error
+	err := r.p.ProductDb.Debug().Preload("Inventory").Find(&pdts).Error
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +104,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
-	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ProductID), &pdt, redis_entity.RedisExpirationGlobal)
+	err = cacheRepo.SetKey(fmt.Sprintf("%s%s", redis_entity.RedisProductData, pdt.ProductID), &pdt, redis_entity.RedisExpirationGlobal)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +150,7 @@ func (r productRepo) DeleteProduct(id string) (*entity.Product, error) {
 
 	// update cache
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
-	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id))
+	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%s", redis_entity.RedisProductData, id))
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +203,7 @@ func (r productRepo) GetProductTx(tx *gorm.DB, id string) (*entity.Product, erro
 	var pdt *entity.Product
 
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
-	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
+	_ = cacheRepo.GetKey(fmt.Sprintf("%s%s", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
 		err := tx.Debug().Unscoped().Preload("Inventory").Where("product_id = ?", id).Take(&pdt).Error
@@ -217,7 +216,7 @@ func (r productRepo) GetProductTx(tx *gorm.DB, id string) (*entity.Product, erro
 			return nil, errors.New("product not found")
 		}
 
-		_ = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
+		_ = cacheRepo.SetKey(fmt.Sprintf("%s%s", redis_entity.RedisProductData, id), pdt, redis_entity.RedisExpirationGlobal)
 	}
 
 	return pdt, nil

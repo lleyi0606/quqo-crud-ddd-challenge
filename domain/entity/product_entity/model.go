@@ -32,13 +32,13 @@ type Product struct {
 }
 
 type ProductUser struct {
-	ProductID   string                     `gorm:"primary_key" json:"product_id"`
-	Name        string                     `gorm:"size:100;" json:"name"`
-	Description string                     `gorm:"size:255;" json:"description"`
-	Price       float64                    `gorm:"type:numeric;" json:"price"`
-	Status      string                     `gorm:"size:100;" json:"status"`
-	CategoryID  int64                      `gorm:"type:numeric;" json:"category_id"`
-	Inventory   inventory_entity.Inventory `gorm:"foreignkey:ProductID;references:ProductID" json:"inventory"`
+	ProductID   string                         `json:"product_id"`
+	Name        string                         ` json:"name"`
+	Description string                         ` json:"description"`
+	Price       float64                        `json:"price"`
+	Status      string                         ` json:"status"`
+	CategoryID  int64                          `json:"category_id"`
+	Inventory   inventory_entity.InventoryUser ` json:"inventory"`
 }
 
 type ProductSearch struct {

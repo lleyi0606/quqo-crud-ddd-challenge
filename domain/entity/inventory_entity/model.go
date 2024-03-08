@@ -9,6 +9,11 @@ type Inventory struct {
 	Stock       int    `gorm:"type:numeric;" json:"stock"`
 }
 
+type InventoryUser struct {
+	WarehouseID int64 `gorm:"type:numeric" json:"warehouse_id"`
+	Stock       int   `gorm:"type:numeric;" json:"stock"`
+}
+
 type InventoryAlgolia struct {
 	Inventory
 	ObjectID string `json:"object_id"`
