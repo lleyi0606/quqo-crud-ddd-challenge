@@ -63,7 +63,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
 	var pdt *entity.Product
 
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {
@@ -104,7 +104,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 	}
 
 	// update cache
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, pdt.ProductID), &pdt, redis_entity.RedisExpirationGlobal)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	}
 
 	// update cache
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id))
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, q
 func (r productRepo) GetProductTx(tx *gorm.DB, id uint64) (*entity.Product, error) {
 	var pdt *entity.Product
 
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisProductData, id), &pdt)
 
 	if pdt == nil {

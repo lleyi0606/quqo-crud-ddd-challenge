@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	entity "products-crud/domain/entity/inventory_entity"
 	loggerentity "products-crud/domain/entity/logger_entity"
 	"products-crud/domain/entity/redis_entity"
@@ -39,7 +40,7 @@ func (r inventoryRepo) AddInventory(ivt *entity.Inventory) (*entity.Inventory, e
 func (r inventoryRepo) GetInventory(id uint64) (*entity.Inventory, error) {
 	var ivt *entity.Inventory
 
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id), &ivt)
 
 	if ivt == nil {
@@ -117,7 +118,7 @@ func (r inventoryRepo) UpdateInventory(ivt *entity.Inventory) (*entity.Inventory
 	}
 
 	// update cache
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err = cacheRepo.SetKey(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, ivt.ProductID), &ivt, redis_entity.RedisExpirationGlobal)
 	if err != nil {
 		return nil, err
@@ -139,7 +140,7 @@ func (r inventoryRepo) UpdateInventoryTx(tx *gorm.DB, ivt *entity.Inventory) (*e
 	}
 
 	// update cache
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 
 	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisProductData, ivt.ProductID))
 	if err != nil {
@@ -160,7 +161,7 @@ func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
 	}
 
 	// update cache
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisInventoryData, id))
 	if err != nil {
 		return nil, err

@@ -33,7 +33,8 @@ type HoneycombRepo struct {
 func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo) *HoneycombRepo {
 
 	// Start a new span
-	tracer := otel.Tracer("") // honeycomb.io
+	// tracer := otel.Tracer("") // honeycomb.io
+	tracer := otel.GetTracerProvider().Tracer("")
 
 	// Retrieve existing context or use the request context
 	ctx, ctxFound := c.Get("otel-context")
@@ -50,16 +51,6 @@ func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerenti
 		trace.WithAttributes(
 			attribute.String("Description", info.Description),
 		))
-
-	// Create a copy of the context and reassign to c
-	// newContext := c.Copy()
-	// c = newContext
-	// c.Set("otel-context", context)
-
-	// defer func() {
-	// 	log.Print("span ended ", info.Path+info.FunctionName)
-	// 	span.End()
-	// }()
 
 	return &HoneycombRepo{p, c, span, context, info}
 }

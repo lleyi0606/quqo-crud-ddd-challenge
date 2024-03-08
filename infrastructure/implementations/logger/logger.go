@@ -78,11 +78,6 @@ func NewLoggerRepositories(p *base.Persistence, c *gin.Context, info loggerentit
 		}
 	}
 
-	// defer func() {
-	// 	log.Print("span ended ", info.Path+info.FunctionName)
-	// 	hcRepo.Span.End()
-	// }()
-
 	loggerR := loggerRepo{
 		p:       p,
 		c:       c,

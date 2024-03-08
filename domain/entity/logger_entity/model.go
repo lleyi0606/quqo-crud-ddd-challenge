@@ -1,12 +1,12 @@
 package loggerentity
 
 import (
-	"go.opentelemetry.io/otel/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 )
 
 type Logger struct {
-	HoneycombTracer trace.Tracer
+	HoneycombTracer *sdktrace.TracerProvider
 	ZapLogger       *zap.Logger
 }
 

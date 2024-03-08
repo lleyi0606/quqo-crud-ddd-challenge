@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/authorization_repository"
 	"products-crud/infrastructure/implementations/cache"
@@ -66,7 +67,7 @@ func (a authorizationRepo) AddTokenToBlacklist(tokenString string) error {
 		RevokedByID: "TEMP_DUMMY",  // Optional: ID of the user who revoked the token
 	}
 
-	cacheRepo := cache.NewCacheRepository(a.p, "redis")
+	cacheRepo := cache.NewCacheRepository(a.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err := cacheRepo.SetKey(fmt.Sprintf("%s%s", redis_entity.RedisJWTData, strings.TrimPrefix(tokenString, "Bearer ")), blacklistedToken, redis_entity.RedisExpirationJwt)
 
 	return err
@@ -75,7 +76,7 @@ func (a authorizationRepo) AddTokenToBlacklist(tokenString string) error {
 func (a authorizationRepo) IsTokenInBlacklist(tokenString string) (bool, error) {
 
 	var token *redis_entity.BlacklistedToken
-	cacheRepo := cache.NewCacheRepository(a.p, "redis")
+	cacheRepo := cache.NewCacheRepository(a.p, os.Getenv("CACHE_TECHNOLOGY"))
 	err := cacheRepo.GetKey(fmt.Sprintf("%s%s", redis_entity.RedisJWTData, tokenString), &token)
 
 	if token == nil {

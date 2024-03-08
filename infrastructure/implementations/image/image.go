@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	entity "products-crud/domain/entity/image_entity"
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/image_repository"
@@ -65,7 +66,7 @@ func (r imageRepo) AddImage(img *entity.ImageInput) (*entity.Image, error) {
 func (r imageRepo) GetImage(id uint64) ([]entity.Image, error) {
 	var img []entity.Image
 
-	cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	_ = cacheRepo.GetKey(fmt.Sprintf("%s%d", redis_entity.RedisImageData, id), &img)
 
 	if img == nil {
@@ -103,7 +104,7 @@ func (r imageRepo) DeleteImage(id uint64) error {
 	}
 
 	// update cache
-	// cacheRepo := cache.NewCacheRepository(r.p, "redis")
+	// cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
 	// err = cacheRepo.DeleteRecord(fmt.Sprintf("%s%d", redis_entity.RedisImageData, id))
 	// if err != nil {
 	// 	return err
