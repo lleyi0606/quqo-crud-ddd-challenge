@@ -58,7 +58,7 @@ func (o opensearchRepo) AddProduct(p *entity.Product) error {
 	return nil
 }
 
-func (o opensearchRepo) DeleteProduct(id uint64) error {
+func (o opensearchRepo) DeleteProduct(id string) error {
 
 	delete := opensearchapi.DeleteRequest{
 		Index:      opensearch_entity.OpenSearchProductsIndex,
@@ -76,7 +76,7 @@ func (o opensearchRepo) DeleteProduct(id uint64) error {
 	return nil
 }
 
-func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
+func (o opensearchRepo) SearchData(str string) ([]map[string]interface{}, error) {
 	log.Print("keyword: ", str)
 	// Search for the document.
 	content := fmt.Sprintf(`{
@@ -168,7 +168,7 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 
 	// Check if hits list is empty and return an empty array
 	if len(hitsList) == 0 {
-		return []entity.Product{}, nil
+		return nil, nil
 	}
 
 	// Iterate through hits and extract products
@@ -199,7 +199,8 @@ func (o opensearchRepo) SearchProducts(str string) ([]entity.Product, error) {
 		products = append(products, product)
 	}
 
-	return products, nil
+	// return products, nil
+	return nil, nil
 }
 
 func NewOpensearchRepository(p *base.Persistence) search_repository.SearchRepository {

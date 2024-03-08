@@ -11,7 +11,6 @@ import (
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,6 +58,9 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 		return
 	}
 
+	pdt.ProductID = entity.GenerateProductID()
+	log.Print("product id is ", pdt.ProductID)
+
 	logger.Info("add product in handlers", map[string]interface{}{"input": pdt})
 
 	p.p_repo = application.NewProductApplication(p.Persistence, c)
@@ -85,7 +87,7 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 	var products []entity.Product
 	var err error
 
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	products, err = p.p_repo.GetProducts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -112,15 +114,15 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract product_id from the URL parameter
-	productIDStr := c.Param("id")
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id GetProduct", ""))
-		return
-	}
+	productID := c.Param("id")
+	// productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id GetProduct", ""))
+	// 	return
+	// }
 
 	// Call the service to get a single product by ID
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	product, err := p.p_repo.GetProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -144,14 +146,9 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	productIDStr := c.Param("id")
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id UpdateProduct", ""))
-		return
-	}
+	productID := c.Param("id")
 
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	pdt, _ := p.p_repo.GetProduct(productID)
 
 	if err := c.ShouldBindJSON(&pdt); err != nil {
@@ -186,15 +183,15 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract product_id from the URL parameter
-	productIDStr := c.Param("id")
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id DeleteProduct", ""))
-		return
-	}
+	productID := c.Param("id")
+	// productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product_id DeleteProduct", ""))
+	// 	return
+	// }
 
 	// Call the service to get a single product by ID
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	product, err := p.p_repo.DeleteProduct(productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -217,14 +214,24 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
+	info := loggerentity.FunctionInfo{
+		FunctionName: "SearchProducts",
+		Path:         "/infrastructure/handlers/",
+		Description:  "Gets query keyword for search",
+		Body:         nil,
+	}
+	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
+
 	keyword := c.Query("name")
 
 	var products []entity.Product
 	var err error
 
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	products, err = p.p_repo.SearchProducts(keyword)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"query": keyword})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
@@ -252,7 +259,7 @@ func (p *ProductHandler) AddProducts(c *gin.Context) {
 		return
 	}
 
-	p.p_repo = application.NewProductApplication(p.Persistence, nil)
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	for _, pdt := range pdts {
 		_, err := p.p_repo.AddProduct(&pdt)
 		if err != nil {

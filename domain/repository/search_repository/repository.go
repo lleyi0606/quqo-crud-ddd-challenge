@@ -6,7 +6,7 @@ import (
 
 type SearchRepository interface {
 	AddProduct(*entity.Product) error
-	SearchProducts(string) ([]entity.Product, error)
-	DeleteProduct(uint64) error
+	SearchData(string) ([]map[string]interface{}, error)
+	DeleteProduct(string) error
 	// UpdateProduct(*entity.Product) error
 }

@@ -1,6 +1,8 @@
 package application
 
 import (
+	"encoding/json"
+	"log"
 	"os"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
 	loggerentity "products-crud/domain/entity/logger_entity"
@@ -38,6 +40,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 	repoProduct := product.NewProductRepository(u.p, u.c)
 
 	i := &inventory_entity.Inventory{
+		ProductID:   pdt.ProductID,
 		WarehouseID: pdt.WarehouseID,
 		Stock:       pdt.Stock,
 	}
@@ -62,7 +65,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 	return repoProduct.AddProduct(p)
 }
 
-func (u *productApp) GetProduct(pdtId uint64) (*entity.Product, error) {
+func (u *productApp) GetProduct(pdtId string) (*entity.Product, error) {
 	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.GetProduct(pdtId)
 }
@@ -77,15 +80,59 @@ func (u *productApp) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 	return repoProduct.UpdateProduct(pdt)
 }
 
-func (u *productApp) DeleteProduct(pdtId uint64) (*entity.Product, error) {
+func (u *productApp) DeleteProduct(pdtId string) (*entity.Product, error) {
 	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.DeleteProduct(pdtId)
 }
 
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
-	// repoProduct := product.NewProductRepository(u.p, nil)
-	// return repoProduct.SearchProducts(str)
 	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
-	repoSearch := search.NewSearchRepository(u.p, searchTechnology)
-	return repoSearch.SearchProducts(str)
+	repoSearch := search.NewSearchRepository(u.p, u.c, searchTechnology)
+	info := loggerentity.FunctionInfo{
+		FunctionName: "SearchProducts",
+		Path:         "/application/",
+		Description:  "Gets ID from search tool and retrieve full data",
+		Body:         nil,
+	}
+	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	defer endFunc()
+
+	resSearch, err := repoSearch.SearchData(str)
+	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{})
+		return nil, err
+	}
+
+	repoProduct := product.NewProductRepository(u.p, u.c)
+	var products []entity.Product
+
+	for _, hit := range resSearch {
+		// Each hit is a JSON representation of a Product
+		jsonBytes, err := json.Marshal(hit)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Print("hit found: ", jsonBytes)
+
+		// Unmarshal the JSON data into a Product struct
+		var pdt entity.ProductSearch
+		if err := json.Unmarshal(jsonBytes, &pdt); err != nil {
+			logger.Error(err.Error()+"location1", map[string]interface{}{"data": pdt})
+			return nil, err
+		}
+
+		log.Print("pdt search is ", pdt)
+
+		product, err := repoProduct.GetProduct(pdt.ProductID)
+		if err != nil {
+			logger.Error(err.Error()+"location2", map[string]interface{}{"data": product})
+			return nil, err
+		}
+
+		// Append the unmarshaled product to the result slice
+		products = append(products, *product)
+	}
+
+	return products, nil
 }

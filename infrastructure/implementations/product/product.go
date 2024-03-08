@@ -49,7 +49,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 
 	// add to search repo
 	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
-	searchRepo := search.NewSearchRepository(r.p, searchTechnology)
+	searchRepo := search.NewSearchRepository(r.p, r.c, searchTechnology)
 	err := searchRepo.AddProduct(pdt)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (r productRepo) AddProduct(pdt *entity.Product) (*entity.Product, error) {
 	return pdt, nil
 }
 
-func (r productRepo) GetProduct(id uint64) (*entity.Product, error) {
+func (r productRepo) GetProduct(id string) (*entity.Product, error) {
 	var pdt *entity.Product
 
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
@@ -121,7 +121,7 @@ func (r productRepo) UpdateProduct(pdt *entity.Product) (*entity.Product, error)
 	return pdt, nil
 }
 
-func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
+func (r productRepo) DeleteProduct(id string) (*entity.Product, error) {
 	var pdt entity.Product
 	res := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&pdt)
 	if res.Error != nil {
@@ -143,7 +143,7 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 
 	// search repo
 	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
-	searchRepo := search.NewSearchRepository(r.p, searchTechnology)
+	searchRepo := search.NewSearchRepository(r.p, r.c, searchTechnology)
 	err := searchRepo.DeleteProduct(id)
 	if err != nil {
 		return nil, err
@@ -159,19 +159,19 @@ func (r productRepo) DeleteProduct(id uint64) (*entity.Product, error) {
 	return &pdt, nil
 }
 
-func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
+// func (r productRepo) SearchProducts(str string) ([]entity.Product, error) {
 
-	// new search repo
-	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
-	searchRepo := search.NewSearchRepository(r.p, searchTechnology)
-	pdts, err := searchRepo.SearchProducts(str)
-	if err != nil {
-		return nil, err
-	}
-	return pdts, nil
-}
+// 	// new search repo
+// 	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
+// 	searchRepo := search.NewSearchRepository(r.p, searchTechnology)
+// 	pdts, err := searchRepo.SearchProducts(str)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return pdts, nil
+// }
 
-func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float64, float64, error) {
+func (r productRepo) CalculateProductPriceByQuantity(id string, qty int) (float64, float64, error) {
 	pdt, err := r.GetProduct(id)
 	if err != nil {
 		return 0, 0, err
@@ -180,7 +180,7 @@ func (r productRepo) CalculateProductPriceByQuantity(id uint64, qty int) (float6
 	return pdt.Price, pdt.Price * float64(qty), nil
 }
 
-func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, qty int) (float64, float64, error) {
+func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id string, qty int) (float64, float64, error) {
 
 	info := loggerentity.FunctionInfo{
 		FunctionName: "CalculateProductPriceByQuantityTx",
@@ -200,7 +200,7 @@ func (r productRepo) CalculateProductPriceByQuantityTx(tx *gorm.DB, id uint64, q
 	return pdt.Price, pdt.Price * float64(qty), nil
 }
 
-func (r productRepo) GetProductTx(tx *gorm.DB, id uint64) (*entity.Product, error) {
+func (r productRepo) GetProductTx(tx *gorm.DB, id string) (*entity.Product, error) {
 	var pdt *entity.Product
 
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))

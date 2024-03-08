@@ -8,7 +8,6 @@ import (
 	entity "products-crud/domain/entity/inventory_entity"
 	repository "products-crud/domain/repository/inventory_respository"
 	base "products-crud/infrastructure/persistences"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,16 +39,16 @@ func (p *InventoryHandler) GetInventory(c *gin.Context) {
 
 	// Extract product ID from the URL parameter
 	productIDStr := c.Param("id")
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID GetInventory", ""))
+	// productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID GetInventory", ""))
 
-		return
-	}
+	// 	return
+	// }
 
 	// Call the service to get a single product by ID
 	p.p_repo = application.NewInventoryApplication(p.Persistence)
-	product, err := p.p_repo.GetInventory(productID)
+	product, err := p.p_repo.GetInventory(productIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
@@ -74,11 +73,11 @@ func (p *InventoryHandler) UpdateStock(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	productIDStr := c.Param("id")
-	productID, err := strconv.ParseUint(productIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID UpdateStock", ""))
-		return
-	}
+	// productID, err := strconv.ParseUint(productIDStr, 10, 64)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid product ID UpdateStock", ""))
+	// 	return
+	// }
 
 	var ivt entity.InventoryStockOnly
 
@@ -89,7 +88,7 @@ func (p *InventoryHandler) UpdateStock(c *gin.Context) {
 		return
 	}
 
-	newProduct, err := p.p_repo.UpdateStock(productID, &ivt)
+	newProduct, err := p.p_repo.UpdateStock(productIDStr, &ivt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return

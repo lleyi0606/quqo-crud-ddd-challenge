@@ -37,7 +37,7 @@ func (r inventoryRepo) AddInventory(ivt *entity.Inventory) (*entity.Inventory, e
 	return ivt, nil
 }
 
-func (r inventoryRepo) GetInventory(id uint64) (*entity.Inventory, error) {
+func (r inventoryRepo) GetInventory(id string) (*entity.Inventory, error) {
 	var ivt *entity.Inventory
 
 	cacheRepo := cache.NewCacheRepository(r.p, os.Getenv("CACHE_TECHNOLOGY"))
@@ -60,7 +60,7 @@ func (r inventoryRepo) GetInventory(id uint64) (*entity.Inventory, error) {
 	return ivt, nil
 }
 
-func (r inventoryRepo) GetInventoryTx(tx *gorm.DB, id uint64) (*entity.Inventory, error) {
+func (r inventoryRepo) GetInventoryTx(tx *gorm.DB, id string) (*entity.Inventory, error) {
 	var ivt *entity.Inventory
 
 	if tx == nil {
@@ -150,7 +150,7 @@ func (r inventoryRepo) UpdateInventoryTx(tx *gorm.DB, ivt *entity.Inventory) (*e
 	return ivt, nil
 }
 
-func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
+func (r inventoryRepo) DeleteInventory(id string) (*entity.Inventory, error) {
 	var ivt entity.Inventory
 	err := r.p.ProductDb.Debug().Where("product_id = ?", id).Delete(&ivt).Error
 	if err != nil {
@@ -170,7 +170,7 @@ func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
 	return &ivt, nil
 }
 
-// func (r inventoryRepo) HasSufficientStock(id uint64, stock int) error {
+// func (r inventoryRepo) HasSufficientStock(id string, stock int) error {
 // 	ivt, err := r.GetInventory(id)
 // 	if err != nil {
 // 		return err
@@ -181,7 +181,7 @@ func (r inventoryRepo) DeleteInventory(id uint64) (*entity.Inventory, error) {
 // 	return nil
 // }
 
-func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
+func (r inventoryRepo) DecreaseStock(id string, qty int) error {
 	ivt, err := r.GetInventory(id)
 	if err != nil {
 		return err
@@ -197,7 +197,7 @@ func (r inventoryRepo) DecreaseStock(id uint64, qty int) error {
 	return err
 }
 
-func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id uint64, qty int) error {
+func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id string, qty int) error {
 
 	info := loggerentity.FunctionInfo{
 		FunctionName: "DecreaseStockTx",

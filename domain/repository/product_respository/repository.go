@@ -8,21 +8,21 @@ import (
 
 type ProductRepository interface {
 	AddProduct(*entity.Product) (*entity.Product, error)
-	GetProduct(uint64) (*entity.Product, error)
+	GetProduct(string) (*entity.Product, error)
 	GetProducts() ([]entity.Product, error)
 	UpdateProduct(*entity.Product) (*entity.Product, error)
-	DeleteProduct(uint64) (*entity.Product, error)
-	SearchProducts(string) ([]entity.Product, error)
-	CalculateProductPriceByQuantity(uint64, int) (float64, float64, error)
-	CalculateProductPriceByQuantityTx(*gorm.DB, uint64, int) (float64, float64, error)
-	// GetProductsByInventory(uint64) ([]entity.Product, error)
+	DeleteProduct(string) (*entity.Product, error)
+	// SearchProducts(string) ([]entity.Product, error)
+	CalculateProductPriceByQuantity(string, int) (float64, float64, error)
+	CalculateProductPriceByQuantityTx(*gorm.DB, string, int) (float64, float64, error)
+	// GetProductsByInventory(string) ([]entity.Product, error)
 }
 
 type ProductHandlerRepository interface {
 	AddProduct(*entity.ProductWithStockAndWarehouse) (*entity.Product, error)
-	GetProduct(uint64) (*entity.Product, error)
+	GetProduct(string) (*entity.Product, error)
 	GetProducts() ([]entity.Product, error)
 	UpdateProduct(*entity.Product) (*entity.Product, error)
-	DeleteProduct(uint64) (*entity.Product, error)
+	DeleteProduct(string) (*entity.Product, error)
 	SearchProducts(string) ([]entity.Product, error)
 }

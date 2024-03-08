@@ -6,6 +6,8 @@ import (
 
 	"products-crud/infrastructure/implementations/search/opensearch"
 	base "products-crud/infrastructure/persistences"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -13,13 +15,13 @@ const (
 	OpenSearch = "opensearch"
 )
 
-func NewSearchRepository(p *base.Persistence, provider string) search_repository.SearchRepository {
+func NewSearchRepository(p *base.Persistence, c *gin.Context, provider string) search_repository.SearchRepository {
 	switch provider {
 	case Algolia:
-		return algolia.NewAlgoliaRepository(p)
+		return algolia.NewAlgoliaRepository(p, c)
 	case OpenSearch:
 		return opensearch.NewOpensearchRepository(p)
 	default:
-		return algolia.NewAlgoliaRepository(p)
+		return algolia.NewAlgoliaRepository(p, c)
 	}
 }

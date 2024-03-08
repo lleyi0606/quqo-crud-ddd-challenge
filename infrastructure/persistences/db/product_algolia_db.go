@@ -7,7 +7,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 )
 
-func NewProductAlgoliaDB() (*search.Index, *search.Index, error) {
+func NewProductSearchDB() (*search.Index, *search.Index, error) {
 
 	app_id := config.Configuration.GetString("algolia.dev.id")
 	api_key := config.Configuration.GetString("algolia.dev.key")
