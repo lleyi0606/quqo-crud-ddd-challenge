@@ -14,6 +14,7 @@ func ProductRoutes(r *gin.RouterGroup, p *base.Persistence) {
 	r.POST("/products", productHandler.AddProduct)
 	r.POST("/products/all", productHandler.AddProducts)
 	r.GET("/products", productHandler.GetProducts)
+	r.GET("/user/products", productHandler.GetProductsUser)
 	r.GET("/products/:id", productHandler.GetProduct)
 	r.PUT("/products/:id", productHandler.UpdateProduct)
 	r.DELETE("/products/:id", productHandler.DeleteProduct)

@@ -100,6 +100,33 @@ func (p *ProductHandler) GetProducts(c *gin.Context) {
 	))
 }
 
+// @Summary Retrieve all products for users
+// @Description Retrieve all products from the database
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Success 200 {object} response_entity.Response "Product getted"
+// @Failure 500 {object} response_entity.Response "Application GetProducts error"
+// @Router /products [get]
+func (p *ProductHandler) GetProductsUser(c *gin.Context) {
+	responseContextData := response_entity.ResponseContext{Ctx: c}
+
+	var products []entity.ProductUser
+	var err error
+
+	p.p_repo = application.NewProductApplication(p.Persistence, c)
+	products, err = p.p_repo.GetProductsUser()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
+		return
+	}
+	c.JSON(http.StatusOK, responseContextData.ResponseData(response_entity.StatusSuccess, "Get products.",
+		map[string]interface{}{
+			"result": products,
+		},
+	))
+}
+
 // @Summary Retrieve a product
 // @Description Retrieve a product from the database by ID
 // @Tags Product

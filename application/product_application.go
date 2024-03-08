@@ -75,6 +75,32 @@ func (u *productApp) GetProducts() ([]entity.Product, error) {
 	return repoProduct.GetProducts()
 }
 
+func (u *productApp) GetProductsUser() ([]entity.ProductUser, error) {
+	repoProduct := product.NewProductRepository(u.p, nil)
+	products, err := repoProduct.GetProducts()
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal each Product to JSON and then unmarshal into ProductUser
+	var productsUser []entity.ProductUser
+	for _, p := range products {
+		jsonBytes, err := json.Marshal(p)
+		if err != nil {
+			return nil, err
+		}
+
+		var productUser entity.ProductUser
+		if err := json.Unmarshal(jsonBytes, &productUser); err != nil {
+			return nil, err
+		}
+
+		productsUser = append(productsUser, productUser)
+	}
+
+	return productsUser, nil
+}
+
 func (u *productApp) UpdateProduct(pdt *entity.Product) (*entity.Product, error) {
 	repoProduct := product.NewProductRepository(u.p, nil)
 	return repoProduct.UpdateProduct(pdt)
