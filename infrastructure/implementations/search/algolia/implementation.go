@@ -2,10 +2,8 @@ package algolia
 
 import (
 	"log"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/repository/search_repository"
-	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
@@ -41,19 +39,19 @@ func (a algoliaRepo) DeleteProduct(id string) error {
 }
 
 func (a algoliaRepo) SearchData(str string) ([]map[string]interface{}, error) {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "SearchProducts",
-		Path:         "/infrastructure/handlers/SearchProducts",
-		Description:  "Gets query keyword for search",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(a.p, a.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "SearchProducts",
+	// 	Path:         "/infrastructure/handlers/SearchProducts",
+	// 	Description:  "Gets query keyword for search",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(a.p, a.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	res, err := a.p.ProductSearchDb.Search(str, opt.AttributesToRetrieve("*"))
 
 	if err != nil {
-		logger.Error(err.Error(), map[string]interface{}{"data": str})
+		// logger.Error(err.Error(), map[string]interface{}{"data": str})
 		return nil, err
 	}
 

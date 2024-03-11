@@ -6,10 +6,9 @@ import (
 	"products-crud/application"
 	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
-	"products-crud/infrastructure/implementations/logger"
+	loggerOpt "products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -39,15 +38,19 @@ func NewProductController(p *base.Persistence) *ProductHandler {
 // @Router /products [post]
 func (p *ProductHandler) AddProduct(c *gin.Context) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "AddProduct",
-		Path:         "infrastructure/handlers/",
-		Description:  "Handles JSON input of AddProduct",
-		Body:         nil,
-	}
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "AddProduct",
+	// 	Path:         "infrastructure/handlers/",
+	// 	Description:  "Handles JSON input of AddProduct",
+	// 	Body:         nil,
+	// }
 
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	defer endFunc()
+	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
+
+	logger := p.Persistence.Logger
+	logger.Start(c, "infrastructure/handlers/AddProduct", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer p.Persistence.Logger.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -241,14 +244,14 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "SearchProducts",
-		Path:         "/infrastructure/handlers/",
-		Description:  "Gets query keyword for search",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "SearchProducts",
+	// 	Path:         "/infrastructure/handlers/",
+	// 	Description:  "Gets query keyword for search",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	keyword := c.Query("name")
 
@@ -258,7 +261,7 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	p.p_repo = application.NewProductApplication(p.Persistence, c)
 	products, err = p.p_repo.SearchProducts(keyword)
 	if err != nil {
-		logger.Error(err.Error(), map[string]interface{}{"query": keyword})
+		// logger.Error(err.Error(), map[string]interface{}{"query": keyword})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}

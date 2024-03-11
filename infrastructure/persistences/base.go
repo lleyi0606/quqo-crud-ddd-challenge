@@ -6,12 +6,12 @@ import (
 	customer_entity "products-crud/domain/entity/customer_entity"
 	image_entity "products-crud/domain/entity/image_entity"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	order_entity "products-crud/domain/entity/order_entity"
 	orderedItem_entity "products-crud/domain/entity/orderedItem_entity"
 	product_entity "products-crud/domain/entity/product_entity"
 	"products-crud/domain/entity/warehouse_entity"
 
+	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/persistences/db"
 
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ type Persistence struct {
 	InventoryAlgoliaDb *search.Index
 	SearchOpenSearchDb *opensearch.Client
 	ImageSupabaseDB    *storage_go.Client
-	Logger             *loggerentity.Logger
+	Logger             *logger.LoggerRepo
 }
 
 func NewPersistence() (*Persistence, error) {

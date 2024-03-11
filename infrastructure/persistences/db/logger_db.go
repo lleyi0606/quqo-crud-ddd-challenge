@@ -1,11 +1,9 @@
 package db
 
 import (
-	loggerentity "products-crud/domain/entity/logger_entity"
+	"products-crud/infrastructure/implementations/logger"
 
-	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.uber.org/zap"
 )
 
 // func newConsoleExporter() (sdktrace.SpanExporter, error) {
@@ -38,33 +36,37 @@ func newTraceProvider() *sdktrace.TracerProvider {
 	)
 }
 
-func NewLoggerDB() (*loggerentity.Logger, error) {
+func NewLoggerDB() (*logger.LoggerRepo, error) {
 
-	// honeycomb for tracing
-	// tracer := otel.Tracer("backend") // honeycomb.io
-	tp := newTraceProvider()
+	logger := logger.NewLoggerRepositories([]string{"honeycomb", "zap"})
 
-	// Handle shutdown properly so nothing leaks.
-	// defer func() { _ = tp.Shutdown(context.Background()) }()
+	return logger, nil
 
-	otel.SetTracerProvider(tp)
-	// if tracePovider == nil {
-	// 	zap.S().Errorw("Tracer provider initialise error")
-	// 	return nil, errors.New("error tracer connection")
-	// }
+	/*
+		// honeycomb for tracing
+		// tracer := otel.Tracer("backend") // honeycomb.io
+		tp := newTraceProvider()
 
-	// zap for logging
-	zapLogger, _ := zap.NewProduction()
-	defer zapLogger.Sync()
+		// Handle shutdown properly so nothing leaks.
+		// defer func() { _ = tp.Shutdown(context.Background()) }()
 
-	undo := zap.ReplaceGlobals(zapLogger)
-	defer undo()
+		otel.SetTracerProvider(tp)
+		// if tracePovider == nil {
+		// 	zap.S().Errorw("Tracer provider initialise error")
+		// 	return nil, errors.New("error tracer connection")
+		// }
 
-	logger := loggerentity.Logger{
-		HoneycombTracer: tp,
-		ZapLogger:       zapLogger,
-	}
+		// zap for logging
+		zapLogger, _ := zap.NewProduction()
+		defer zapLogger.Sync()
 
-	return &logger, nil
+		undo := zap.ReplaceGlobals(zapLogger)
+		defer undo()
+
+		// logger := loggerentity.Logger{
+		// 	HoneycombTracer: tp,
+		// 	ZapLogger:       zapLogger,
+		// }
+	*/
 
 }

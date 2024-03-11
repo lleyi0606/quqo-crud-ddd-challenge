@@ -2,11 +2,9 @@ package orderedItem
 
 import (
 	"errors"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/orderedItem_entity"
 	repository "products-crud/domain/repository/orderedItem_repository"
 
-	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -33,17 +31,17 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 
 func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "AddOrderedItemTx",
-		Path:         "infrastructure/implementations/",
-		Description:  "Add ordered item into DB",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "AddOrderedItemTx",
+	// 	Path:         "infrastructure/implementations/",
+	// 	Description:  "Add ordered item into DB",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	if err := tx.Debug().Create(&item).Error; err != nil {
-		logger.Error(err.Error(), map[string]interface{}{})
+		// logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 

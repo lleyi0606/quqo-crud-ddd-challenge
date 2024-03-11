@@ -1,14 +1,13 @@
 package loggerentity
 
-import (
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.uber.org/zap"
-)
+import "products-crud/domain/repository/logger_repository"
 
-type Logger struct {
-	HoneycombTracer *sdktrace.TracerProvider
-	ZapLogger       *zap.Logger
-}
+// type Logger struct {
+// 	HoneycombTracer *sdktrace.TracerProvider
+// 	ZapLogger       *zap.Logger
+// }
+
+type Logger logger_repository.LoggerRepository
 
 type FunctionInfo struct {
 	FunctionName string `gorm:"size:255;"`

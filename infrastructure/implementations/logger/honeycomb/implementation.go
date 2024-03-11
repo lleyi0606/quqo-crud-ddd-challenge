@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	loggerentity "products-crud/domain/entity/logger_entity"
-	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
@@ -16,25 +14,23 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// type HoneycombRepo struct {
-// 	p *base.Persistence
-// 	c *gin.Context
-// 	// s *trace.Span
-// }
-
 type HoneycombRepo struct {
-	p            *base.Persistence
 	c            *gin.Context
 	Span         trace.Span
-	otel_context context.Context
-	info         loggerentity.FunctionInfo
+	Otel_context context.Context
+	// info         loggerentity.FunctionInfo
 }
 
-func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo) *HoneycombRepo {
+func NewHoneycombRepository() *HoneycombRepo {
 
+	return &HoneycombRepo{nil, nil, nil}
+}
+
+func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) func() {
+	log.Print("started in ", functionPath)
 	// Start a new span
-	// tracer := otel.Tracer("") // honeycomb.io
-	tracer := otel.GetTracerProvider().Tracer("")
+	tracer := otel.Tracer("") // honeycomb.io
+	// tracer := otel.GetTracerProvider().Tracer("")
 
 	// Retrieve existing context or use the request context
 	ctx, ctxFound := c.Get("otel-context")
@@ -43,68 +39,23 @@ func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerenti
 		ctx = c.Request.Context()
 		c.Set("otel-context", ctx)
 	} else {
-		log.Println("otel-context FOUND")
+		log.Println("otel-context FOUND", getSpanID(ctx.(context.Context)))
 	}
 
 	// Start a new span with attributes
-	context, span := tracer.Start(ctx.(context.Context), info.Path+info.FunctionName,
+	context, span := tracer.Start(ctx.(context.Context), functionPath,
 		trace.WithAttributes(
-			attribute.String("Description", info.Description),
+			attribute.String("FunctionPath", functionPath),
 		))
 
-	return &HoneycombRepo{p, c, span, context, info}
+	h.c = c
+	h.Span = span
+	h.Otel_context = context
+
+	return func() {
+		span.End()
+	}
 }
-
-// func NewHoneycombRepository(p *base.Persistence, c *gin.Context, info loggerentity.FunctionInfo) *HoneycombRepo {
-// 	_, callerInfo, _, _ := runtime.Caller(3)
-// 	log.Printf("!!! new honeycomb called %s // %s", info.Path+info.FunctionName, callerInfo)
-
-// 	// Start a new span
-// 	tracer := otel.Tracer("") // honeycomb.io
-
-// 	// Retrieve existing context or use the request context
-// 	ctx, ctxFound := c.Get("otel-context")
-// 	if !ctxFound {
-// 		log.Println("otel-context NOT FOUND")
-// 		ctx = c.Request.Context()
-// 		c.Set("otel-context", ctx)
-// 	} else {
-// 		log.Println("otel-context FOUND")
-// 	}
-
-// 	// Check if the callerInfo is different
-// 	storedCaller, callerInfoExists := c.Get("callerInfo")
-// 	if callerInfoExists && storedCaller.(string) == callerInfo {
-// 		log.Println("Reuse otel-context", storedCaller, "...", callerInfo)
-
-// 		// Retrieve the previous context from the stored value
-// 		if prevCtx, prevCtxExists := c.Get("previous-context"); prevCtxExists {
-// 			// Start a new span using the previous context
-// 			_, span := tracer.Start(prevCtx.(context.Context), info.Path+info.FunctionName,
-// 				trace.WithAttributes(
-// 					attribute.String("Description", info.Description),
-// 				))
-// 			c.Set("callerInfo", callerInfo)
-
-// 			return &HoneycombRepo{p, c, span}
-// 		}
-// 	} else {
-// 		log.Println("Store new otel-context", storedCaller, "...", callerInfo)
-
-// 		// Start a new span using the current context
-// 		context, span := tracer.Start(ctx.(context.Context), info.Path+info.FunctionName,
-// 			trace.WithAttributes(
-// 				attribute.String("Description", info.Description),
-// 			))
-// 		c.Set("previous-context", ctx)
-// 		c.Set("otel-context", context)
-// 		c.Set("callerInfo", callerInfo)
-
-// 		return &HoneycombRepo{p, c, span}
-// 	}
-
-// 	return &HoneycombRepo{p, c, nil}
-// }
 
 func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
 
@@ -187,18 +138,29 @@ func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 }
 
 func (l *HoneycombRepo) SetNewOtelContext() {
-	log.Print("otel context set from options")
-	l.c.Set("otel-context", l.otel_context)
+	// log.Print("otel context set from option ", getSpanID(l.Otel_context))
+	l.c.Set("otel-context", l.Otel_context)
 }
 
 func (l *HoneycombRepo) End() {
 	// Set otel-context immediately
-	l.c.Set("otel-context", l.otel_context)
-	log.Print("otel context set in End ", l.info.Path+l.info.FunctionName)
+	// l.c.Set("otel-context", l.otel_context)
+	// log.Print("otel context set in End ", l.info.Path+l.info.FunctionName)
 
 	// Defer a closure that calls l.Span.End()
-	defer func() {
-		log.Print("span ended in End() ", l.info.Path+l.info.FunctionName)
-		l.Span.End()
-	}()
+	// defer func() {
+	// log.Print("span ended in End() ", l.info.Path+l.info.FunctionName)
+	l.Span.End()
+	// }()
+}
+
+func getSpanID(ctx context.Context) trace.SpanID {
+	// Retrieve the span from the context
+	span := trace.SpanFromContext(ctx)
+
+	// Access the span ID from the span
+	spanContext := span.SpanContext()
+	spanID := spanContext.SpanID()
+
+	return spanID
 }

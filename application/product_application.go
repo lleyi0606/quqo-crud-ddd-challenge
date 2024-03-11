@@ -5,11 +5,9 @@ import (
 	"log"
 	"os"
 	inventory_entity "products-crud/domain/entity/inventory_entity"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/product_entity"
 	repository "products-crud/domain/repository/product_respository"
 	"products-crud/infrastructure/implementations/inventory"
-	"products-crud/infrastructure/implementations/logger"
 	"products-crud/infrastructure/implementations/product"
 	"products-crud/infrastructure/implementations/search"
 	base "products-crud/infrastructure/persistences"
@@ -28,14 +26,14 @@ func NewProductApplication(p *base.Persistence, c *gin.Context) repository.Produ
 
 func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*entity.Product, error) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "AddProduct",
-		Path:         "application/",
-		Description:  "Application of AddProduct",
-		Body:         pdt,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "AddProduct",
+	// 	Path:         "application/",
+	// 	Description:  "Application of AddProduct",
+	// 	Body:         pdt,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
 
 	repoProduct := product.NewProductRepository(u.p, u.c)
 
@@ -48,7 +46,7 @@ func (u *productApp) AddProduct(pdt *entity.ProductWithStockAndWarehouse) (*enti
 	repoInventory := inventory.NewInventoryRepository(u.p, nil)
 	ivt, err := repoInventory.AddInventory(i)
 	if err != nil {
-		logger.Error(err.Error(), map[string]interface{}{})
+		// logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 
@@ -114,18 +112,19 @@ func (u *productApp) DeleteProduct(pdtId string) (*entity.Product, error) {
 func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
 	searchTechnology := os.Getenv("SEARCH_TECHNOLOGY")
 	repoSearch := search.NewSearchRepository(u.p, u.c, searchTechnology)
-	info := loggerentity.FunctionInfo{
-		FunctionName: "SearchProducts",
-		Path:         "/application/",
-		Description:  "Gets ID from search tool and retrieve full data",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "SearchProducts",
+	// 	Path:         "/application/",
+	// 	Description:  "Gets ID from search tool and retrieve full data",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	resSearch, err := repoSearch.SearchData(str)
 	if err != nil {
-		logger.Error(err.Error(), map[string]interface{}{})
+		// logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 
@@ -144,7 +143,7 @@ func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
 		// Unmarshal the JSON data into a Product struct
 		var pdt entity.ProductSearch
 		if err := json.Unmarshal(jsonBytes, &pdt); err != nil {
-			logger.Error(err.Error()+"location1", map[string]interface{}{"data": pdt})
+			// logger.Error(err.Error()+"location1", map[string]interface{}{"data": pdt})
 			return nil, err
 		}
 
@@ -152,7 +151,7 @@ func (u *productApp) SearchProducts(str string) ([]entity.Product, error) {
 
 		product, err := repoProduct.GetProduct(pdt.ProductID)
 		if err != nil {
-			logger.Error(err.Error()+"location2", map[string]interface{}{"data": product})
+			// logger.Error(err.Error()+"location2", map[string]interface{}{"data": product})
 			return nil, err
 		}
 

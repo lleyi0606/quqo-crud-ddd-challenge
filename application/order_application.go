@@ -1,7 +1,6 @@
 package application
 
 import (
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
 	orderItem_entity "products-crud/domain/entity/orderedItem_entity"
 
@@ -27,13 +26,13 @@ func NewOrderApplication(p *base.Persistence, c *gin.Context) repository.OrderHa
 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "AddOrder",
-		Path:         "application/",
-		Description:  "Application of add order",
-	}
-	logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "AddOrder",
+	// 	Path:         "application/",
+	// 	Description:  "Application of add order",
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
 
 	tx := u.p.ProductDb.Begin()
 	var errTx error
@@ -46,7 +45,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		} else {
 			errC := tx.Commit().Error
 			if errC != nil {
-				logger.Error(errC.Error(), map[string]interface{}{"data": orderInput})
+				// logger.Error(errC.Error(), map[string]interface{}{"data": orderInput})
 				tx.Rollback()
 			}
 		}
@@ -76,8 +75,8 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 			OrderID:    orderInput.OrderID,
 			ProductID:  orderedItemInput.ProductID,
 			Quantity:   orderedItemInput.Quantity,
-			UnitPrice:  unitPrice,  // You need to set the appropriate value
-			TotalPrice: totalPrice, // You need to set the appropriate value
+			UnitPrice:  unitPrice,
+			TotalPrice: totalPrice,
 		}
 
 		if _, errTx = repoOrderedItem.AddOrderedItemTx(tx, orderedItem); errTx != nil {
@@ -109,18 +108,12 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		return nil, errTx
 	}
 
-	endFunc()
 	return res, nil
 }
 
 func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "GetOrder",
-		Path:         "application/",
-		Description:  "Application of get order",
-	}
-	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	endFunc := u.p.Logger.Start(u.c, "application/GetOrder", map[string]interface{}{}, logger.SetNewOtelContext())
 	defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
@@ -129,12 +122,15 @@ func (u *OrderApp) GetOrder(id uint64) (*entity.Order, error) {
 
 func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "UpdateOrder",
-		Path:         "application/",
-		Description:  "Application of update order",
-	}
-	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "UpdateOrder",
+	// 	Path:         "application/",
+	// 	Description:  "Application of update order",
+	// }
+	// _, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
+
+	endFunc := u.p.Logger.Start(u.c, "application/UpdateOrder", map[string]interface{}{}, logger.SetNewOtelContext())
 	defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
@@ -142,25 +138,25 @@ func (u *OrderApp) UpdateOrder(cat *entity.Order) (*entity.Order, error) {
 }
 
 func (u *OrderApp) DeleteOrder(id uint64) error {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "DeleteOrder",
-		Path:         "application/",
-		Description:  "Application of delete order",
-	}
-	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "DeleteOrder",
+	// 	Path:         "application/",
+	// 	Description:  "Application of delete order",
+	// }
+	// _, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	repoOrder := order.NewOrderRepository(u.p, u.c)
 	return repoOrder.DeleteOrder(id)
 }
 
 func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "CalculateFees",
-		Path:         "application/",
-		Description:  "CalculateFees in Application",
-	}
-	_, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "CalculateFees",
+	// 	Path:         "application/",
+	// 	Description:  "CalculateFees in Application",
+	// }
+	// _, endFunc := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 	return 0.02 * amt, nil
 }

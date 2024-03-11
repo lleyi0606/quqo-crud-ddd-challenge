@@ -6,11 +6,9 @@ import (
 	"log"
 	"os"
 	entity "products-crud/domain/entity/inventory_entity"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	"products-crud/domain/entity/redis_entity"
 	repository "products-crud/domain/repository/inventory_respository"
 	"products-crud/infrastructure/implementations/cache"
-	"products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 
 	"github.com/gin-gonic/gin"
@@ -199,24 +197,24 @@ func (r inventoryRepo) DecreaseStock(id string, qty int) error {
 
 func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id string, qty int) error {
 
-	info := loggerentity.FunctionInfo{
-		FunctionName: "DecreaseStockTx",
-		Path:         "infrastructure/implementations/",
-		Description:  "Decrease stock of a product",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "DecreaseStockTx",
+	// 	Path:         "infrastructure/implementations/",
+	// 	Description:  "Decrease stock of a product",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)
 	if err.Error != nil {
-		logger.Error(err.Error.Error(), map[string]interface{}{})
+		// logger.Error(err.Error.Error(), map[string]interface{}{})
 		return err.Error
 	}
 	if stock < qty {
 		stockErr := fmt.Errorf("insufficient stock for product_id %d", id)
-		logger.Error(err.Error.Error(), map[string]interface{}{})
+		// logger.Error(err.Error.Error(), map[string]interface{}{})
 		return stockErr
 	}
 

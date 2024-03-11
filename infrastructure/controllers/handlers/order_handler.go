@@ -7,10 +7,9 @@ import (
 	"products-crud/application"
 	_ "products-crud/docs"
 	response_entity "products-crud/domain/entity"
-	loggerentity "products-crud/domain/entity/logger_entity"
 	entity "products-crud/domain/entity/order_entity"
 	repository "products-crud/domain/repository/order_repository"
-	"products-crud/infrastructure/implementations/logger"
+	loggerOpt "products-crud/infrastructure/implementations/logger"
 	base "products-crud/infrastructure/persistences"
 	"strconv"
 
@@ -41,14 +40,18 @@ func NewOrderController(p *base.Persistence) *OrderHandler {
 // @Router /orders [post]
 func (p *OrderHandler) AddOrder(c *gin.Context) {
 
-	info := loggerentity.FunctionInfo{
+	/* info := loggerentity.FunctionInfo{
 		FunctionName: "AddOrder",
 		Path:         "infrastructure/handlers/",
 		Description:  "Handles JSON input to add order",
 		Body:         nil,
 	}
 	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	defer endFunc()
+	defer endFunc() */
+
+	logger := p.Persistence.Logger
+	logger.Start(c, "infrastructure/handlers/AddOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer p.Persistence.Logger.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -102,14 +105,20 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application GetOrder error"
 // @Router /orders/{id} [get]
 func (p *OrderHandler) GetOrder(c *gin.Context) {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "GetOrder",
-		Path:         "infrastructure/handlers/",
-		Description:  "Handles JSON input to get order",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "GetOrder",
+	// 	Path:         "infrastructure/handlers/",
+	// 	Description:  "Handles JSON input to get order",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
+
+	logger := p.Persistence.Logger
+	endFunc := logger.Start(c, "infrastructure/handlers/GetOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	// defer p.Persistence.Logger.End()
 	defer endFunc()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
@@ -145,13 +154,17 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
 // @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "UpdateOrder",
-		Path:         "infrastructure/handlers/",
-		Description:  "Handles JSON input to update order",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "UpdateOrder",
+	// 	Path:         "infrastructure/handlers/",
+	// 	Description:  "Handles JSON input to update order",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer endFunc()
+
+	logger := p.Persistence.Logger
+	endFunc := logger.Start(c, "infrastructure/handlers/UpdateOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
 	defer endFunc()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
@@ -177,7 +190,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 
 	cus.OrderID = orderID
 
-	logger.SetContextFromSpan()
+	// logger.SetContextFromSpan()
 	newOrder, err := p.repo.UpdateOrder(cus)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
@@ -197,14 +210,19 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application DeleteOrder error"
 // @Router /orders/{id} [delete]
 func (p *OrderHandler) DeleteOrder(c *gin.Context) {
-	info := loggerentity.FunctionInfo{
-		FunctionName: "DeleteOrder",
-		Path:         "infrastructure/handlers/",
-		Description:  "Handles JSON input to delete order",
-		Body:         nil,
-	}
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
-	defer endFunc()
+	// info := loggerentity.FunctionInfo{
+	// 	FunctionName: "DeleteOrder",
+	// 	Path:         "infrastructure/handlers/",
+	// 	Description:  "Handles JSON input to delete order",
+	// 	Body:         nil,
+	// }
+	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
+	// defer endFunc()
+
+	logger := p.Persistence.Logger
+	logger.Start(c, "infrastructure/handlers/DeleteOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer p.Persistence.Logger.End()
+
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
 	// Extract order_id from the URL parameter
