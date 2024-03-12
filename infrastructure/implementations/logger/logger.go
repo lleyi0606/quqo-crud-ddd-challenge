@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"log"
 	"products-crud/domain/repository/logger_repository"
 	"products-crud/infrastructure/implementations/logger/honeycomb"
 	"products-crud/infrastructure/implementations/logger/zap"
@@ -81,9 +80,12 @@ func (l *LoggerRepo) Debug(msg string, fields map[string]interface{}) {
 	}
 }
 
-func (l *LoggerRepo) Info(msg string, fields map[string]interface{}) {
+func (l *LoggerRepo) Info(msg string, fields map[string]interface{}, options ...Option) {
+	for _, opt := range options {
+		opt(l)
+	}
+
 	for _, logger := range l.loggers {
-		log.Print("logger in Info")
 		logger.Info(msg, fields)
 	}
 }
@@ -111,6 +113,16 @@ func SetNewOtelContext() Option {
 		for _, logger := range c.loggers {
 			if honeycombRepo, ok := logger.(*honeycomb.HoneycombRepo); ok {
 				honeycombRepo.SetNewOtelContext()
+			}
+		}
+	}
+}
+
+func WithSpan(span trace.Span) Option {
+	return func(c *LoggerRepo) {
+		for _, logger := range c.loggers {
+			if honeycombRepo, ok := logger.(*honeycomb.HoneycombRepo); ok {
+				honeycombRepo.UseGivenSpan(span)
 			}
 		}
 	}

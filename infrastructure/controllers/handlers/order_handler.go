@@ -178,7 +178,7 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
-	logger.Info("json input parsed", map[string]interface{}{"json input": order})
+	logger.Info("json input parsed", map[string]interface{}{"json input": order}, loggerOpt.WithSpan(span))
 
 	order.OrderID = orderID
 

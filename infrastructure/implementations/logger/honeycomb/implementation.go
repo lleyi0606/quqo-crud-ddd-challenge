@@ -74,6 +74,7 @@ func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
 func (l *HoneycombRepo) Info(msg string, fields map[string]interface{}) {
 
 	log.Print("!!! info in honeycomb")
+
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
 		log.Println("Error marshaling data to JSON in Info:", err)
@@ -141,6 +142,10 @@ func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 func (l *HoneycombRepo) SetNewOtelContext() {
 	// log.Print("otel context set from option ", getSpanID(l.Otel_context))
 	l.c.Set("otel-context", l.Otel_context)
+}
+
+func (l *HoneycombRepo) UseGivenSpan(span trace.Span) {
+	l.Span = span
 }
 
 func (l *HoneycombRepo) End() {
