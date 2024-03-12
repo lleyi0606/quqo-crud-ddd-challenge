@@ -156,7 +156,7 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 
 	logger := p.Persistence.Logger
-	span := logger.Start(c, "infrastructure/handlers/UpdateOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	span := logger.Start(c, "infrastructure/handlers/UpdateOrder", nil, loggerOpt.SetNewOtelContext())
 	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}

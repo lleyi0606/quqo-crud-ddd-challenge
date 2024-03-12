@@ -22,16 +22,11 @@ func NewOrderRepository(p *base.Persistence, c *gin.Context) repository.OrderRep
 
 func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "AddOrder",
-	// 	Path:         "infrastructure/implementations/",
-	// 	Description:  "Add order into DB",
-	// }
-	// logger, span := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	// defer span.End()
+	span := r.p.Logger.Start(r.c, "infrastructure/implementations/AddOrder", map[string]interface{}{"order": order})
+	defer span.End()
 
 	if err := r.p.ProductDb.Debug().Create(&order).Error; err != nil {
-		// logger.Error(err.Error(), map[string]interface{}{"data": order})
+		r.p.Logger.Error(err.Error(), map[string]interface{}{"data": order})
 		return nil, err
 	}
 
@@ -40,17 +35,11 @@ func (r orderRepo) AddOrder(order *entity.Order) (*entity.Order, error) {
 
 func (r orderRepo) AddOrderTx(tx *gorm.DB, order *entity.Order) (*entity.Order, error) {
 
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "AddOrderTx",
-	// 	Path:         "infrastructure/implementations/",
-	// 	Description:  "Add order into DB",
-	// 	Body:         nil,
-	// }
-	// logger, span := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	// defer span.End()
+	span := r.p.Logger.Start(r.c, "infrastructure/implementations/AddOrderTx", map[string]interface{}{"order": order})
+	defer span.End()
 
 	if err := tx.Debug().Create(&order).Error; err != nil {
-		// logger.Error(err.Error(), map[string]interface{}{"data": order})
+		r.p.Logger.Error(err.Error(), map[string]interface{}{"data": order})
 		return nil, err
 	}
 
@@ -105,23 +94,18 @@ func (r orderRepo) UpdateOrder(order *entity.Order) (*entity.Order, error) {
 
 func (r orderRepo) DeleteOrder(id uint64) error {
 
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "DeleteOrder",
-	// 	Path:         "infrastructure/implementations/",
-	// 	Description:  "Delete order from DB",
-	// }
-	// logger, span := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	// defer span.End()
+	span := r.p.Logger.Start(r.c, "infrastructure/implementations/DeleteOrder", map[string]interface{}{"id": id})
+	defer span.End()
 
 	var order entity.Order
 	res := r.p.ProductDb.Debug().Where("order_id = ?", id).Delete(&order)
 	if res.Error != nil {
-		// logger.Error(res.Error.Error(), map[string]interface{}{"data": order})
+		r.p.Logger.Error(res.Error.Error(), map[string]interface{}{"data": order})
 		return res.Error
 	}
 
 	if res.RowsAffected == 0 {
-		// logger.Error("order not found", map[string]interface{}{"data": order})
+		r.p.Logger.Error("order not found", map[string]interface{}{"data": order})
 		return errors.New("order not found")
 	}
 

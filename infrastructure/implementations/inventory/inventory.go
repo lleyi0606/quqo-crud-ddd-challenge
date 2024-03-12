@@ -197,14 +197,8 @@ func (r inventoryRepo) DecreaseStock(id string, qty int) error {
 
 func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id string, qty int) error {
 
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "DecreaseStockTx",
-	// 	Path:         "infrastructure/implementations/",
-	// 	Description:  "Decrease stock of a product",
-	// 	Body:         nil,
-	// }
-	// logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	// defer endFunc()
+	span := r.p.Logger.Start(r.c, "implementations/DecreaseStockTx", map[string]interface{}{"id": id, "qty": qty})
+	defer span.End()
 
 	var stock int
 	err := tx.Raw("SELECT stock FROM inventories WHERE product_id = ?", id).Scan(&stock)
@@ -213,8 +207,8 @@ func (r inventoryRepo) DecreaseStockTx(tx *gorm.DB, id string, qty int) error {
 		return err.Error
 	}
 	if stock < qty {
-		stockErr := fmt.Errorf("insufficient stock for product_id %d", id)
-		// logger.Error(err.Error.Error(), map[string]interface{}{})
+		stockErr := fmt.Errorf("insufficient stock for product_id %s", id)
+		r.p.Logger.Error(stockErr.Error(), map[string]interface{}{})
 		return stockErr
 	}
 

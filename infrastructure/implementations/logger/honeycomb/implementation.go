@@ -18,7 +18,7 @@ import (
 
 type HoneycombRepo struct {
 	c            *gin.Context
-	Span         trace.Span
+	span         trace.Span
 	otel_context context.Context
 	// info         loggerentity.FunctionInfo
 }
@@ -48,7 +48,7 @@ func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[st
 		))
 
 	h.c = c
-	h.Span = span
+	h.span = span
 	h.otel_context = context
 
 	return span
@@ -63,7 +63,7 @@ func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
 	commonAttributes := getCommonAttributes(l.c)
 	attributes := append([]attribute.KeyValue{attribute.String("level", "debug"),
 		attribute.String("data", string(jsonObj))}, commonAttributes...)
-	l.Span.AddEvent(msg,
+	l.span.AddEvent(msg,
 		trace.WithAttributes(
 			attributes...,
 		))
@@ -77,7 +77,7 @@ func (l *HoneycombRepo) Info(msg string, fields map[string]interface{}) {
 	commonAttributes := getCommonAttributes(l.c)
 	attributes := append([]attribute.KeyValue{attribute.String("level", "info"),
 		attribute.String("data", string(jsonObj))}, commonAttributes...)
-	l.Span.AddEvent(msg,
+	l.span.AddEvent(msg,
 		trace.WithAttributes(
 			attributes...,
 		))
@@ -91,7 +91,7 @@ func (l *HoneycombRepo) Warn(msg string, fields map[string]interface{}) {
 	commonAttributes := getCommonAttributes(l.c)
 	attributes := append([]attribute.KeyValue{attribute.String("level", "warn"),
 		attribute.String("data", string(jsonObj))}, commonAttributes...)
-	l.Span.AddEvent(msg,
+	l.span.AddEvent(msg,
 		trace.WithAttributes(
 			attributes...,
 		))
@@ -106,12 +106,12 @@ func (l *HoneycombRepo) Error(msg string, fields map[string]interface{}) {
 	commonAttributes := getCommonAttributes(l.c)
 	attributes := append([]attribute.KeyValue{attribute.String("level", "error"),
 		attribute.String("data", string(jsonObj))}, commonAttributes...)
-	l.Span.AddEvent(msg,
+	l.span.AddEvent(msg,
 		trace.WithAttributes(
 			attributes...,
 		))
-	l.Span.RecordError(fmt.Errorf("Error: %s", string(jsonObj)))
-	l.Span.SetStatus(codes.Error, msg)
+	l.span.RecordError(fmt.Errorf("Error: %s", string(jsonObj)))
+	l.span.SetStatus(codes.Error, msg)
 }
 
 func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
@@ -125,14 +125,14 @@ func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 	commonAttributes := getCommonAttributes(l.c)
 	attributes := append([]attribute.KeyValue{attribute.String("level", "fatal"),
 		attribute.String("data", string(jsonObj))}, commonAttributes...)
-	l.Span.AddEvent(msg,
+	l.span.AddEvent(msg,
 		trace.WithAttributes(
 			attributes...,
 		))
 
 	// Record an error to make sure it's captured by OpenTelemetry
-	l.Span.RecordError(fmt.Errorf("Fatal error: %s", msg))
-	l.Span.SetStatus(codes.Error, msg)
+	l.span.RecordError(fmt.Errorf("Fatal error: %s", msg))
+	l.span.SetStatus(codes.Error, msg)
 
 	// Terminate the application
 	os.Exit(1)
@@ -143,25 +143,27 @@ func (l *HoneycombRepo) SetNewOtelContext() {
 }
 
 func (l *HoneycombRepo) UseGivenSpan(span trace.Span) {
-	l.Span = span
+	l.span = span
 }
 
 func getCommonAttributes(c *gin.Context) []attribute.KeyValue {
 	// Get caller information (file name and line number)
 	_, file, line, ok := runtime.Caller(3)
+	var fileName string
 	if !ok {
-		file = "unknown"
+		fileName = "unknown"
 		line = 0
 	} else {
 		// Extract only the file name from the full path
 		fileParts := strings.Split(file, "/")
-		file = fileParts[len(fileParts)-1]
+		fileName = fileParts[len(fileParts)-1]
 	}
 
 	attributes := []attribute.KeyValue{
 		attribute.String("IP Address", c.ClientIP()),
 		attribute.String("Environment", os.Getenv("ENV")),
-		attribute.String("CallerFile", file),
+		attribute.String("CallerFile", fileName),
+		attribute.String("FullPath", file),
 		attribute.Int("CallerLine", line),
 	}
 

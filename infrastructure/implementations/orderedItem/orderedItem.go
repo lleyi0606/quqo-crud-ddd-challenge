@@ -31,17 +31,11 @@ func (r orderedItemRepo) AddOrderedItem(item *entity.OrderedItem) (*entity.Order
 
 func (r orderedItemRepo) AddOrderedItemTx(tx *gorm.DB, item *entity.OrderedItem) (*entity.OrderedItem, error) {
 
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "AddOrderedItemTx",
-	// 	Path:         "infrastructure/implementations/",
-	// 	Description:  "Add ordered item into DB",
-	// 	Body:         nil,
-	// }
-	// logger, endFunc := logger.NewLoggerRepositories(r.p, r.c, info, []string{"Honeycomb", "zap"})
-	// defer endFunc()
+	span := r.p.Logger.Start(r.c, "implmentations/AddOrderedItemTx", map[string]interface{}{"item": item})
+	defer span.End()
 
 	if err := tx.Debug().Create(&item).Error; err != nil {
-		// logger.Error(err.Error(), map[string]interface{}{})
+		r.p.Logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 
@@ -53,10 +47,12 @@ func (r orderedItemRepo) GetOrderedItems() ([]entity.OrderedItem, error) {
 
 	err := r.p.ProductDb.Debug().Find(&orderedItem).Error
 	if err != nil {
+		r.p.Logger.Error(err.Error(), map[string]interface{}{})
 		return nil, err
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		r.p.Logger.Error("orderedItem not found", map[string]interface{}{})
 		return nil, errors.New("orderedItem not found")
 	}
 

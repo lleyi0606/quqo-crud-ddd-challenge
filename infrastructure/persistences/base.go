@@ -70,7 +70,7 @@ func NewPersistence() (*Persistence, error) {
 	// Logger
 	logger, errLogger := db.NewLoggerDB()
 	if errLogger != nil {
-		zap.S().Error("HONEYCOMB NOT INITIALIZED", "error", errLogger)
+		zap.S().Error("LOGGER NOT INITIALIZED", "error", errLogger)
 	}
 
 	return &Persistence{

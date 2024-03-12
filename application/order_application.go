@@ -25,14 +25,8 @@ func NewOrderApplication(p *base.Persistence, c *gin.Context) repository.OrderHa
 }
 
 func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error) {
-
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "AddOrder",
-	// 	Path:         "application/",
-	// 	Description:  "Application of add order",
-	// }
-	// logger, span := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	// defer span.End()
+	span := u.p.Logger.Start(u.c, "application/AddOrder", map[string]interface{}{"input": orderInput}, logger.SetNewOtelContext())
+	defer span.End()
 
 	tx := u.p.ProductDb.Begin()
 	var errTx error
@@ -45,7 +39,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 		} else {
 			errC := tx.Commit().Error
 			if errC != nil {
-				// logger.Error(errC.Error(), map[string]interface{}{"data": orderInput})
+				u.p.Logger.Error(errC.Error(), map[string]interface{}{"data": orderInput})
 				tx.Rollback()
 			}
 		}
@@ -79,6 +73,7 @@ func (u *OrderApp) AddOrder(orderInput *entity.OrderInput) (*entity.Order, error
 			TotalPrice: totalPrice,
 		}
 
+		u.p.Logger.SetContextFromSpan(span)
 		if _, errTx = repoOrderedItem.AddOrderedItemTx(tx, orderedItem); errTx != nil {
 			return nil, errTx
 		}
@@ -145,12 +140,7 @@ func (u *OrderApp) DeleteOrder(id uint64) error {
 }
 
 func (u *OrderApp) CalculateFees(amt float64) (float64, error) {
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "CalculateFees",
-	// 	Path:         "application/",
-	// 	Description:  "CalculateFees in Application",
-	// }
-	// _, span := logger.NewLoggerRepositories(u.p, u.c, info, []string{"Honeycomb", "zap"})
-	// defer span.End()
+	span := u.p.Logger.Start(u.c, "application/CalculateFees", map[string]interface{}{"amt": amt})
+	defer span.End()
 	return 0.02 * amt, nil
 }
