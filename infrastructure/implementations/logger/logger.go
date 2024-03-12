@@ -40,8 +40,8 @@ func NewLoggerRepositories(providers []string) *LoggerRepo {
 			hcRepo = honeycomb.NewHoneycombRepository()
 			loggers = append(loggers, hcRepo)
 		default:
-			// hcRepo = honeycomb.NewHoneycombRepository()
-			// loggers = append(loggers, hcRepo)
+			hcRepo = honeycomb.NewHoneycombRepository()
+			loggers = append(loggers, hcRepo)
 		}
 	}
 
@@ -54,14 +54,14 @@ func NewLoggerRepositories(providers []string) *LoggerRepo {
 	}
 }
 
-func (l *LoggerRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}, options ...Option) func() {
+func (l *LoggerRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}, options ...Option) trace.Span {
 
 	l.c = c
 
-	var endFunc func()
+	var span trace.Span
 	for _, logger := range l.loggers {
 		if _, ok := logger.(*honeycomb.HoneycombRepo); ok {
-			endFunc = logger.Start(c, functionPath, fields)
+			span = logger.Start(c, functionPath, fields)
 		} else {
 			logger.Start(c, functionPath, fields)
 		}
@@ -71,7 +71,7 @@ func (l *LoggerRepo) Start(c *gin.Context, functionPath string, fields map[strin
 		opt(l)
 	}
 
-	return endFunc
+	return span
 
 }
 
@@ -82,9 +82,6 @@ func (l *LoggerRepo) Debug(msg string, fields map[string]interface{}) {
 }
 
 func (l *LoggerRepo) Info(msg string, fields map[string]interface{}) {
-
-	log.Print("!!! info called")
-
 	for _, logger := range l.loggers {
 		log.Print("logger in Info")
 		logger.Info(msg, fields)
@@ -92,21 +89,18 @@ func (l *LoggerRepo) Info(msg string, fields map[string]interface{}) {
 }
 
 func (l *LoggerRepo) Warn(msg string, fields map[string]interface{}) {
-
 	for _, logger := range l.loggers {
 		logger.Warn(msg, fields)
 	}
 }
 
 func (l *LoggerRepo) Error(msg string, fields map[string]interface{}) {
-
 	for _, logger := range l.loggers {
 		logger.Error(msg, fields)
 	}
 }
 
 func (l *LoggerRepo) Fatal(msg string, fields map[string]interface{}) {
-
 	for _, logger := range l.loggers {
 		logger.Fatal(msg, fields)
 	}
@@ -119,35 +113,16 @@ func SetNewOtelContext() Option {
 				honeycombRepo.SetNewOtelContext()
 			}
 		}
-		// c.c.Set("otel-context", c.Otel_context)
 	}
 }
 
-func (l *LoggerRepo) SetContextFromSpan() {
-	newCtx := trace.ContextWithSpan(l.c.Request.Context(), l.span)
+func (l *LoggerRepo) SetContextFromSpan(span trace.Span) {
+	newCtx := trace.ContextWithSpan(l.c.Request.Context(), span)
 	l.c.Set("otel-context", newCtx)
 }
 
 func (l *LoggerRepo) End() {
-
 	for _, logger := range l.loggers {
 		logger.End()
 	}
-
-	// l.c.Set("otel-context", l.Otel_context)
-	// l.span.End()
-	// log.Print("otel context set in End()")
-
-	// var ctx context.Context
-	// if storedCtx, exists := l.c.Get("otel-context"); exists {
-	// 	log.Println("otel-context FOUND in End")
-	// 	ctx = storedCtx.(context.Context)
-	// } else {
-	// 	log.Println("otel-context NOT FOUND in End")
-	// 	ctx = l.c.Request.Context()
-	// }
-
-	// span := trace.SpanFromContext(ctx)
-	// defer span.End()
-
 }

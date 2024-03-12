@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -22,8 +23,8 @@ func NewZapRepository() *zapRepo {
 	return &zapRepo{nil, zapLogger}
 }
 
-func (z *zapRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) func() {
-	return func() {}
+func (z *zapRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) trace.Span {
+	return nil
 }
 
 func (l *zapRepo) Debug(msg string, fields map[string]interface{}) {

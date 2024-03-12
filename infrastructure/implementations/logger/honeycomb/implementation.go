@@ -26,7 +26,7 @@ func NewHoneycombRepository() *HoneycombRepo {
 	return &HoneycombRepo{nil, nil, nil}
 }
 
-func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) func() {
+func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) trace.Span {
 	log.Print("started in ", functionPath)
 	// Start a new span
 	tracer := otel.Tracer("") // honeycomb.io
@@ -52,9 +52,10 @@ func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[st
 	h.Span = span
 	h.Otel_context = context
 
-	return func() {
-		span.End()
-	}
+	// return func() {
+	// 	span.End()
+	// }
+	return span
 }
 
 func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {

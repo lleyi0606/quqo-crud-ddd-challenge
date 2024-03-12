@@ -46,8 +46,8 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 		Description:  "Handles JSON input to add order",
 		Body:         nil,
 	}
-	logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	defer endFunc() */
+	logger, span := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	defer span.End() */
 
 	logger := p.Persistence.Logger
 	logger.Start(c, "infrastructure/handlers/AddOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
@@ -72,16 +72,16 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	}
 	log.Print("order json is ", orderJSON)
 
-	cusIDString := c.GetString("userID")
+	orderIDString := c.GetString("userID")
 	// Convert string to int64
-	cusID, err := strconv.ParseUint(cusIDString, 10, 64)
+	orderID, err := strconv.ParseUint(orderIDString, 10, 64)
 	if err != nil {
 		// Handle the error if the conversion fails
 		logger.Error(err.Error(), map[string]interface{}{"error": err})
-		log.Println("Error converting cusIDString to int64:", err)
+		log.Println("Error converting orderIDString to int64:", err)
 	} else {
-		// Now cusID is of type uint64
-		order.CustomerID = cusID
+		// Now orderID is of type uint64
+		order.CustomerID = orderID
 	}
 
 	p.repo = application.NewOrderApplication(p.Persistence, c)
@@ -111,13 +111,13 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 	// 	Description:  "Handles JSON input to get order",
 	// 	Body:         nil,
 	// }
-	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	// defer endFunc()
+	// logger, span := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
+	// defer span.End()
 
 	logger := p.Persistence.Logger
-	endFunc := logger.Start(c, "infrastructure/handlers/GetOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	span := logger.Start(c, "infrastructure/handlers/GetOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
 	// defer p.Persistence.Logger.End()
-	defer endFunc()
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -154,18 +154,10 @@ func (p *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 500 {object} response_entity.Response "Application UpdateOrder error"
 // @Router /orders/{id} [put]
 func (p *OrderHandler) UpdateOrder(c *gin.Context) {
-	// info := loggerentity.FunctionInfo{
-	// 	FunctionName: "UpdateOrder",
-	// 	Path:         "infrastructure/handlers/",
-	// 	Description:  "Handles JSON input to update order",
-	// 	Body:         nil,
-	// }
-	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"}, logger.SetNewOtelContext())
-	// defer endFunc()
 
 	logger := p.Persistence.Logger
-	endFunc := logger.Start(c, "infrastructure/handlers/UpdateOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
-	defer endFunc()
+	span := logger.Start(c, "infrastructure/handlers/UpdateOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -173,26 +165,27 @@ func (p *OrderHandler) UpdateOrder(c *gin.Context) {
 	orderID, err := strconv.ParseUint(orderIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responseContextData.ResponseData(response_entity.StatusFail, "Invalid order_id UpdateOrder", ""))
-		logger.Error(err.Error(), map[string]interface{}{})
+		logger.Error(err.Error(), map[string]interface{}{"id": orderIDStr})
 		return
 	}
+	logger.Info("id input parsed", map[string]interface{}{"id": orderIDStr})
 
 	p.repo = application.NewOrderApplication(p.Persistence, c)
-	cus, _ := p.repo.GetOrder(orderID)
+	order, _ := p.repo.GetOrder(orderID)
 
-	if err := c.ShouldBindJSON(&cus); err != nil {
+	if err := c.ShouldBindJSON(&order); err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"json input": order})
 		c.JSON(http.StatusUnprocessableEntity, responseContextData.ResponseData(response_entity.StatusFail, "invalid JSON", ""))
 		return
 	}
+	logger.Info("json input parsed", map[string]interface{}{"json input": order})
 
-	// Log the JSON input
-	log.Printf("Received JSON input for Order update: %+v", cus)
+	order.OrderID = orderID
 
-	cus.OrderID = orderID
-
-	// logger.SetContextFromSpan()
-	newOrder, err := p.repo.UpdateOrder(cus)
+	logger.SetContextFromSpan(span)
+	newOrder, err := p.repo.UpdateOrder(order)
 	if err != nil {
+		logger.Error(err.Error(), map[string]interface{}{"data": newOrder})
 		c.JSON(http.StatusInternalServerError, responseContextData.ResponseData(response_entity.StatusFail, err.Error(), ""))
 		return
 	}
@@ -216,8 +209,8 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	// 	Description:  "Handles JSON input to delete order",
 	// 	Body:         nil,
 	// }
-	// logger, endFunc := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
-	// defer endFunc()
+	// logger, span := logger.NewLoggerRepositories(p.Persistence, c, info, []string{"Honeycomb", "zap"})
+	// defer span.End()
 
 	logger := p.Persistence.Logger
 	logger.Start(c, "infrastructure/handlers/DeleteOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
