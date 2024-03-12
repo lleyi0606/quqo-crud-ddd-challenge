@@ -50,8 +50,8 @@ func (p *OrderHandler) AddOrder(c *gin.Context) {
 	defer span.End() */
 
 	logger := p.Persistence.Logger
-	logger.Start(c, "infrastructure/handlers/AddOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
-	defer p.Persistence.Logger.End()
+	span := logger.Start(c, "infrastructure/handlers/AddOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
@@ -213,8 +213,8 @@ func (p *OrderHandler) DeleteOrder(c *gin.Context) {
 	// defer span.End()
 
 	logger := p.Persistence.Logger
-	logger.Start(c, "infrastructure/handlers/DeleteOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
-	defer p.Persistence.Logger.End()
+	span := logger.Start(c, "infrastructure/handlers/DeleteOrder", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 

@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"products-crud/domain/repository/logger_repository"
 	"products-crud/infrastructure/implementations/logger/honeycomb"
 	"products-crud/infrastructure/implementations/logger/zap"
@@ -17,11 +16,8 @@ const (
 )
 
 type LoggerRepo struct {
-	// p            *base.Persistence
-	c            *gin.Context
-	span         trace.Span
-	loggers      []logger_repository.LoggerRepository
-	Otel_context *context.Context
+	c       *gin.Context
+	loggers []logger_repository.LoggerRepository
 }
 
 type Option func(*LoggerRepo)
@@ -45,11 +41,8 @@ func NewLoggerRepositories(providers []string) *LoggerRepo {
 	}
 
 	return &LoggerRepo{
-		// p:            &base.Persistence{},
-		c:            &gin.Context{},
-		span:         nil,
-		loggers:      loggers,
-		Otel_context: &hcRepo.Otel_context,
+		c:       &gin.Context{},
+		loggers: loggers,
 	}
 }
 
@@ -71,7 +64,6 @@ func (l *LoggerRepo) Start(c *gin.Context, functionPath string, fields map[strin
 	}
 
 	return span
-
 }
 
 func (l *LoggerRepo) Debug(msg string, fields map[string]interface{}) {
@@ -133,8 +125,8 @@ func (l *LoggerRepo) SetContextFromSpan(span trace.Span) {
 	l.c.Set("otel-context", newCtx)
 }
 
-func (l *LoggerRepo) End() {
-	for _, logger := range l.loggers {
-		logger.End()
-	}
-}
+// func (l *LoggerRepo) End() {
+// 	for _, logger := range l.loggers {
+// 		logger.End()
+// 	}
+// }

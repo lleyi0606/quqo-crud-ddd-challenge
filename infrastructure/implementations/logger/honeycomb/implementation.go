@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
@@ -17,7 +19,7 @@ import (
 type HoneycombRepo struct {
 	c            *gin.Context
 	Span         trace.Span
-	Otel_context context.Context
+	otel_context context.Context
 	// info         loggerentity.FunctionInfo
 }
 
@@ -27,98 +29,92 @@ func NewHoneycombRepository() *HoneycombRepo {
 }
 
 func (h *HoneycombRepo) Start(c *gin.Context, functionPath string, fields map[string]interface{}) trace.Span {
-	log.Print("started in ", functionPath)
 	// Start a new span
 	tracer := otel.Tracer("") // honeycomb.io
-	// tracer := otel.GetTracerProvider().Tracer("")
 
 	// Retrieve existing context or use the request context
 	ctx, ctxFound := c.Get("otel-context")
 	if !ctxFound {
-		log.Println("otel-context NOT FOUND")
 		ctx = c.Request.Context()
 		c.Set("otel-context", ctx)
-	} else {
-		log.Println("otel-context FOUND", getSpanID(ctx.(context.Context)))
 	}
 
 	// Start a new span with attributes
+	commonAttributes := getCommonAttributes(c)
+	attributes := append([]attribute.KeyValue{attribute.String("FunctionPath", functionPath)}, commonAttributes...)
 	context, span := tracer.Start(ctx.(context.Context), functionPath,
 		trace.WithAttributes(
-			attribute.String("FunctionPath", functionPath),
+			attributes...,
 		))
 
 	h.c = c
 	h.Span = span
-	h.Otel_context = context
+	h.otel_context = context
 
-	// return func() {
-	// 	span.End()
-	// }
 	return span
 }
 
 func (l *HoneycombRepo) Debug(msg string, fields map[string]interface{}) {
-
-	log.Print("!!! debug in honeycomb")
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
 		log.Println("Error marshaling data to JSON in Debug:", err)
 	}
-	l.Span.AddEvent(msg, trace.WithAttributes(
-		attribute.String("level", "debug"),
-		attribute.String("data", string(jsonObj)),
-	))
+
+	commonAttributes := getCommonAttributes(l.c)
+	attributes := append([]attribute.KeyValue{attribute.String("level", "debug"),
+		attribute.String("data", string(jsonObj))}, commonAttributes...)
+	l.Span.AddEvent(msg,
+		trace.WithAttributes(
+			attributes...,
+		))
 }
 
 func (l *HoneycombRepo) Info(msg string, fields map[string]interface{}) {
-
-	log.Print("!!! info in honeycomb")
-
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
 		log.Println("Error marshaling data to JSON in Info:", err)
 	}
-	l.Span.AddEvent(msg, trace.WithAttributes(
-		attribute.String("level", "info"),
-		attribute.String("data", string(jsonObj)),
-	))
+	commonAttributes := getCommonAttributes(l.c)
+	attributes := append([]attribute.KeyValue{attribute.String("level", "info"),
+		attribute.String("data", string(jsonObj))}, commonAttributes...)
+	l.Span.AddEvent(msg,
+		trace.WithAttributes(
+			attributes...,
+		))
 }
 
 func (l *HoneycombRepo) Warn(msg string, fields map[string]interface{}) {
-
-	log.Print("!!! warn in honeycomb")
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
 		log.Println("Error marshaling data to JSON in Warn:", err)
 	}
-	l.Span.AddEvent(msg, trace.WithAttributes(
-		attribute.String("level", "warn"),
-		attribute.String("data", string(jsonObj)),
-	))
+	commonAttributes := getCommonAttributes(l.c)
+	attributes := append([]attribute.KeyValue{attribute.String("level", "warn"),
+		attribute.String("data", string(jsonObj))}, commonAttributes...)
+	l.Span.AddEvent(msg,
+		trace.WithAttributes(
+			attributes...,
+		))
 }
 
 func (l *HoneycombRepo) Error(msg string, fields map[string]interface{}) {
-
-	log.Print("!!! info in honeycomb")
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
 		log.Println("Error marshaling data to JSON in Error:", err)
-		// l.Span.RecordError(fmt.Errorf("Error marshaling data to JSON: %v", err))
 		return
 	}
-	l.Span.AddEvent(msg, trace.WithAttributes(
-		attribute.String("level", "error"),
-		attribute.String("data", string(jsonObj)),
-	))
+	commonAttributes := getCommonAttributes(l.c)
+	attributes := append([]attribute.KeyValue{attribute.String("level", "error"),
+		attribute.String("data", string(jsonObj))}, commonAttributes...)
+	l.Span.AddEvent(msg,
+		trace.WithAttributes(
+			attributes...,
+		))
 	l.Span.RecordError(fmt.Errorf("Error: %s", string(jsonObj)))
 	l.Span.SetStatus(codes.Error, msg)
 }
 
 func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
-
-	// l.logger.Fatal("", zap.Any("args", fields))
-	log.Print("!!! fatal in honeycomb")
 	// Convert the fields to JSON
 	jsonObj, err := json.Marshal(fields)
 	if err != nil {
@@ -126,10 +122,13 @@ func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 	}
 
 	// Add an event with the error details
-	l.Span.AddEvent(msg, trace.WithAttributes(
-		attribute.String("level", "fatal"),
-		attribute.String("data", string(jsonObj)),
-	))
+	commonAttributes := getCommonAttributes(l.c)
+	attributes := append([]attribute.KeyValue{attribute.String("level", "fatal"),
+		attribute.String("data", string(jsonObj))}, commonAttributes...)
+	l.Span.AddEvent(msg,
+		trace.WithAttributes(
+			attributes...,
+		))
 
 	// Record an error to make sure it's captured by OpenTelemetry
 	l.Span.RecordError(fmt.Errorf("Fatal error: %s", msg))
@@ -140,33 +139,46 @@ func (l *HoneycombRepo) Fatal(msg string, fields map[string]interface{}) {
 }
 
 func (l *HoneycombRepo) SetNewOtelContext() {
-	// log.Print("otel context set from option ", getSpanID(l.Otel_context))
-	l.c.Set("otel-context", l.Otel_context)
+	l.c.Set("otel-context", l.otel_context)
 }
 
 func (l *HoneycombRepo) UseGivenSpan(span trace.Span) {
 	l.Span = span
 }
 
-func (l *HoneycombRepo) End() {
-	// Set otel-context immediately
-	// l.c.Set("otel-context", l.otel_context)
-	// log.Print("otel context set in End ", l.info.Path+l.info.FunctionName)
+func getCommonAttributes(c *gin.Context) []attribute.KeyValue {
+	// Get caller information (file name and line number)
+	_, file, line, ok := runtime.Caller(3)
+	if !ok {
+		file = "unknown"
+		line = 0
+	} else {
+		// Extract only the file name from the full path
+		fileParts := strings.Split(file, "/")
+		file = fileParts[len(fileParts)-1]
+	}
 
-	// Defer a closure that calls l.Span.End()
-	// defer func() {
-	// log.Print("span ended in End() ", l.info.Path+l.info.FunctionName)
-	l.Span.End()
-	// }()
+	attributes := []attribute.KeyValue{
+		attribute.String("IP Address", c.ClientIP()),
+		attribute.String("Environment", os.Getenv("ENV")),
+		attribute.String("CallerFile", file),
+		attribute.Int("CallerLine", line),
+	}
+
+	return attributes
 }
 
-func getSpanID(ctx context.Context) trace.SpanID {
-	// Retrieve the span from the context
-	span := trace.SpanFromContext(ctx)
+// func (l *HoneycombRepo) End() {
+// 	l.Span.End()
+// }
 
-	// Access the span ID from the span
-	spanContext := span.SpanContext()
-	spanID := spanContext.SpanID()
+// func getSpanID(ctx context.Context) trace.SpanID {
+// 	// Retrieve the span from the context
+// 	span := trace.SpanFromContext(ctx)
 
-	return spanID
-}
+// 	// Access the span ID from the span
+// 	spanContext := span.SpanContext()
+// 	spanID := spanContext.SpanID()
+
+// 	return spanID
+// }

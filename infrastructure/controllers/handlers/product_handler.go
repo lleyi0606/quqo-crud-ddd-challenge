@@ -49,8 +49,8 @@ func (p *ProductHandler) AddProduct(c *gin.Context) {
 	// defer endFunc()
 
 	logger := p.Persistence.Logger
-	logger.Start(c, "infrastructure/handlers/AddProduct", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
-	defer p.Persistence.Logger.End()
+	span := logger.Start(c, "infrastructure/handlers/AddProduct", map[string]interface{}{}, loggerOpt.SetNewOtelContext())
+	defer span.End()
 
 	responseContextData := response_entity.ResponseContext{Ctx: c}
 
