@@ -19,7 +19,7 @@ Redis
 
 ## Using the Multi-Strategy Logger 
 
-- How to use Logger 
+### How to use Logger 
 1. Initialise NewLoggerRepository and store inside Persistence 
 
 ```	
@@ -64,11 +64,11 @@ func (r orderRepo) GetOrder(id uint64) (*entity.Order, error) {
 }
 ```
 
--- Explain Trace 
+### Explain Trace 
 
 The overall representation of a request's journey through a system. A trace is composed of one or more spans.
 
--- Explain Span
+### Explain Span
 
 A single unit of work within a trace. Each span represents a specific function or operation and contains metadata such as start time, end time, and attributes.
 
